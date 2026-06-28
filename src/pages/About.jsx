@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Heart, Users, Globe, Shield, Star } from "lucide-react";
 import SectionHeading from "@/components/church/SectionHeading";
 
-const PASTOR_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/9a12990e3_generated_590facf1.png";
+const PASTOR_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/f4b111e89_Rudy-Shepard.webp";
 const COMMUNITY_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/46b6067d7_generated_5000933d.png";
 const BIBLE_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/12dd4b96b_generated_ae10f41a.png";
 const PEACE_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/39e1a28f5_generated_721db83b.png";
