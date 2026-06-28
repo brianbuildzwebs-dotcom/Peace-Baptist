@@ -1,0 +1,42 @@
+{
+  "name": "CustomForm",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "form_type": {
+      "type": "string",
+      "enum": [
+        "event_registration",
+        "membership",
+        "volunteer",
+        "baptism",
+        "general",
+        "ministry_signup"
+      ],
+      "default": "general"
+    }
+  },
+  "required": [
+    "title",
+    "fields"
+  ]
+}

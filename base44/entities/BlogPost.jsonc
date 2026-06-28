@@ -1,0 +1,47 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "announcement",
+        "devotional",
+        "news",
+        "event_recap",
+        "testimony"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "title",
+    "content"
+  ]
+}

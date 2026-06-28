@@ -1,0 +1,31 @@
+{
+  "name": "FormSubmission",
+  "type": "object",
+  "properties": {
+    "form_id": {
+      "type": "string"
+    },
+    "form_title": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    },
+    "submitter_name": {
+      "type": "string"
+    },
+    "submitter_email": {
+      "type": "string"
+    },
+    "signature_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "form_id",
+    "data"
+  ]
+}

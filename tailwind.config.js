@@ -10,6 +10,10 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			navy: { DEFAULT: '#0F172A', light: '#1E293B', dark: '#020617' },
+  			gold: { DEFAULT: '#C5A059', light: '#E8D5A8', dark: '#A68438' },
+  			'verdant': { DEFAULT: '#1E3F35', light: '#2D5F4F' },
+  			'cloud': '#F1F5F9',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -62,9 +66,9 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			heading: ['var(--font-heading)'],
-  			body: ['var(--font-body)'],
-  			display: ['var(--font-display)'],
+  			heading: ['Playfair Display', 'Georgia', 'serif'],
+  			body: ['Inter', 'system-ui', 'sans-serif'],
+  			display: ['Playfair Display', 'Georgia', 'serif'],
   			mono: ['var(--font-mono)']
   		},
   		keyframes: {

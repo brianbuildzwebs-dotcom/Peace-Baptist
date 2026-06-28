@@ -1,0 +1,57 @@
+{
+  "name": "PrayerRequest",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "request": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "health",
+        "spiritual",
+        "financial",
+        "family",
+        "relationships",
+        "guidance",
+        "thanksgiving",
+        "other"
+      ]
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "praying",
+        "answered",
+        "archived"
+      ],
+      "default": "new"
+    },
+    "admin_notes": {
+      "type": "string"
+    },
+    "prayed_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "request",
+    "category"
+  ]
+}
