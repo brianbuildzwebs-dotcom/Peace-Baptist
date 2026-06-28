@@ -23,7 +23,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <span className="inline-block text-gold text-xs font-bold tracking-[0.3em] uppercase mb-6">
-              Welcome to Peace Baptist Church
+              Welcome to Peace Baptist Church · Wilmington, NC
             </span>
           </motion.div>
 
@@ -43,7 +43,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-white/80 text-lg sm:text-xl max-w-2xl leading-relaxed mb-10"
           >
-            As we glorify Jesus Christ through heartfelt preaching and uplifting music.
+            An independent, fundamental Baptist church devoted to the King James Bible — serving Wilmington since 1975.
           </motion.p>
 
           <motion.div
@@ -78,8 +78,8 @@ export default function HeroSection() {
           className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl"
         >
           {[
-            { icon: Clock, label: "Sunday Worship", time: "10:30 AM" },
             { icon: BookOpen, label: "Sunday School", time: "9:30 AM" },
+            { icon: Clock, label: "Sunday Worship", time: "10:30 AM & 6:00 PM" },
             { icon: Calendar, label: "Wed Bible Study", time: "7:00 PM" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10">

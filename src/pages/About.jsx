@@ -18,10 +18,10 @@ const values = [
 ];
 
 const staff = [
-  { name: "Pastor James Mitchell", role: "Senior Pastor", bio: "Leading Peace Baptist since 2005 with a heart for expository preaching and pastoral care.", image: PASTOR_IMG },
-  { name: "Rev. Sarah Williams", role: "Associate Pastor", bio: "Overseeing family ministries and women's fellowship with passion and dedication." },
-  { name: "Michael Torres", role: "Worship Director", bio: "Leading our congregation in heartfelt praise and worship for over a decade." },
-  { name: "Angela Davis", role: "Youth Pastor", bio: "Empowering the next generation with biblical truth and authentic mentorship." },
+  { name: "Pastor Rudy Shepard", role: "Senior Pastor", bio: "Founded Peace Baptist in 1975 and has faithfully led the congregation for 50 years. Now 77, his dedication to God and Wilmington is unwavering.", image: PASTOR_IMG },
+  { name: "Sunday School", role: "9:30 AM Sunday", bio: "Bible study for all ages before the morning worship service." },
+  { name: "Children's Church", role: "Master Clubs", bio: "Dedicated programs for children, nurturing their faith in a fun and engaging environment." },
+  { name: "Peace Teens", role: "Youth Ministry", bio: "Active youth group helping teenagers grow in their faith and build lasting friendships." },
 ];
 
 const fade = { initial: { opacity: 0, y: 30 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } };
@@ -51,9 +51,9 @@ export default function About() {
             <motion.div {...fade}>
               <SectionHeading label="Since 1975" title="Our History" center={false} />
               <div className="space-y-5 text-gray-600 leading-relaxed">
-                <p>Peace Baptist Church was founded in 1975 by a small group of believers who shared a vision for an independent, Bible-believing church where the Word of God would be faithfully proclaimed and every person would be warmly welcomed.</p>
-                <p>What began as a humble gathering of twenty families in a rented school gymnasium has grown into a vibrant congregation of over 500 members. Through the decades, we have remained steadfast in our commitment to verse-by-verse expository preaching, heartfelt worship, and genuine community.</p>
-                <p>Today, Peace Baptist Church continues to be a lighthouse in our community — reaching the lost, discipling believers, and serving those in need with the love of Christ.</p>
+                <p>Peace Baptist Church was established in 1975 by Pastor Rudy Shepard as an independent, fundamental Baptist church in Wilmington, NC, devoted to the King James Bible and dynamic preaching of God's Word.</p>
+                <p>What began as a small gathering of believers has grown into a vibrant congregation dedicated to serving Wilmington and the surrounding areas. Through decades of faithful ministry, we have remained committed to sound biblical teaching, heartfelt worship, and genuine Christian fellowship.</p>
+                <p>Today, Peace Baptist Church continues to be a lighthouse in the Wilmington community — reaching the lost, discipling believers, and serving those in need with the love of Christ.</p>
               </div>
             </motion.div>
             <motion.div {...fade} className="grid grid-cols-2 gap-4">
@@ -72,11 +72,11 @@ export default function About() {
               <img src={PASTOR_IMG} alt="Pastor James Mitchell" className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover" />
             </motion.div>
             <motion.div {...fade} className="order-1 lg:order-2">
-              <SectionHeading label="Our Pastor" title="Pastor James Mitchell" center={false} />
+              <SectionHeading label="Our Pastor" title="Pastor Rudy Shepard" center={false} />
               <div className="space-y-5 text-gray-600 leading-relaxed">
-                <p>Pastor James Mitchell has faithfully served as the Senior Pastor of Peace Baptist Church since 2005. A graduate of Southeastern Baptist Theological Seminary, he holds a Master of Divinity and a Doctor of Ministry in Biblical Studies.</p>
-                <p>Known for his warm pastoral heart and his commitment to expository preaching, Pastor Mitchell leads our congregation with wisdom, humility, and a deep love for the Word of God. Under his leadership, the church has experienced tremendous growth in both numbers and spiritual depth.</p>
-                <p>He and his wife, Grace, have been married for 28 years and have three adult children. In his free time, he enjoys reading, fishing, and mentoring young pastors.</p>
+                <p>Pastor Rudy Shepard's journey with the Lord began at the tender age of 12, and by 18 he was laying the foundations of his ministry at Mt. Olive College. After graduating, he became the part-time pastor of Lanier's Chapel in Lyman, NC.</p>
+                <p>In 1975, he founded Peace Baptist Church in Wilmington, NC, where he continues to lead after an incredible 50 years of faithful ministry. Now at 77 years old, he remains a devoted servant of the Lord, having witnessed countless lives transformed by the Gospel.</p>
+                <p>He has had the joy of watching children he once baptized grow into adults, start families, and welcome grandchildren. His life is a testament to resilience and unwavering dedication in service to God and his congregation.</p>
               </div>
             </motion.div>
           </div>
@@ -132,7 +132,7 @@ export default function About() {
           <motion.div {...fade}>
             <span className="text-gold text-xs font-bold tracking-[0.3em] uppercase">Our Mission</span>
             <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 mb-8">
-              "To glorify God by making disciples of Jesus Christ through the faithful proclamation of His Word, authentic worship, and compassionate service to all people."
+              "To impact Wilmington and surrounding areas positively for Jesus Christ through dynamic preaching, heartfelt worship, and genuine Christian fellowship."
             </h2>
             <div className="w-16 h-0.5 bg-gold mx-auto" />
           </motion.div>

@@ -42,7 +42,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-navy">Address</h3>
-                    <p className="text-gray-600 text-sm">1234 Peaceful Way<br />Springfield, IL 62701</p>
+                    <p className="text-gray-600 text-sm">320 Military Cutoff Rd<br />Wilmington, NC 28405</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -51,7 +51,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-navy">Phone</h3>
-                    <a href="tel:+12175551234" className="text-gray-600 text-sm hover:text-gold transition-colors">(217) 555-1234</a>
+                    <a href="tel:+19107914034" className="text-gray-600 text-sm hover:text-gold transition-colors">(910) 791-4034</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -60,7 +60,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-navy">Email</h3>
-                    <a href="mailto:info@peacebaptist.net" className="text-gray-600 text-sm hover:text-gold transition-colors">info@peacebaptist.net</a>
+                    <a href="mailto:peacebible@bellsouth.net" className="text-gray-600 text-sm hover:text-gold transition-colors">peacebible@bellsouth.net</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -72,6 +72,7 @@ export default function Contact() {
                     <div className="text-gray-600 text-sm space-y-1">
                       <p>Sunday School: 9:30 AM</p>
                       <p>Sunday Worship: 10:30 AM</p>
+                      <p>Sunday Evening: 6:00 PM</p>
                       <p>Wednesday Bible Study: 7:00 PM</p>
                     </div>
                   </div>

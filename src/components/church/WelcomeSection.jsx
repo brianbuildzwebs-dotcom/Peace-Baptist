@@ -32,7 +32,7 @@ export default function WelcomeSection() {
               <div className="flex items-center gap-3 mb-3">
                 <img src={PASTOR_IMG} alt="Pastor James Mitchell" className="w-12 h-12 rounded-full object-cover" />
                 <div>
-                  <div className="font-heading font-bold text-sm text-navy">Pastor James Mitchell</div>
+                  <div className="font-heading font-bold text-sm text-navy">Pastor Rudy Shepard</div>
                   <div className="text-xs text-gold">Senior Pastor</div>
                 </div>
               </div>
@@ -57,18 +57,18 @@ export default function WelcomeSection() {
             />
             <div className="space-y-5 text-gray-600 leading-relaxed">
               <p>
-                Since 1975, Peace Baptist Church has been a beacon of hope and faith in our community.
-                We are an independent, Bible-believing congregation committed to sharing the love of
-                Jesus Christ with everyone who walks through our doors.
+                Since 1975, Peace Baptist Church has been a beacon of hope and faith in Wilmington, NC.
+                We are an independent, fundamental Baptist congregation devoted to the King James Bible and
+                committed to sharing the love of Jesus Christ with everyone who walks through our doors.
               </p>
               <p>
                 Whether you're exploring faith for the first time or looking for a church family,
                 we invite you to experience the warmth, authenticity, and genuine fellowship that
-                makes Peace Baptist a true spiritual home.
+                makes Peace Baptist a true spiritual home in the heart of Wilmington.
               </p>
               <p>
-                Our mission is simple: to glorify God, grow in Christ, and serve others with
-                compassion and grace.
+                Our mission is to impact Wilmington and surrounding areas positively for Jesus Christ
+                through dynamic preaching, heartfelt worship, and genuine Christian fellowship.
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-6">

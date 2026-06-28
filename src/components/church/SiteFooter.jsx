@@ -63,7 +63,7 @@ export default function SiteFooter() {
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed">
-              An independent Bible-believing church dedicated to glorifying Jesus Christ through heartfelt preaching and uplifting music since 1975.
+              An independent, fundamental Baptist church in Wilmington, NC, devoted to the King James Bible and dynamic preaching since 1975.
             </p>
           </div>
 
@@ -95,6 +95,13 @@ export default function SiteFooter() {
               <li className="flex items-start gap-3">
                 <Clock size={16} className="text-gold mt-1 shrink-0" />
                 <div>
+                  <div className="text-sm font-medium">Sunday School</div>
+                  <div className="text-white/60 text-sm">9:30 AM</div>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock size={16} className="text-gold mt-1 shrink-0" />
+                <div>
                   <div className="text-sm font-medium">Sunday Morning Worship</div>
                   <div className="text-white/60 text-sm">10:30 AM</div>
                 </div>
@@ -102,8 +109,8 @@ export default function SiteFooter() {
               <li className="flex items-start gap-3">
                 <Clock size={16} className="text-gold mt-1 shrink-0" />
                 <div>
-                  <div className="text-sm font-medium">Sunday School</div>
-                  <div className="text-white/60 text-sm">9:30 AM</div>
+                  <div className="text-sm font-medium">Sunday Evening Service</div>
+                  <div className="text-white/60 text-sm">6:00 PM</div>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -122,15 +129,15 @@ export default function SiteFooter() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-gold mt-1 shrink-0" />
-                <span className="text-white/60 text-sm">1234 Peaceful Way<br />Springfield, IL 62701</span>
+                <span className="text-white/60 text-sm">320 Military Cutoff Rd<br />Wilmington, NC 28405</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-gold shrink-0" />
-                <a href="tel:+12175551234" className="text-white/60 hover:text-gold text-sm transition-colors">(217) 555-1234</a>
+                <a href="tel:+19107914034" className="text-white/60 hover:text-gold text-sm transition-colors">(910) 791-4034</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={16} className="text-gold shrink-0" />
-                <a href="mailto:info@peacebaptist.net" className="text-white/60 hover:text-gold text-sm transition-colors">info@peacebaptist.net</a>
+                <a href="mailto:peacebible@bellsouth.net" className="text-white/60 hover:text-gold text-sm transition-colors">peacebible@bellsouth.net</a>
               </li>
             </ul>
             <div className="flex gap-4 mt-6">

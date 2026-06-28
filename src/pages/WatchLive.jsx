@@ -69,7 +69,7 @@ export default function WatchLive() {
                   <Clock size={16} className="text-gold mt-1 shrink-0" />
                   <div>
                     <div className="text-white/60 text-xs">Service Times</div>
-                    <div className="text-white text-sm">Sunday: 9:30 AM & 10:30 AM</div>
+                    <div className="text-white text-sm">Sun: 9:30 AM, 10:30 AM & 6:00 PM</div>
                     <div className="text-white text-sm">Wednesday: 7:00 PM</div>
                   </div>
                 </div>
@@ -77,7 +77,7 @@ export default function WatchLive() {
                   <User size={16} className="text-gold mt-1 shrink-0" />
                   <div>
                     <div className="text-white/60 text-xs">Today's Speaker</div>
-                    <div className="text-white text-sm">Pastor James Mitchell</div>
+                    <div className="text-white text-sm">Pastor Rudy Shepard</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
