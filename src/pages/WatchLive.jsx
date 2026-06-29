@@ -4,17 +4,23 @@ import { Play, Clock, Search, Calendar, User, BookOpen } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
+import LiveChat from "@/components/watch/LiveChat";
 
 export default function WatchLive() {
   const [media, setMedia] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [liveUrl, setLiveUrl] = useState("");
 
   useEffect(() => {
     base44.entities.MediaItem.filter({ type: "sermon" }, "-date", 20)
       .then(setMedia)
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    base44.entities.SiteSettings.filter({ key: "live_stream_url" })
+      .then((rows) => { if (rows[0]) setLiveUrl(rows[0].value); })
+      .catch(() => {});
   }, []);
 
   const filtered = media.filter((m) =>
@@ -43,15 +49,25 @@ export default function WatchLive() {
             {/* Video Player */}
             <div className="lg:col-span-3">
               <div className="relative rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl">
-                <div className="absolute inset-0 flex items-center justify-center bg-navy-light">
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                      <Play size={32} className="text-gold ml-1" />
+                {liveUrl ? (
+                  <iframe
+                    src={liveUrl}
+                    title="Live Stream"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-navy-light">
+                    <div className="text-center px-8">
+                      <div className="w-20 h-20 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
+                        <Play size={32} className="text-gold ml-1" />
+                      </div>
+                      <p className="text-white/60 text-sm">Live stream will appear here during services</p>
+                      <p className="text-white/40 text-xs mt-2">Admin: go to Settings → paste your YouTube live URL</p>
                     </div>
-                    <p className="text-white/60 text-sm">Live stream will appear here during services</p>
-                    <p className="text-white/40 text-xs mt-2">Replace this with your YouTube or Facebook embed URL</p>
                   </div>
-                </div>
+                )}
               </div>
               <div className="mt-4 flex items-center gap-4 text-white/60 text-sm">
                 <div className="flex items-center gap-2">
@@ -61,39 +77,9 @@ export default function WatchLive() {
               </div>
             </div>
 
-            {/* Sidebar - Service Notes */}
-            <div className="bg-navy-light rounded-2xl p-6 border border-white/5">
-              <h3 className="font-heading text-lg font-bold text-white mb-4">Service Details</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Clock size={16} className="text-gold mt-1 shrink-0" />
-                  <div>
-                    <div className="text-white/60 text-xs">Service Times</div>
-                    <div className="text-white text-sm">Sun: 9:30 AM, 10:30 AM & 6:00 PM</div>
-                    <div className="text-white text-sm">Wednesday: 7:00 PM</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <User size={16} className="text-gold mt-1 shrink-0" />
-                  <div>
-                    <div className="text-white/60 text-xs">Today's Speaker</div>
-                    <div className="text-white text-sm">Pastor Rudy Shepard</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <BookOpen size={16} className="text-gold mt-1 shrink-0" />
-                  <div>
-                    <div className="text-white/60 text-xs">Scripture</div>
-                    <div className="text-white text-sm">Romans 8:28-39</div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <h4 className="text-white/60 text-xs uppercase tracking-wider mb-3">Sermon Notes</h4>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  Sermon notes will be displayed here during the live service. Follow along as Pastor Mitchell walks through this week's passage.
-                </p>
-              </div>
+            {/* Sidebar - Live Chat */}
+            <div className="flex flex-col">
+              <LiveChat />
             </div>
           </div>
         </div>

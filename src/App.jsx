@@ -31,6 +31,7 @@ import AdminForms from './pages/admin/AdminForms';
 import AdminPrayers from './pages/admin/AdminPrayers';
 import AdminMedia from './pages/admin/AdminMedia';
 import AdminBlog from './pages/admin/AdminBlog';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // Auth pages
 import Login from './pages/Login';
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/prayers" element={<AdminPrayers />} />
           <Route path="/admin/media" element={<AdminMedia />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>
 

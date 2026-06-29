@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Calendar, FileText, Heart, Play, Edit, BarChart3, Menu, X, LogOut, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Calendar, FileText, Heart, Play, Edit, Settings, Menu, X, LogOut, ChevronLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { label: "Prayer Requests", path: "/admin/prayers", icon: Heart },
   { label: "Media", path: "/admin/media", icon: Play },
   { label: "Blog", path: "/admin/blog", icon: Edit },
+  { label: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -70,7 +71,7 @@ export default function AdminLayout() {
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <h1 className="text-white font-heading font-bold text-lg">
-            {navItems.find((n) => isActive(n.path))?.label || "Admin"}
+            {navItems.find((n) => n.path === location.pathname)?.label || "Admin"}
           </h1>
         </header>
         <main className="p-6">

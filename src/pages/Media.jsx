@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Search, Filter, Music, BookOpen } from "lucide-react";
+import { Play, Search, Music, BookOpen, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
@@ -11,12 +11,23 @@ export default function Media() {
   const [tab, setTab] = useState("sermon");
   const [search, setSearch] = useState("");
   const [speaker, setSpeaker] = useState("");
+  const [sermonPlaylistUrl, setSermonPlaylistUrl] = useState("");
+  const [worshipPlaylistUrl, setWorshipPlaylistUrl] = useState("");
+  const [selectedVideo, setSelectedVideo] = useState(null);
 
   useEffect(() => {
     base44.entities.MediaItem.list("-date", 50)
       .then(setMedia)
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    base44.entities.SiteSettings.filter({ key: "sermon_playlist_url" })
+      .then((rows) => { if (rows[0]) setSermonPlaylistUrl(rows[0].value); })
+      .catch(() => {});
+
+    base44.entities.SiteSettings.filter({ key: "worship_playlist_url" })
+      .then((rows) => { if (rows[0]) setWorshipPlaylistUrl(rows[0].value); })
+      .catch(() => {});
   }, []);
 
   const speakers = [...new Set(media.filter(m => m.speaker).map(m => m.speaker))];
@@ -57,6 +68,37 @@ export default function Media() {
             </button>
           </div>
 
+          {/* Sermon Playlist Embed */}
+          {tab === "sermon" && sermonPlaylistUrl && (
+            <div className="mb-10 rounded-2xl overflow-hidden shadow-lg aspect-video">
+              <iframe
+                src={sermonPlaylistUrl}
+                title="Sermon Playlist"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+
+          {/* Worship Playlist Embed */}
+          {tab === "worship" && worshipPlaylistUrl && (
+            <div className="mb-10 rounded-2xl overflow-hidden border border-gray-200 shadow">
+              <iframe
+                src={worshipPlaylistUrl}
+                title="Worship Music Playlist"
+                className="w-full"
+                height="300"
+                allow="autoplay"
+                frameBorder="0"
+              />
+              <div className="p-3 bg-gray-50 flex items-center gap-2 text-xs text-gray-400">
+                <ExternalLink size={12} />
+                <span>Streaming via external music service</span>
+              </div>
+            </div>
+          )}
+
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
             <div className="relative flex-1">
@@ -77,6 +119,22 @@ export default function Media() {
             )}
           </div>
 
+          {/* Video Modal */}
+          {selectedVideo && (
+            <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setSelectedVideo(null)}>
+              <div className="w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <iframe
+                  src={selectedVideo}
+                  title="Video Player"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  autoPlay
+                />
+              </div>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center py-16 text-gray-400">Loading media...</div>
           ) : filtered.length === 0 ? (
@@ -94,6 +152,7 @@ export default function Media() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
                   className="group cursor-pointer"
+                  onClick={() => item.video_url && setSelectedVideo(item.video_url)}
                 >
                   <div className="relative aspect-video rounded-2xl overflow-hidden bg-navy/5 mb-4">
                     {item.thumbnail_url ? (
@@ -103,11 +162,13 @@ export default function Media() {
                         <Play size={32} className="text-navy/20" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/40 transition-colors flex items-center justify-center">
-                      <div className="w-14 h-14 rounded-full bg-gold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity scale-75 group-hover:scale-100">
-                        <Play size={20} className="text-navy ml-0.5" />
+                    {item.video_url && (
+                      <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/40 transition-colors flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-gold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity scale-75 group-hover:scale-100">
+                          <Play size={20} className="text-navy ml-0.5" />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <h3 className="font-heading text-lg font-bold text-navy group-hover:text-gold transition-colors">{item.title}</h3>
                   <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">

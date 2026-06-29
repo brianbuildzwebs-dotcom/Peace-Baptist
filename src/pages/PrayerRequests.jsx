@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Send, Check, Eye } from "lucide-react";
+import { Heart, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SectionHeading from "@/components/church/SectionHeading";
 
@@ -14,24 +14,41 @@ export default function PrayerRequests() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [praiseReports, setPraiseReports] = useState([]);
+  const [publicPrayers, setPublicPrayers] = useState([]);
 
+  // Load public prayer requests and subscribe to real-time updates
   useEffect(() => {
-    base44.entities.PrayerRequest.filter({ status: "answered", is_public: true }, "-updated_date", 6)
-      .then(setPraiseReports)
+    base44.entities.PrayerRequest.filter({ is_public: true }, "-created_date", 20)
+      .then(setPublicPrayers)
       .catch(() => {});
+
+    const unsub = base44.entities.PrayerRequest.subscribe((event) => {
+      if (event.type === "create" && event.data?.is_public) {
+        setPublicPrayers((prev) => [event.data, ...prev]);
+      }
+    });
+    return unsub;
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    const isPublicPost = !isAnonymous; // non-anonymous posts appear publicly
     await base44.entities.PrayerRequest.create({
       name: isAnonymous ? "" : name,
       email: isAnonymous ? "" : email,
       request,
       category,
       is_anonymous: isAnonymous,
+      is_public: isPublicPost,
     });
+    // Notify admin
+    base44.functions.invoke("notifyNewPrayer", {
+      name: isAnonymous ? "" : name,
+      category,
+      request,
+      is_anonymous: isAnonymous,
+    }).catch(() => {});
     setSubmitting(false);
     setSubmitted(true);
   };
@@ -113,27 +130,37 @@ export default function PrayerRequests() {
               )}
             </div>
 
-            {/* Praise Reports */}
+            {/* Public Prayer Wall */}
             <div className="lg:col-span-2">
-              <SectionHeading label="Praise Reports" title="Answered Prayers" center={false} />
-              {praiseReports.length === 0 ? (
+              <SectionHeading label="Prayer Wall" title="Community Prayers" center={false} subtitle="Real-time prayer requests from our congregation." />
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-xs text-gray-400">Live — updates automatically</span>
+              </div>
+              {publicPrayers.length === 0 ? (
                 <div className="bg-cloud rounded-2xl p-8 text-center">
                   <Heart size={32} className="text-gold/30 mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">Praise reports will appear here as prayers are answered.</p>
+                  <p className="text-gray-500 text-sm">Prayer requests will appear here in real-time.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {praiseReports.map((pr) => (
-                    <div key={pr.id} className="bg-cloud rounded-xl p-5 border border-gray-100">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                  {publicPrayers.map((pr) => (
+                    <motion.div
+                      key={pr.id}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="bg-cloud rounded-xl p-5 border border-gray-100"
+                    >
                       <div className="flex items-center gap-2 text-gold text-xs font-bold uppercase tracking-wider mb-2">
                         <Heart size={12} className="fill-gold" />
                         {pr.category}
+                        {pr.status === "answered" && <span className="ml-auto text-green-500 normal-case font-normal">✓ Answered</span>}
                       </div>
                       <p className="text-gray-700 text-sm leading-relaxed">{pr.request}</p>
                       {pr.name && !pr.is_anonymous && (
                         <p className="text-gray-400 text-xs mt-2">— {pr.name}</p>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}

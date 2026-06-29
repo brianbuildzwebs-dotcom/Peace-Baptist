@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -7,6 +7,13 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [mapsUrl, setMapsUrl] = useState("");
+
+  useEffect(() => {
+    base44.entities.SiteSettings.filter({ key: "google_maps_embed" })
+      .then((rows) => { if (rows[0]?.value) setMapsUrl(rows[0].value); })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,12 +86,25 @@ export default function Contact() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="mt-8 rounded-2xl overflow-hidden border border-gray-200 h-48 bg-cloud flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin size={32} className="text-gold/30 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">Map view — add Google Maps embed</p>
-                </div>
+              {/* Google Maps */}
+              <div className="mt-8 rounded-2xl overflow-hidden border border-gray-200 h-48">
+                {mapsUrl ? (
+                  <iframe
+                    src={mapsUrl}
+                    title="Church Location"
+                    className="w-full h-full"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="w-full h-full bg-cloud flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin size={32} className="text-gold/30 mx-auto mb-2" />
+                      <p className="text-gray-400 text-sm">Admin: add Google Maps embed URL in Settings</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
