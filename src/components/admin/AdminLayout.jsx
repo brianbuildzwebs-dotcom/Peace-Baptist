@@ -10,7 +10,6 @@ const navItems = [
   { label: "Prayer Requests", path: "/admin/prayers", icon: Heart },
   { label: "Media", path: "/admin/media", icon: Play },
   { label: "Blog", path: "/admin/blog", icon: Edit },
-  { label: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -55,6 +54,15 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/5">
+          <Link
+            to="/admin/settings"
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all mb-2 ${
+              isActive("/admin/settings") ? "bg-gold/10 text-gold" : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <Settings size={18} /> Settings
+          </Link>
           <Link to="/" className="flex items-center gap-2 px-4 py-2.5 text-white/40 hover:text-white text-sm rounded-xl hover:bg-white/5 transition-all">
             <ChevronLeft size={16} /> Back to Site
           </Link>
