@@ -75,7 +75,7 @@ export default function PrayerRequests() {
           <div className="grid lg:grid-cols-5 gap-16">
             {/* Form */}
             <div className="lg:col-span-3">
-              <SectionHeading label="We're Here for You" title="Submit a Prayer Request" center={false} subtitle="Your request will be shared with our prayer team. All submissions are kept confidential." />
+              <SectionHeading label="We're Here for You" title="Submit a Prayer Request" center={false} subtitle="All Prayer Requests are published instantly. By posting a Prayer Request you agree to the terms and conditions of our Privacy Policy." />
 
               {submitted ? (
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-cloud rounded-2xl p-12 text-center">
