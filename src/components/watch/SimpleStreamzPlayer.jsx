@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { useUnlockOrientation } from "@/hooks/useUnlockOrientation";
 
 export default function SimpleStreamzPlayer({ channelId, embedBase }) {
+  useUnlockOrientation();
   const frameId = `simple-streamz-${channelId}`;
   const embedUrl = `${embedBase}/embed/c/${channelId}`;
 
@@ -43,7 +45,8 @@ export default function SimpleStreamzPlayer({ channelId, embedBase }) {
           overflow: "hidden",
           display: "block",
         }}
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+        allowFullScreen
       />
     </div>
   );

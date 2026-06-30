@@ -102,7 +102,7 @@ export default function AdminDashboard() {
         <div>
           <h3 className="text-white font-heading font-bold">Live stream alert</h3>
           <p className="text-white/40 text-sm mt-1">
-            Notify members when Sunday service is live on the website.
+            Notify subscribed phones when Sunday service is live. You do not need notification permission on this computer to send.
             {subscriberCount != null && (
               <span className={`block mt-1 ${subscriberCount === 0 ? "text-amber-300" : "text-gold/80"}`}>
                 {subscriberCount === 0

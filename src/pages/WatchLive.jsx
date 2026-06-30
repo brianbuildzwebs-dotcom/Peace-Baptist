@@ -8,8 +8,10 @@ import SimpleStreamzPlayer from "@/components/watch/SimpleStreamzPlayer";
 import { churchInfo } from "@/lib/churchInfo";
 import { parseSimpleStreamzEmbed, extractEmbedSrc } from "@/lib/embedUtils";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useUnlockOrientation } from "@/hooks/useUnlockOrientation";
 
 export default function WatchLive() {
+  useUnlockOrientation();
   const { get } = useSiteSettings();
   const { data: legacyRows = [] } = useQuery({
     queryKey: ["site-setting", "live_stream_url"],
@@ -48,13 +50,13 @@ export default function WatchLive() {
                 />
               </div>
             ) : (
-              <div className="relative rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl">
+              <div className="relative rounded-2xl overflow-hidden bg-black aspect-video watch-player-frame shadow-2xl">
                 {fallbackIframeSrc ? (
                   <iframe
                     src={fallbackIframeSrc}
                     title="Live Stream"
                     className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                     allowFullScreen
                   />
                 ) : (

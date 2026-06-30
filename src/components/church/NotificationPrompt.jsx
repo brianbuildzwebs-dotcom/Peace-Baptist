@@ -4,11 +4,13 @@ import {
   canPromptForPush,
   clearStalePushEnabledFlag,
   fetchPushStatus,
+  getNotificationPermissionHelp,
   getPushPermission,
   getSavedTopics,
   hasActivePushSubscription,
   needsPwaForPush,
   refreshPushSubscriptionIfNeeded,
+  requestNotificationPermissionFromGesture,
   subscribeToPush,
 } from "@/lib/pushNotifications";
 
@@ -17,6 +19,7 @@ const DISMISS_KEY = "pbc_notify_prompt_dismissed";
 export default function NotificationPrompt({ onOpenInstall }) {
   const [visible, setVisible] = useState(false);
   const [installFirst, setInstallFirst] = useState(false);
+  const [permissionBlocked, setPermissionBlocked] = useState(false);
   const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -61,16 +64,13 @@ export default function NotificationPrompt({ onOpenInstall }) {
     }
 
     if (iosNeedsInstall) {
+      setPermissionBlocked(false);
       setVisible(true);
       return;
     }
 
     const perm = await getPushPermission();
-    if (perm === "denied") {
-      setVisible(false);
-      return;
-    }
-
+    setPermissionBlocked(perm === "denied");
     setVisible(true);
   }, []);
 
@@ -93,16 +93,32 @@ export default function NotificationPrompt({ onOpenInstall }) {
 
   const handleEnable = () => {
     if (loading || enablingRef.current) return;
+
+    if (needsPwaForPush()) {
+      onOpenInstall?.();
+      setError("Add Peace Baptist to your Home Screen, then open the app from that icon and tap Enable notifications again.");
+      return;
+    }
+
+    if (Notification.permission === "denied") {
+      setPermissionBlocked(true);
+      setError(getNotificationPermissionHelp("denied"));
+      return;
+    }
+
+    setPermissionBlocked(false);
+
     enablingRef.current = true;
     setLoading(true);
     setError("");
 
-    (async () => {
+    const permissionPromise = requestNotificationPermissionFromGesture();
+
+    permissionPromise.then(async (permission) => {
       try {
-        if (needsPwaForPush()) {
-          onOpenInstall?.();
-          setError("Add Peace Baptist to your Home Screen, then open the app from that icon and tap Enable notifications again.");
-          return;
+        if (permission !== "granted") {
+          if (permission === "denied") setPermissionBlocked(true);
+          throw new Error(getNotificationPermissionHelp(permission));
         }
 
         if (serverReady === false) {
@@ -116,7 +132,10 @@ export default function NotificationPrompt({ onOpenInstall }) {
           setServerReady(true);
         }
 
-        await subscribeToPush(topics.length ? topics : ["daily_walk", "prayer", "live"]);
+        await subscribeToPush(
+          topics.length ? topics : ["daily_walk", "prayer", "live"],
+          { permission }
+        );
         sessionStorage.setItem(DISMISS_KEY, "1");
         setVisible(false);
         setToast("Notifications enabled");
@@ -126,7 +145,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
         setLoading(false);
         enablingRef.current = false;
       }
-    })();
+    });
   };
 
   const dismiss = () => {
@@ -159,7 +178,9 @@ export default function NotificationPrompt({ onOpenInstall }) {
                 <p className="text-white/70 text-sm mt-1">
                   {installFirst
                     ? "On iPhone, add Peace Baptist to your Home Screen first — then you can turn on Daily Walk, prayer, and live stream alerts."
-                    : "Get the Daily Walk each morning, prayer request updates, and live service alerts."}
+                    : permissionBlocked
+                      ? "Notifications are blocked in your browser. Allow them for peacebaptist.net, then try again."
+                      : "Get the Daily Walk each morning, prayer request updates, and live service alerts."}
                 </p>
               </div>
               <button type="button" onClick={dismiss} className="text-white/40 hover:text-white shrink-0 p-1 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Dismiss">
@@ -167,7 +188,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
               </button>
             </div>
 
-            {!installFirst && (
+            {!installFirst && !permissionBlocked && (
               <div className="flex flex-wrap gap-2 mb-4 text-xs">
                 {[
                   { id: "daily_walk", label: "Daily Walk" },
@@ -191,7 +212,13 @@ export default function NotificationPrompt({ onOpenInstall }) {
               </div>
             )}
 
-            {error && <p className="text-red-300 text-xs mb-3">{error}</p>}
+            {error && <p className="text-red-300 text-xs mb-3 leading-relaxed">{error}</p>}
+
+            {permissionBlocked && !installFirst && (
+              <p className="text-white/50 text-xs mb-3 leading-relaxed">
+                {getNotificationPermissionHelp("denied")}
+              </p>
+            )}
 
             {installFirst ? (
               <button
@@ -205,17 +232,21 @@ export default function NotificationPrompt({ onOpenInstall }) {
               <button
                 type="button"
                 onClick={handleEnable}
-                disabled={loading || topics.length === 0}
+                disabled={loading || (!permissionBlocked && topics.length === 0)}
                 className="w-full py-3 min-h-[44px] bg-gold text-navy font-semibold rounded-xl text-sm hover:bg-gold-light transition-colors disabled:opacity-50"
               >
-                {loading ? "Setting up…" : "Enable notifications"}
+                {loading
+                  ? "Setting up…"
+                  : permissionBlocked
+                    ? "I've allowed notifications — try again"
+                    : "Enable notifications"}
               </button>
             )}
 
             <p className="text-white/40 text-[11px] mt-2 text-center">
               {installFirst
                 ? "After installing, open the church app from your Home Screen — the enable button will appear there."
-                : "Each phone must enable alerts separately. Open from your Home Screen icon on iPhone."}
+                : "Admin test sends go to subscribed phones only — your computer does not need notifications to send them."}
             </p>
           </div>
         </div>

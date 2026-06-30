@@ -84,8 +84,30 @@ async function waitForServiceWorkerReady(registration, attempts = 12) {
 }
 
 export async function getPushPermission() {
-  if (!isPushSupported()) return 'unsupported';
+  if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
   return Notification.permission;
+}
+
+export function getNotificationPermissionHelp(permission = Notification?.permission) {
+  if (permission === 'denied') {
+    return 'Notifications are blocked for this site. In Chrome: click the lock icon in the address bar → Site settings → Notifications → Allow. Then refresh and tap Enable again. On iPhone: Settings → Notifications → Peace Baptist → Allow Notifications.';
+  }
+  if (permission === 'default') {
+    return 'Tap Allow when your browser asks for notification permission. If no prompt appears, check that notifications are not blocked in your browser or device settings.';
+  }
+  return 'Notification permission was not granted.';
+}
+
+/**
+ * Must be invoked synchronously inside a click handler — before any await.
+ */
+export function requestNotificationPermissionFromGesture() {
+  if (typeof window === 'undefined' || !('Notification' in window)) {
+    return Promise.resolve('unsupported');
+  }
+  if (Notification.permission === 'granted') return Promise.resolve('granted');
+  if (Notification.permission === 'denied') return Promise.resolve('denied');
+  return Notification.requestPermission();
 }
 
 export async function fetchPushStatus() {
@@ -150,8 +172,13 @@ export async function refreshPushSubscriptionIfNeeded() {
   }
 }
 
-export async function subscribeToPush(topics = getSavedTopics()) {
+export async function subscribeToPush(topics = getSavedTopics(), { permission: grantedPermission } = {}) {
   if (!isPushSupported()) throw new Error('Push notifications are not supported on this device.');
+
+  const permission = grantedPermission ?? Notification.permission;
+  if (permission !== 'granted') {
+    throw new Error(getNotificationPermissionHelp(permission));
+  }
 
   const status = await fetchPushStatus();
   if (!status.configured || !status.publicKey) {
@@ -165,9 +192,6 @@ export async function subscribeToPush(topics = getSavedTopics()) {
   if (!registration?.pushManager) {
     throw new Error('Could not register the app service worker. Try again in a moment.');
   }
-
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') throw new Error('Notification permission was not granted.');
 
   // Replace any stale subscription (e.g. after VAPID key rotation or browser vs installed app).
   const existing = await registration.pushManager.getSubscription();

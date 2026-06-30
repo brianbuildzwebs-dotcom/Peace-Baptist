@@ -135,3 +135,17 @@
     display: block !important;
   }
 }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .simple-streamz-embed iframe {
+    aspect-ratio: auto !important;
+    height: calc(100vh - 5rem) !important;
+    min-height: 220px !important;
+  }
+
+  .watch-player-frame {
+    aspect-ratio: auto !important;
+    height: calc(100vh - 5rem) !important;
+    min-height: 220px !important;
+  }
+}
