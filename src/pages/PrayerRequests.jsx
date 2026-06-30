@@ -42,13 +42,6 @@ export default function PrayerRequests() {
       is_anonymous: isAnonymous,
       is_public: isPublicPost,
     });
-    // Notify admin
-    base44.functions.invoke("notifyNewPrayer", {
-      name: isAnonymous ? "" : name,
-      category,
-      request,
-      is_anonymous: isAnonymous,
-    }).catch(() => {});
     setSubmitting(false);
     setSubmitted(true);
   };

@@ -1,3 +1,4 @@
+import { getAdminEmail, getFromEmail, isResendConfigured } from '../email.js';
 import { getSupabaseAdmin, getSupabaseProjectRef, getSupabaseUrl, isSupabaseConfigured } from '../supabase.js';
 
 export async function handleHealth(req, res) {
@@ -26,6 +27,9 @@ export async function handleHealth(req, res) {
       hasSupabaseUrl: Boolean(getSupabaseUrl()),
       hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
       hasAnonKey: Boolean(process.env.SUPABASE_ANON_KEY?.trim() || process.env.VITE_SUPABASE_ANON_KEY?.trim()),
+      hasResendKey: isResendConfigured(),
+      adminEmail: getAdminEmail(),
+      fromEmail: getFromEmail(),
     },
   });
 }
