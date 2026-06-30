@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Heart, Users, Globe, Shield, Star } from "lucide-react";
 import SectionHeading from "@/components/church/SectionHeading";
 import { churchInfo } from "@/lib/churchInfo";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 const values = [
   { icon: BookOpen, title: "Biblical Authority", desc: "We believe the Bible is the inspired, inerrant Word of God and our sole authority for faith and practice." },
@@ -14,7 +15,7 @@ const values = [
 ];
 
 const staff = [
-  { name: "Pastor Rudy Shepard", role: "Senior Pastor", bio: "Founded Peace Baptist in 1975 and has faithfully led the congregation for 50 years. Now 77, his dedication to God and Wilmington is unwavering.", image: churchInfo.images.pastor },
+  { name: "Pastor Rudy Shepard", role: "Senior Pastor", bio: "Founded Peace Baptist in 1975 and has faithfully led the congregation for 50 years. Now 77, his dedication to God and Wilmington is unwavering.", imageKey: "pastor" },
   { name: "Sunday School", role: "9:30 AM Sunday", bio: "Bible study for all ages before the morning worship service." },
   { name: "Children's Church", role: "Master Clubs", bio: "Dedicated programs for children, nurturing their faith in a fun and engaging environment." },
   { name: "Peace Teens", role: "Youth Ministry", bio: "Active youth group helping teenagers grow in their faith and build lasting friendships." },
@@ -23,12 +24,14 @@ const staff = [
 const fade = { initial: { opacity: 0, y: 30 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } };
 
 export default function About() {
+  const { getImage } = useSiteImages();
+
   return (
     <div>
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[400px] flex items-center">
         <div className="absolute inset-0">
-          <img src={churchInfo.images.aboutHero} alt="Peace Baptist Church exterior" className="w-full h-full object-cover" />
+          <img src={getImage("aboutHero")} alt="Peace Baptist Church exterior" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 to-navy/60" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-hero-offset">
@@ -53,8 +56,8 @@ export default function About() {
               </div>
             </motion.div>
             <motion.div {...fade} className="grid grid-cols-2 gap-4">
-              <img src={churchInfo.images.aboutSanctuary} alt="Peace Baptist Church sanctuary" className="rounded-2xl shadow-lg h-64 object-cover w-full" />
-              <img src={churchInfo.images.aboutBuilding} alt="Peace Baptist Church building" className="rounded-2xl shadow-lg h-64 object-cover w-full mt-8" />
+              <img src={getImage("aboutSanctuary")} alt="Peace Baptist Church sanctuary" className="rounded-2xl shadow-lg h-64 object-cover w-full" />
+              <img src={getImage("aboutBuilding")} alt="Peace Baptist Church building" className="rounded-2xl shadow-lg h-64 object-cover w-full mt-8" />
             </motion.div>
           </div>
         </div>
@@ -65,7 +68,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div {...fade} className="order-2 lg:order-1">
-              <img src={churchInfo.images.pastor} alt="Pastor Rudy Shepard" className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover" />
+              <img src={getImage("pastor")} alt="Pastor Rudy Shepard" className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover" />
             </motion.div>
             <motion.div {...fade} className="order-1 lg:order-2">
               <SectionHeading label="Our Pastor" title="Pastor Rudy Shepard" center={false} />
@@ -105,8 +108,8 @@ export default function About() {
             {staff.map((s, i) => (
               <motion.div key={s.name} {...fade} transition={{ ...fade.transition, delay: i * 0.1 }} className="text-center group">
                 <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-5 shadow-lg ring-4 ring-white">
-                  {s.image ? (
-                    <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                  {s.imageKey ? (
+                    <img src={getImage(s.imageKey)} alt={s.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full bg-navy/10 flex items-center justify-center">
                       <span className="text-3xl font-heading font-bold text-navy/30">{s.name.charAt(0)}</span>

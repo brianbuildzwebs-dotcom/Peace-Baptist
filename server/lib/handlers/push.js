@@ -6,6 +6,7 @@ import {
   isPushConfigured,
   notifyLiveStream,
   savePushSubscription,
+  runScheduledPushes,
   sendDailyWalkNotification,
 } from '../push.js';
 
@@ -118,6 +119,23 @@ export async function handlePushCronDailyWalk(req, res) {
     return res.status(200).json({ ok: true, ...result });
   } catch (err) {
     console.error('Daily walk cron:', err);
+    return res.status(500).json({ error: err.message || 'Cron failed' });
+  }
+}
+
+export async function handlePushCronScheduled(req, res) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!authorizeCron(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const result = await runScheduledPushes();
+    return res.status(200).json({ ok: true, ...result });
+  } catch (err) {
+    console.error('Scheduled push cron:', err);
     return res.status(500).json({ error: err.message || 'Cron failed' });
   }
 }

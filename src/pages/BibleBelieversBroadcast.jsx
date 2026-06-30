@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Radio, ExternalLink } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import SectionHeading from "@/components/church/SectionHeading";
 import { churchInfo } from "@/lib/churchInfo";
+import { extractEmbedSrc } from "@/lib/embedUtils";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function BibleBelieversBroadcast() {
   const { bibleBelieversBroadcast } = churchInfo;
-  const [embedUrl, setEmbedUrl] = useState(bibleBelieversBroadcast.embedUrl);
-
-  useEffect(() => {
-    base44.entities.SiteSettings.filter({ key: "bible_believers_broadcast_embed" })
-      .then((rows) => {
-        if (rows[0]?.value) setEmbedUrl(rows[0].value);
-      })
-      .catch(() => {});
-  }, []);
+  const { get } = useSiteSettings();
+  const embedUrl = extractEmbedSrc(get("bbb_player_embed")) || bibleBelieversBroadcast.embedUrl;
 
   return (
     <div>

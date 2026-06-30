@@ -5,8 +5,8 @@
   ],
   "crons": [
     {
-      "path": "/api/push/cron/daily-walk",
-      "schedule": "0 11 * * *"
+      "path": "/api/push/cron/scheduled",
+      "schedule": "0 * * * *"
     }
   ]
 }

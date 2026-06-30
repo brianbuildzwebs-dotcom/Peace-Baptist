@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Users, HandHelping, BookOpen } from "lucide-react";
-import { churchInfo } from "@/lib/churchInfo";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 const actions = [
   { icon: Heart, title: "Submit a Prayer", desc: "Share your burdens and let our community lift you up in prayer.", path: "/prayer-requests", btn: "Request Prayer" },
@@ -12,10 +12,12 @@ const actions = [
 ];
 
 export default function GetInvolved() {
+  const { getImage } = useSiteImages();
+
   return (
     <section className="relative py-24 overflow-hidden">
       <div className="absolute inset-0">
-        <img src={churchInfo.images.worship} alt="Peace Baptist Church sanctuary" className="w-full h-full object-cover" />
+        <img src={getImage("worship")} alt="Peace Baptist Church sanctuary" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-navy/85" />
       </div>
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

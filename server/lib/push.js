@@ -252,16 +252,130 @@ export async function sendDailyWalkNotification({ force = false, fromCron = fals
   return { ...result, date: today, devotionId: devotion.id };
 }
 
-async function getDailyWalkNotifyHour() {
+async function getSiteSettingValue(key) {
   const supabase = getSupabaseAdmin();
-  if (!supabase) return 7;
-
+  if (!supabase) return null;
   const { data } = await supabase
     .from('site_settings')
     .select('value')
-    .eq('key', 'daily_walk_notify_hour')
+    .eq('key', key)
     .maybeSingle();
+  return data?.value ?? null;
+}
 
-  const hour = parseInt(data?.value ?? '7', 10);
+async function setSiteSettingValue(key, label, value) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
+  await supabase
+    .from('site_settings')
+    .upsert({ key, label, value }, { onConflict: 'key' });
+}
+
+async function getDailyWalkNotifyHour() {
+  const hour = parseInt(await getSiteSettingValue('daily_walk_notify_hour') ?? '7', 10);
   return Number.isFinite(hour) ? hour : 7;
+}
+
+function easternNow() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: CHURCH_TIMEZONE,
+    hour: 'numeric',
+    minute: 'numeric',
+    weekday: 'short',
+    hour12: false,
+  }).formatToParts(new Date());
+
+  const hour = parseInt(parts.find((p) => p.type === 'hour')?.value ?? '0', 10);
+  const minute = parseInt(parts.find((p) => p.type === 'minute')?.value ?? '0', 10);
+  const weekday = parts.find((p) => p.type === 'weekday')?.value ?? 'Sun';
+  const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return { hour, minute, day: dayMap[weekday] ?? 0 };
+}
+
+const DEFAULT_PUSH_SCHEDULES = [
+  {
+    id: 'daily_walk_morning',
+    type: 'daily_walk',
+    hour: 7,
+    minute: 0,
+    days: [0, 1, 2, 3, 4, 5, 6],
+    enabled: true,
+    topic: 'daily_walk',
+  },
+];
+
+async function getPushSchedules() {
+  const raw = await getSiteSettingValue('push_schedules');
+  if (!raw) return DEFAULT_PUSH_SCHEDULES;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length ? parsed : DEFAULT_PUSH_SCHEDULES;
+  } catch {
+    return DEFAULT_PUSH_SCHEDULES;
+  }
+}
+
+async function getScheduleSentLog() {
+  const raw = await getSiteSettingValue('push_schedule_sent_log');
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function saveScheduleSentLog(log) {
+  await setSiteSettingValue('push_schedule_sent_log', 'Push schedule sent log', JSON.stringify(log));
+}
+
+function scheduleMatchesNow(schedule, now) {
+  if (!schedule?.enabled) return false;
+  if (!Array.isArray(schedule.days) || !schedule.days.includes(now.day)) return false;
+  return Number(schedule.hour) === now.hour && Number(schedule.minute ?? 0) === now.minute;
+}
+
+export async function runScheduledPushes() {
+  const now = easternNow();
+  const today = easternDateString();
+  const schedules = await getPushSchedules();
+  const sentLog = await getScheduleSentLog();
+  const results = [];
+
+  for (const schedule of schedules) {
+    if (!scheduleMatchesNow(schedule, now)) continue;
+    if (sentLog[schedule.id] === today) {
+      results.push({ scheduleId: schedule.id, skipped: true, reason: 'already_sent_today' });
+      continue;
+    }
+
+    let result;
+    if (schedule.type === 'daily_walk') {
+      result = await sendDailyWalkNotification({ fromCron: true });
+    } else if (schedule.type === 'live') {
+      result = await notifyLiveStream();
+    } else if (schedule.type === 'custom') {
+      result = await sendTopicPush(schedule.topic || 'live', {
+        title: schedule.title || 'Peace Baptist Church',
+        body: schedule.body || '',
+        url: schedule.url || '/',
+        tag: `schedule-${schedule.id}-${today}`,
+      });
+    } else {
+      result = { skipped: true, reason: 'unknown_type' };
+    }
+
+    if (!result?.skipped) {
+      sentLog[schedule.id] = today;
+    }
+
+    results.push({ scheduleId: schedule.id, type: schedule.type, ...result });
+  }
+
+  if (results.some((r) => !r.skipped)) {
+    await saveScheduleSentLog(sentLog);
+  }
+
+  return { now, results };
 }

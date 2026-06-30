@@ -33,6 +33,7 @@ import AdminPrayers from './pages/admin/AdminPrayers';
 import AdminMedia from './pages/admin/AdminMedia';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminDailyWalk from './pages/admin/AdminDailyWalk';
+import AdminNotifications from './pages/admin/AdminNotifications';
 
 // Auth pages
 import Login from './pages/Login';
@@ -101,6 +102,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/prayers" element={<AdminPrayers />} />
           <Route path="/admin/media" element={<AdminMedia />} />
           <Route path="/admin/daily-walk" element={<AdminDailyWalk />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>

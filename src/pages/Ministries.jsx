@@ -5,8 +5,10 @@ import { base44 } from "@/api/base44Client";
 import SectionHeading from "@/components/church/SectionHeading";
 import SignaturePad from "@/components/church/SignaturePad";
 import { churchInfo } from "@/lib/churchInfo";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 export default function Ministries() {
+  const { getImage, getMinistryImage } = useSiteImages();
   const [ministries, setMinistries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMinistry, setSelectedMinistry] = useState(null);
@@ -18,17 +20,16 @@ export default function Ministries() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const applyMinistryImages = (rows) =>
-    rows.map((m) => {
-      const fallback = churchInfo.ministries?.find((d) => d.name === m.name);
-      return fallback?.image_url ? { ...m, image_url: fallback.image_url } : m;
-    });
+  const resolveMinistryImage = (m) => {
+    const fallback = churchInfo.ministries?.find((d) => d.name === m.name);
+    if (fallback?.id) return getMinistryImage(fallback.id, m.image_url || fallback.image_url);
+    return m.image_url || fallback?.image_url || "";
+  };
 
   useEffect(() => {
     base44.entities.Ministry.filter({ status: "active" })
       .then((data) => {
-        const list = data.length > 0 ? data : churchInfo.ministries || [];
-        setMinistries(applyMinistryImages(list));
+        setMinistries(data.length > 0 ? data : churchInfo.ministries || []);
       })
       .catch(() => {
         setMinistries(churchInfo.ministries || []);
@@ -66,7 +67,7 @@ export default function Ministries() {
     <div>
       <section className="relative h-[50vh] min-h-[400px] flex items-center">
         <div className="absolute inset-0">
-          <img src={churchInfo.images.worship} alt="Peace Baptist Church sanctuary" className="w-full h-full object-cover" />
+          <img src={getImage("worship")} alt="Peace Baptist Church sanctuary" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 to-navy/60" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-hero-offset">
@@ -98,9 +99,9 @@ export default function Ministries() {
                   transition={{ duration: 0.4, delay: i * 0.05 }}
                   className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 group"
                 >
-                  {m.image_url && (
+                  {resolveMinistryImage(m) && (
                     <div className="h-48 overflow-hidden">
-                      <img src={m.image_url} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <img src={resolveMinistryImage(m)} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>
                   )}
                   <div className="p-6">

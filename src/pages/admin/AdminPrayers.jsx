@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Eye, CheckCircle, Archive, MessageSquare, X } from "lucide-react";
+import { Heart, Eye, CheckCircle, Archive, MessageSquare, Trash2, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AdminPrayers() {
@@ -33,6 +33,13 @@ export default function AdminPrayers() {
 
   const togglePublic = async (id, current) => {
     await base44.entities.PrayerRequest.update(id, { is_public: !current });
+    loadPrayers();
+  };
+
+  const handleDelete = async (pr) => {
+    if (!confirm(`Delete this prayer request${pr.name && !pr.is_anonymous ? ` from ${pr.name}` : ""}? This cannot be undone.`)) return;
+    await base44.entities.PrayerRequest.delete(pr.id);
+    if (selected?.id === pr.id) setSelected(null);
     loadPrayers();
   };
 
@@ -91,6 +98,7 @@ export default function AdminPrayers() {
                   <button onClick={() => togglePublic(pr.id, pr.is_public)} title="Toggle Public" className="p-1.5 text-white/30 hover:text-blue-400 rounded hover:bg-white/5"><Eye size={14} /></button>
                   <button onClick={() => { setSelected(pr); setNotes(pr.admin_notes || ""); }} title="Add Notes" className="p-1.5 text-white/30 hover:text-gold rounded hover:bg-white/5"><MessageSquare size={14} /></button>
                   <button onClick={() => updateStatus(pr.id, "archived")} title="Archive" className="p-1.5 text-white/30 hover:text-gray-400 rounded hover:bg-white/5"><Archive size={14} /></button>
+                  <button onClick={() => handleDelete(pr)} title="Delete" className="p-1.5 text-white/30 hover:text-red-400 rounded hover:bg-white/5"><Trash2 size={14} /></button>
                 </div>
               </div>
             </div>

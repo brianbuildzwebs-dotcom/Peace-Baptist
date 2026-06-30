@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Play, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import SectionHeading from "@/components/church/SectionHeading";
 import SimpleStreamzPlayer from "@/components/watch/SimpleStreamzPlayer";
 import { churchInfo } from "@/lib/churchInfo";
+import { parseSimpleStreamzEmbed, extractEmbedSrc } from "@/lib/embedUtils";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function WatchLive() {
-  const [liveUrl, setLiveUrl] = useState("");
-  const { liveStream, pastServicesPlaylist } = churchInfo;
-  const hasStreamzPlayer = liveStream?.channelId && liveStream?.embedBase;
-  const playlistEmbed = pastServicesPlaylist?.embedUrl;
+  const { get } = useSiteSettings();
+  const { data: legacyRows = [] } = useQuery({
+    queryKey: ["site-setting", "live_stream_url"],
+    queryFn: () => base44.entities.SiteSettings.filter({ key: "live_stream_url" }).catch(() => []),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!hasStreamzPlayer) {
-      base44.entities.SiteSettings.filter({ key: "live_stream_url" })
-        .then((rows) => { if (rows[0]) setLiveUrl(rows[0].value); })
-        .catch(() => {});
-    }
-  }, [hasStreamzPlayer]);
+  const { liveStream, pastServicesPlaylist } = churchInfo;
+  const defaultLiveEmbed = `${liveStream.embedBase}/embed/c/${liveStream.channelId}`;
+  const liveEmbed = get("live_player_embed") || legacyRows[0]?.value || defaultLiveEmbed;
+  const streamz = parseSimpleStreamzEmbed(liveEmbed);
+  const fallbackIframeSrc = !streamz ? extractEmbedSrc(liveEmbed) : "";
+  const hasStreamzPlayer = streamz?.channelId && streamz?.embedBase;
+  const playlistEmbed = get("sermon_playlist_url") || pastServicesPlaylist?.embedUrl;
 
   return (
     <div>
-      {/* Hero */}
       <section className="relative navy-gradient page-hero-offset pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -33,22 +37,21 @@ export default function WatchLive() {
         </div>
       </section>
 
-      {/* Live Stream Player */}
       <section className="bg-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           <div className="max-w-5xl mx-auto">
             {hasStreamzPlayer ? (
               <div className="relative shadow-2xl">
                 <SimpleStreamzPlayer
-                  channelId={liveStream.channelId}
-                  embedBase={liveStream.embedBase}
+                  channelId={streamz.channelId}
+                  embedBase={streamz.embedBase}
                 />
               </div>
             ) : (
               <div className="relative rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl">
-                {liveUrl ? (
+                {fallbackIframeSrc ? (
                   <iframe
-                    src={liveUrl}
+                    src={fallbackIframeSrc}
                     title="Live Stream"
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -61,7 +64,7 @@ export default function WatchLive() {
                         <Play size={32} className="text-gold ml-1" />
                       </div>
                       <p className="text-white/60 text-sm">Live stream will appear here during services</p>
-                      <p className="text-white/40 text-xs mt-2">Configure your Simple Streamz channel in site settings</p>
+                      <p className="text-white/40 text-xs mt-2">Admins can update the player in Media Library</p>
                     </div>
                   </div>
                 )}
@@ -77,7 +80,6 @@ export default function WatchLive() {
         </div>
       </section>
 
-      {/* Past Services Playlist */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading

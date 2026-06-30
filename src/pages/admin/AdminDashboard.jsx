@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio, Bell } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -106,6 +107,19 @@ export default function AdminDashboard() {
         </button>
       </div>
       {livePushStatus && <p className="text-white/50 text-sm">{livePushStatus}</p>}
+
+      <div className="bg-white/5 rounded-2xl p-6 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-white font-heading font-bold">Scheduled notifications</h3>
+          <p className="text-white/40 text-sm mt-1">Set automatic Daily Walk, live, or custom pushes. Manual send buttons still work anytime.</p>
+        </div>
+        <Link
+          to="/admin/notifications"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold/15 text-gold border border-gold/30 rounded-xl text-sm font-semibold hover:bg-gold/25 shrink-0"
+        >
+          <Bell size={16} /> Manage schedule
+        </Link>
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Prayer Requests */}

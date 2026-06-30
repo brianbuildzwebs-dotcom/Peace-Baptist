@@ -6,6 +6,7 @@ import { handleFunction } from '../server/lib/handlers/functions.js';
 import { handleUpload } from '../server/lib/handlers/upload.js';
 import {
   handlePushCronDailyWalk,
+  handlePushCronScheduled,
   handlePushSendDailyWalkNow,
   handlePushSendLive,
   handlePushSubscriberCount,
@@ -69,6 +70,7 @@ export default async function handler(req, res) {
       if (second === 'send-live') return handlePushSendLive(req, res);
       if (second === 'send-daily-walk') return handlePushSendDailyWalkNow(req, res);
       if (second === 'cron' && third === 'daily-walk') return handlePushCronDailyWalk(req, res);
+      if (second === 'cron' && third === 'scheduled') return handlePushCronScheduled(req, res);
       return res.status(404).json({ error: 'Not found' });
     }
 

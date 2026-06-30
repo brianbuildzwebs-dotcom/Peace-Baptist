@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import SectionHeading from "./SectionHeading";
 import { churchInfo } from "@/lib/churchInfo";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 const COMMUNITY_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/46b6067d7_generated_5000933d.png";
 const PASTOR_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/f4b111e89_Rudy-Shepard.webp";
@@ -14,6 +15,8 @@ const stats = [
 ];
 
 export default function WelcomeSection() {
+  const { getImage } = useSiteImages();
+
   return (
     <section className="py-24 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +30,7 @@ export default function WelcomeSection() {
           >
             <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-gold/20 to-transparent -z-10" />
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-navy/10 ring-1 ring-black/5">
-              <img src={churchInfo.images.welcome} alt="Peace Baptist Church building with cross" className="w-full h-[420px] object-cover" />
+              <img src={getImage("welcome")} alt="Peace Baptist Church building with cross" className="w-full h-[420px] object-cover" />
             </div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -37,7 +40,7 @@ export default function WelcomeSection() {
               className="absolute -bottom-8 -right-2 sm:right-6 bg-white rounded-2xl shadow-xl p-6 max-w-xs border border-gold/20"
             >
               <div className="flex items-center gap-3 mb-3">
-                <img src={churchInfo.images.pastor} alt={churchInfo.pastor} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/30" />
+                <img src={getImage("pastor")} alt={churchInfo.pastor} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/30" />
                 <div>
                   <div className="font-heading font-bold text-sm text-navy">{churchInfo.pastor}</div>
                   <div className="text-xs text-gold">Senior Pastor</div>

@@ -3,13 +3,16 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play, Clock, Calendar, BookOpen, Heart, MapPin } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 export default function HeroSection() {
+  const { getImage } = useSiteImages();
+
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={churchInfo.images.hero}
+          src={getImage("hero")}
           alt="Peace Baptist Church sanctuary"
           className="w-full h-full object-cover hero-ken-burns"
         />
