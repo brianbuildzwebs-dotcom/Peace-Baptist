@@ -32,7 +32,7 @@ export const churchInfo = {
   },
   liveStream: {
     provider: "simple-streamz",
-    channelId: "dd12abe211fe4011bb83",
+    channelId: "ef5d376560a945d2ba92",
     embedBase: "https://simplestreamz.io",
   },
   pastServicesPlaylist: {
