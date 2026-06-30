@@ -18,10 +18,17 @@ export default function Ministries() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const applyMinistryImages = (rows) =>
+    rows.map((m) => {
+      const fallback = churchInfo.ministries?.find((d) => d.name === m.name);
+      return fallback?.image_url ? { ...m, image_url: fallback.image_url } : m;
+    });
+
   useEffect(() => {
     base44.entities.Ministry.filter({ status: "active" })
       .then((data) => {
-        setMinistries(data.length > 0 ? data : churchInfo.ministries || []);
+        const list = data.length > 0 ? data : churchInfo.ministries || [];
+        setMinistries(applyMinistryImages(list));
       })
       .catch(() => {
         setMinistries(churchInfo.ministries || []);

@@ -64,7 +64,7 @@ export const churchInfo = {
         "Teaching and activities for young people to grow in faith, build friendships, and serve the Lord.",
       leader: "Youth Leaders",
       meeting_time: "Sunday & Wednesday",
-      image_url: "/images/hero-sanctuary.jpg",
+      image_url: "/images/youth-ministry.jpg",
       status: "active",
     },
     {

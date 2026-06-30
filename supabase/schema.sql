@@ -14,11 +14,19 @@ create table if not exists public.profiles (
   created_date timestamptz not null default now()
 );
 
--- If profiles already existed from an older Supabase template, add missing columns.
+-- If profiles already existed from an older Supabase template, fix role constraint + columns.
+alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles add column if not exists email text;
 alter table public.profiles add column if not exists full_name text;
 alter table public.profiles add column if not exists role text default 'user';
 alter table public.profiles add column if not exists created_date timestamptz default now();
+
+update public.profiles
+set role = 'user'
+where role is null or role not in ('user', 'admin');
+
+alter table public.profiles
+  add constraint profiles_role_check check (role in ('user', 'admin'));
 
 alter table public.profiles enable row level security;
 
@@ -202,7 +210,7 @@ values
     'Teaching and activities for young people to grow in faith, build friendships, and serve the Lord.',
     'Youth Leaders',
     'Sunday & Wednesday',
-    '/images/hero-sanctuary.jpg',
+    '/images/youth-ministry.jpg',
     'active'
   ),
   (
