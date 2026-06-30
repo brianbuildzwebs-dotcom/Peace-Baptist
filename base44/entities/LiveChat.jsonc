@@ -1,0 +1,19 @@
+{
+  "name": "LiveChat",
+  "type": "object",
+  "properties": {
+    "sender_name": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "message",
+    "sender_name"
+  ]
+}

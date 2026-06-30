@@ -1,0 +1,26 @@
+{
+  "name": "Testimonial",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "quote": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "quote"
+  ]
+}

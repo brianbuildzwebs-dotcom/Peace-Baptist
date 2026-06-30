@@ -1,0 +1,36 @@
+{
+  "name": "Ministry",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "leader": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "meeting_time": {
+      "type": "string"
+    },
+    "form_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "name",
+    "description"
+  ]
+}

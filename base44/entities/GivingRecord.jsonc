@@ -1,0 +1,48 @@
+{
+  "name": "GivingRecord",
+  "type": "object",
+  "properties": {
+    "donor_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "fund": {
+      "type": "string",
+      "enum": [
+        "general",
+        "missions",
+        "building",
+        "youth",
+        "benevolence"
+      ],
+      "default": "general"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "one-time",
+        "weekly",
+        "monthly"
+      ],
+      "default": "one-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "amount",
+    "fund"
+  ]
+}

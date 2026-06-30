@@ -1,0 +1,51 @@
+{
+  "name": "MediaItem",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "sermon",
+        "worship",
+        "special"
+      ],
+      "default": "sermon"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "speaker": {
+      "type": "string"
+    },
+    "series": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "duration": {
+      "type": "string"
+    },
+    "scripture": {
+      "type": "string"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "type"
+  ]
+}

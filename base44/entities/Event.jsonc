@@ -1,0 +1,68 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "end_time": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "worship",
+        "fellowship",
+        "youth",
+        "outreach",
+        "study",
+        "special",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "ongoing",
+        "completed",
+        "cancelled"
+      ],
+      "default": "upcoming"
+    },
+    "rsvp_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "form_id": {
+      "type": "string"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "max_attendees": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "title",
+    "date"
+  ]
+}
