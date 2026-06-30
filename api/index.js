@@ -1,9 +1,9 @@
-import { handleHealth } from './lib/handlers/health.js';
-import { handleLogin } from './lib/handlers/login.js';
-import { handleMe, handleAuthAction } from './lib/handlers/auth.js';
-import { handleEntityCollection, handleEntityById } from './lib/handlers/entities.js';
-import { handleFunction } from './lib/handlers/functions.js';
-import { handleUpload } from './lib/handlers/upload.js';
+import { handleHealth } from '../server/lib/handlers/health.js';
+import { handleLogin } from '../server/lib/handlers/login.js';
+import { handleMe, handleAuthAction } from '../server/lib/handlers/auth.js';
+import { handleEntityCollection, handleEntityById } from '../server/lib/handlers/entities.js';
+import { handleFunction } from '../server/lib/handlers/functions.js';
+import { handleUpload } from '../server/lib/handlers/upload.js';
 import {
   handlePushCronDailyWalk,
   handlePushSendDailyWalkNow,
@@ -11,7 +11,7 @@ import {
   handlePushSubscribe,
   handlePushUnsubscribe,
   handlePushVapidPublicKey,
-} from './lib/handlers/push.js';
+} from '../server/lib/handlers/push.js';
 
 function getPathSegments(req) {
   const raw = req.query?.path;
