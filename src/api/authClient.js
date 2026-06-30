@@ -12,13 +12,19 @@ async function authRequest(path, options = {}) {
   const response = await fetch(`${API_BASE}/auth${path}`, { ...options, headers });
 
   if (!response.ok) {
-    const error = new Error(`Auth error: ${response.status}`);
-    error.status = response.status;
+    let data = null;
     try {
-      error.data = await response.json();
+      data = await response.json();
     } catch {
-      error.data = null;
+      data = null;
     }
+    const message =
+      data?.error ||
+      data?.message ||
+      (response.status === 404 ? 'Login service not found. Try again in a minute.' : `Auth error: ${response.status}`);
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
     throw error;
   }
 
