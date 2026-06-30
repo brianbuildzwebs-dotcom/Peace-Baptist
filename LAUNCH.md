@@ -1,0 +1,134 @@
+# Peace Baptist — launch checklist
+
+**Current issue (verified):** `https://peacebaptist.net/api/health` reports  
+`supabaseProjectRef: hxtlrwibkdyirnvejfor` — that is **Simple Streamz production**, not a church-only database.  
+Fix this before go-live.
+
+---
+
+## Step 1 — Create a dedicated Supabase project
+
+1. Go to [supabase.com/dashboard](https://supabase.com/dashboard) → **New project**
+2. Name it e.g. `peace-baptist-website` (any region is fine)
+3. Save the new project ref (subdomain before `.supabase.co`)
+
+You will **not** use `hxtlrwibkdyirnvejfor` for this site.
+
+---
+
+## Step 2 — Run church schema (new project only)
+
+1. Supabase → **SQL Editor** → New query
+2. Paste and run the full file: `supabase/schema.sql`
+3. Confirm seed data:
+
+```sql
+select
+  (select count(*) from public.ministries) as ministries,
+  (select count(*) from public.events) as events,
+  (select count(*) from public.testimonials) as testimonials;
+```
+
+Expect ministries ≥ 5, events ≥ 3, testimonials ≥ 3.
+
+---
+
+## Step 3 — Create church admin login
+
+1. Supabase → **Authentication** → **Users** → **Add user**
+2. Email: staff account you want for `/admin` (e.g. `peacebible@bellsouth.net` or your email while building)
+3. Password: strong password, check **Auto Confirm User**
+4. Run `supabase/set-admin.sql` in SQL Editor — **change the email** in that file to match step 2
+
+---
+
+## Step 4 — Update Vercel environment variables
+
+Vercel → **Peace-Baptist** project → **Settings** → **Environment Variables**
+
+Replace Supabase values with the **new** project (Production + Preview):
+
+| Variable | Value |
+|----------|--------|
+| `SUPABASE_URL` | `https://YOUR-NEW-REF.supabase.co` |
+| `SUPABASE_ANON_KEY` | anon key from new project → Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role key (server only — never commit) |
+| `VITE_SUPABASE_URL` | same as `SUPABASE_URL` |
+| `VITE_SUPABASE_ANON_KEY` | same as `SUPABASE_ANON_KEY` |
+
+Keep these (already set):
+
+| Variable | Expected |
+|----------|----------|
+| `RESEND_API_KEY` | your Resend key |
+| `ADMIN_EMAIL` | church inbox for notifications (`peacebible@bellsouth.net` recommended) |
+| `FROM_EMAIL` | `Peace Baptist Church <notifications@peacebaptist.net>` |
+| `SITE_URL` | `https://peacebaptist.net` |
+
+**Remove or ignore** any vars pointing at `hxtlrwibkdyirnvejfor`.
+
+Then: **Deployments** → latest → **Redeploy** (uncheck “Use existing build” if offered, so env is picked up).
+
+---
+
+## Step 5 — Verify production
+
+Open:
+
+```
+https://peacebaptist.net/api/health
+```
+
+Must show:
+
+- `"ok": true`
+- `"supabaseProjectRef": "YOUR-NEW-REF"` (**not** `hxtlrwibkdyirnvejfor`)
+
+---
+
+## Step 6 — Smoke test the site
+
+| Test | URL / action |
+|------|----------------|
+| Home loads | https://peacebaptist.net |
+| Events from DB | https://peacebaptist.net/events |
+| Prayer wall submit | https://peacebaptist.net/prayer-requests |
+| Contact form | https://peacebaptist.net/contact |
+| Admin login | https://peacebaptist.net/login → `/admin` |
+| Watch Live player | https://peacebaptist.net/watch-live |
+| Email notification | Submit a test prayer — check `ADMIN_EMAIL` inbox |
+
+---
+
+## Step 7 — Simple Streamz (separate product)
+
+Streaming uses your embed only — **no** Peace Baptist row needed in Simple Streamz for the website.
+
+1. Embed is configured in `src/lib/churchInfo.js` (`channelId` + `https://simplestreamz.io`)
+2. Optional: remove test user from Simple Streamz prod — run  
+   `scripts/remove-peace-baptist-test-account.sql` in the **Simple Streamz** repo (Supabase `hxtlrwibkdyirnvejfor`)
+
+---
+
+## Step 8 — Git push (after local fixes)
+
+```bash
+cd "C:\Users\Brian\Downloads\Peace-Baptist"
+git add src/lib/churchInfo.js LAUNCH.md
+git commit -m "Point live embed at simplestreamz.io and add launch checklist"
+git push origin main
+```
+
+Vercel will auto-deploy from GitHub.
+
+---
+
+## Quick reference — two projects, never mix
+
+| | Peace Baptist website | Simple Streamz |
+|--|----------------------|----------------|
+| Repo | `Peace-Baptist` | `simple-stream-core` |
+| Hosting | Vercel | Cloudflare Workers |
+| Database | **New** Supabase project | `hxtlrwibkdyirnvejfor` |
+| Domain | peacebaptist.net | simplestreamz.io |
+| Link between them | Embed on Watch Live only | — |
