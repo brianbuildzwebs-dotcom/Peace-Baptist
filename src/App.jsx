@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import AppSplashMark from './components/church/AppSplashMark';
 
 // Public pages
 import Home from './pages/Home';
@@ -51,12 +52,7 @@ const AuthenticatedApp = () => {
   if ((isLoadingPublicSettings || isLoadingAuth) && !isAuthRoute) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-navy">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-gold flex items-center justify-center mx-auto mb-4">
-            <span className="text-navy font-heading font-bold text-xl">P</span>
-          </div>
-          <div className="w-8 h-8 border-4 border-gold/20 border-t-gold rounded-full animate-spin mx-auto"></div>
-        </div>
+        <AppSplashMark size={120} />
       </div>
     );
   }

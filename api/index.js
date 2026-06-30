@@ -1,4 +1,5 @@
 import { handleHealth } from '../server/lib/handlers/health.js';
+import { handleManifest } from '../server/lib/handlers/manifest.js';
 import { handleLogin } from '../server/lib/handlers/login.js';
 import { handleMe, handleAuthAction } from '../server/lib/handlers/auth.js';
 import { handleEntityCollection, handleEntityById } from '../server/lib/handlers/entities.js';
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
 
   try {
     if (root === 'health') return handleHealth(req, res);
+    if (root === 'manifest') return handleManifest(req, res);
 
     if (root === 'upload') return handleUpload(req, res);
 

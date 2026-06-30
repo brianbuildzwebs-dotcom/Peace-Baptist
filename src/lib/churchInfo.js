@@ -98,6 +98,7 @@ export const churchInfo = {
     },
   ],
   images: {
+    splash: "/images/church-exterior.jpg",
     hero: "/images/hero-sanctuary.jpg",
     welcome: "/images/church-exterior.jpg",
     aboutHero: "/images/church-exterior.jpg",

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Download, Share, PlusSquare, Smartphone } from "lucide-react";
+import { X, Download, Share, PlusSquare } from "lucide-react";
 import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 import {
   getDeferredInstallPrompt,
@@ -7,8 +7,12 @@ import {
   isIosDevice,
   onInstallPromptChange,
 } from "@/lib/pwaInstall";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function InstallAppModal({ open, onClose }) {
+  const { getImage } = useSiteImages();
+  const splash = getImage("splash") || churchInfo.images.splash;
   const { hideInstallPromo } = usePwaInstallState();
   const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const ios = isIosDevice();
@@ -48,9 +52,11 @@ export default function InstallAppModal({ open, onClose }) {
         </button>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gold flex items-center justify-center">
-            <Smartphone size={22} className="text-navy" />
-          </div>
+          <img
+            src={splash}
+            alt=""
+            className="w-14 h-14 rounded-2xl object-cover border border-gold/30 shrink-0"
+          />
           <div>
             <h2 className="font-heading text-xl font-bold">Peace Baptist App</h2>
             <p className="text-white/50 text-sm">No app store — install from your browser</p>

@@ -21,7 +21,7 @@
       "src": "/images/church-exterior.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": ["lifestyle", "education"]

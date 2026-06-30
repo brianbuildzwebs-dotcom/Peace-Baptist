@@ -91,10 +91,19 @@ export default function AdminSettings() {
           const preview = getValue(field.key) || defaultImageForField(field);
           return (
             <div key={field.key} className="border-b border-white/5 pb-5 last:border-0 last:pb-0">
-              <label className="block text-white/60 text-xs font-medium mb-2">{field.label}</label>
+              <label className="block text-white/60 text-xs font-medium mb-1">{field.label}</label>
+              {field.hint && <p className="text-white/30 text-xs mb-2">{field.hint}</p>}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 {preview && (
-                  <img src={preview} alt={field.label} className="w-32 h-20 object-cover rounded-xl border border-white/10 shrink-0" />
+                  <img
+                    src={preview}
+                    alt={field.label}
+                    className={`object-cover border border-white/10 shrink-0 ${
+                      field.squarePreview
+                        ? "w-24 h-24 rounded-2xl"
+                        : "w-32 h-20 rounded-xl"
+                    }`}
+                  />
                 )}
                 <label className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white/60 text-sm cursor-pointer hover:bg-white/20 transition-all ${uploadingKey === field.key ? "opacity-50" : ""}`}>
                   <Upload size={14} />
