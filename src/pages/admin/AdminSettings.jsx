@@ -25,6 +25,7 @@ export default function AdminSettings() {
   const [saved, setSaved] = useState({});
   const [loading, setLoading] = useState(true);
   const [uploadingKey, setUploadingKey] = useState(null);
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     base44.entities.SiteSettings.list()
@@ -58,17 +59,22 @@ export default function AdminSettings() {
   };
 
   const handleImageUpload = async (field, e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     setUploadingKey(field.key);
+    setUploadError("");
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setValue(field.key, file_url);
-      await persistSetting(field.key, field.label, file_url);
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
+      if (!fileUrl) throw new Error("Upload succeeded but no image URL was returned.");
+      setValue(field.key, fileUrl);
+      await persistSetting(field.key, field.label, fileUrl);
       setSaved((prev) => ({ ...prev, [field.key]: true }));
       setTimeout(() => setSaved((prev) => ({ ...prev, [field.key]: false })), 2000);
+    } catch (err) {
+      setUploadError(err.message || "Upload failed. Try a smaller image (under 4MB).");
     } finally {
       setUploadingKey(null);
+      e.target.value = "";
     }
   };
 
@@ -86,9 +92,13 @@ export default function AdminSettings() {
           <Image size={16} className="text-gold" />
           <h3 className="text-white font-semibold">Site Images</h3>
         </div>
-        <p className="text-white/30 text-xs -mt-2">Upload a new image for any section below. Leave blank to keep the current default.</p>
+        <p className="text-white/30 text-xs -mt-2">Upload a new image for any section below. JPEG or PNG under 4MB. Leave blank to keep the current default.</p>
+        {uploadError && (
+          <p className="text-red-300 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{uploadError}</p>
+        )}
         {SITE_IMAGE_FIELDS.map((field) => {
-          const preview = getValue(field.key) || defaultImageForField(field);
+          const customUrl = getValue(field.key);
+          const preview = customUrl || defaultImageForField(field);
           return (
             <div key={field.key} className="border-b border-white/5 pb-5 last:border-0 last:pb-0">
               <label className="block text-white/60 text-xs font-medium mb-1">{field.label}</label>
@@ -96,6 +106,7 @@ export default function AdminSettings() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 {preview && (
                   <img
+                    key={preview}
                     src={preview}
                     alt={field.label}
                     className={`object-cover border border-white/10 shrink-0 ${
@@ -110,7 +121,7 @@ export default function AdminSettings() {
                   {uploadingKey === field.key ? "Uploading..." : "Upload Image"}
                   <input type="file" accept="image/*" onChange={(e) => handleImageUpload(field, e)} className="hidden" disabled={uploadingKey === field.key} />
                 </label>
-                {getValue(field.key) && (
+                {customUrl && (
                   <span className={`text-xs px-2 py-1 rounded-lg ${saved[field.key] ? "bg-green-500/20 text-green-400" : "text-gold/70"}`}>
                     {saved[field.key] ? "Saved ✓" : "Custom image active"}
                   </span>

@@ -42,14 +42,32 @@ export const base44 = {
   integrations: {
     Core: {
       async UploadFile({ file }) {
-        const formData = new FormData();
-        formData.append('file', file);
+        const token = localStorage.getItem('peace_auth_token');
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 1) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+
         const response = await fetch(`${API_BASE}/upload`, {
           method: 'POST',
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type || 'image/jpeg',
+            data: btoa(binary),
+          }),
         });
-        if (!response.ok) throw new Error('Upload failed');
-        return response.json();
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.error || payload.message || 'Upload failed');
+        }
+        return payload;
       },
     },
   },
