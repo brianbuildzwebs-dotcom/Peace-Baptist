@@ -17,7 +17,6 @@ import Events from './pages/Events';
 import PrayerRequests from './pages/PrayerRequests';
 import Give from './pages/Give';
 import Contact from './pages/Contact';
-import Blog from './pages/Blog';
 import Ministries from './pages/Ministries';
 
 // Layouts
@@ -30,7 +29,6 @@ import AdminEvents from './pages/admin/AdminEvents';
 import AdminForms from './pages/admin/AdminForms';
 import AdminPrayers from './pages/admin/AdminPrayers';
 import AdminMedia from './pages/admin/AdminMedia';
-import AdminBlog from './pages/admin/AdminBlog';
 import AdminSettings from './pages/admin/AdminSettings';
 
 // Auth pages
@@ -76,7 +74,6 @@ const AuthenticatedApp = () => {
         <Route path="/prayer-requests" element={<PrayerRequests />} />
         <Route path="/give" element={<Give />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/blog" element={<Blog />} />
         <Route path="/ministries" element={<Ministries />} />
       </Route>
 
@@ -94,7 +91,6 @@ const AuthenticatedApp = () => {
           <Route path="/admin/forms" element={<AdminForms />} />
           <Route path="/admin/prayers" element={<AdminPrayers />} />
           <Route path="/admin/media" element={<AdminMedia />} />
-          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>

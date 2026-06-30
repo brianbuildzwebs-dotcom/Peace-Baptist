@@ -10,7 +10,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 export const base44 = {
   entities: {
     Event: createEntityClient('Event'),
-    BlogPost: createEntityClient('BlogPost'),
+
     PrayerRequest: createEntityClient('PrayerRequest'),
     MediaItem: createEntityClient('MediaItem'),
     Ministry: createEntityClient('Ministry'),
