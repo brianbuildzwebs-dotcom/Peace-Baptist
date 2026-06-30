@@ -10,29 +10,48 @@ function configureVapid() {
   if (vapidConfigured) return true;
   const publicKey = getVapidPublicKey();
   const privateKey = getVapidPrivateKey();
-  const subject = process.env.VAPID_SUBJECT?.trim() || `mailto:${process.env.ADMIN_EMAIL || 'peacebible@bellsouth.net'}`;
+  const subject = vapidSubject();
   if (!publicKey || !privateKey) return false;
   webpush.setVapidDetails(subject, publicKey, privateKey);
   vapidConfigured = true;
   return true;
 }
 
-function normalizeVapidKey(raw) {
-  if (!raw) return null;
-  const cleaned = String(raw)
+function cleanVapidEnv(raw) {
+  return String(raw || '')
     .trim()
     .replace(/^["']|["']$/g, '')
     .replace(/\s+/g, '');
-  if (!/^[A-Za-z0-9_-]{80,90}$/.test(cleaned)) return null;
+}
+
+function normalizeVapidPublicKey(raw) {
+  const cleaned = cleanVapidEnv(raw);
+  // web-push public keys are ~87–88 URL-safe base64 characters.
+  if (!/^[A-Za-z0-9_-]{65,90}$/.test(cleaned)) return null;
   return cleaned;
 }
 
+function normalizeVapidPrivateKey(raw) {
+  const cleaned = cleanVapidEnv(raw);
+  // web-push private keys are ~43 URL-safe base64 characters (not the same length as public).
+  if (!/^[A-Za-z0-9_-]{40,50}$/.test(cleaned)) return null;
+  return cleaned;
+}
+
+function vapidSubject() {
+  const raw = process.env.VAPID_SUBJECT?.trim()
+    || process.env.ADMIN_EMAIL?.trim()
+    || 'peacebible@bellsouth.net';
+  if (/^mailto:/i.test(raw) || /^https?:\/\//i.test(raw)) return raw;
+  return `mailto:${raw}`;
+}
+
 export function getVapidPublicKey() {
-  return normalizeVapidKey(process.env.VAPID_PUBLIC_KEY);
+  return normalizeVapidPublicKey(process.env.VAPID_PUBLIC_KEY);
 }
 
 export function getVapidPrivateKey() {
-  return normalizeVapidKey(process.env.VAPID_PRIVATE_KEY);
+  return normalizeVapidPrivateKey(process.env.VAPID_PRIVATE_KEY);
 }
 
 export function isPushConfigured() {

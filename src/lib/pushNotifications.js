@@ -10,7 +10,7 @@ function normalizeVapidPublicKey(raw) {
 
 function urlBase64ToUint8Array(base64String) {
   const normalized = normalizeVapidPublicKey(base64String);
-  if (!/^[A-Za-z0-9_-]{80,90}$/.test(normalized)) {
+  if (!/^[A-Za-z0-9_-]{65,90}$/.test(normalized)) {
     throw new Error(
       'Push is misconfigured on the server. The VAPID public key in Vercel must be the key only — not a command or extra text.'
     );

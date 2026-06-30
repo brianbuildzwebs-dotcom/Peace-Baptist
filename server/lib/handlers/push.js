@@ -41,8 +41,8 @@ export async function handlePushStatus(req, res) {
       configured: false,
       publicKey: publicKey || null,
       error: publicKey
-        ? 'VAPID_PRIVATE_KEY is missing or invalid in Vercel. Paste only the private key from the same npm run generate-vapid-keys output as the public key.'
-        : 'VAPID_PUBLIC_KEY is missing or invalid in Vercel. Paste only the public key from npm run generate-vapid-keys.',
+        ? 'VAPID_PRIVATE_KEY is missing or invalid in Vercel. It is the shorter key (~43 characters) from npm run generate-vapid-keys — not the long public key.'
+        : 'VAPID_PUBLIC_KEY is missing or invalid in Vercel. It is the longer key (~87 characters) from npm run generate-vapid-keys — not the short private key.',
     });
   }
   return res.status(200).json({ configured: true, publicKey });
