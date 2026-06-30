@@ -1,5 +1,18 @@
 import { getSupabaseAdmin } from './supabase.js';
 
+function readJwtAal(token) {
+  if (!token) return null;
+  try {
+    const segment = token.split('.')[1];
+    if (!segment) return null;
+    const padded = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+    return payload.aal || 'aal1';
+  } catch {
+    return null;
+  }
+}
+
 export async function getUserFromRequest(req) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) return null;
@@ -36,5 +49,17 @@ export async function requireAdmin(req, res) {
     res.status(403).json({ error: 'Admin access required' });
     return null;
   }
+
+  const auth = req.headers.authorization;
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null;
+  const aal = readJwtAal(token);
+  if (aal !== 'aal2') {
+    res.status(403).json({
+      error: 'Admin MFA is required for this action.',
+      code: 'mfa_required',
+    });
+    return null;
+  }
+
   return user;
 }

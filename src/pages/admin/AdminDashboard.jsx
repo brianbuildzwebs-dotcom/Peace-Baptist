@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio, Bell } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+import { adminFetch } from "@/lib/admin-fetch";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ events: 0, prayers: 0, submissions: 0, media: 0, contacts: 0, giving: 0 });
@@ -14,11 +13,7 @@ export default function AdminDashboard() {
   const [subscriberCount, setSubscriberCount] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("peace_auth_token");
-    fetch(`${API_BASE}/push/subscriber-count`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((r) => r.json())
+    adminFetch("/push/subscriber-count")
       .then((d) => setSubscriberCount(d.count ?? 0))
       .catch(() => setSubscriberCount(null));
 
@@ -41,16 +36,7 @@ export default function AdminDashboard() {
     if (!confirm("Send a live stream notification to all subscribers?")) return;
     setLivePushStatus("Sending…");
     try {
-      const token = localStorage.getItem("peace_auth_token");
-      const response = await fetch(`${API_BASE}/push/send-live`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || "Send failed");
+      const payload = await adminFetch("/push/send-live", { method: "POST" });
       const sent = payload.sent || 0;
       const total = payload.total || 0;
       if (sent === 0) {

@@ -1,8 +1,16 @@
+import {
+  TOKEN_KEY,
+  REFRESH_KEY,
+  syncPeaceAuthFromSession,
+  restoreSupabaseSession,
+  logoutPeaceAuth,
+  getPeaceAccessToken,
+} from '@/lib/auth-session';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-const TOKEN_KEY = 'peace_auth_token';
 
 async function authRequest(path, options = {}) {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = await getPeaceAccessToken();
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
@@ -33,7 +41,7 @@ async function authRequest(path, options = {}) {
 
 export const authClient = {
   async me() {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = await getPeaceAccessToken();
     if (!token) {
       const error = new Error('Not authenticated');
       error.status = 401;
@@ -42,9 +50,15 @@ export const authClient = {
     return authRequest('/me');
   },
 
-  setToken(token) {
+  setToken(token, refreshToken) {
     if (token) localStorage.setItem(TOKEN_KEY, token);
     else localStorage.removeItem(TOKEN_KEY);
+    if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken);
+    else if (!token) localStorage.removeItem(REFRESH_KEY);
+  },
+
+  async restoreSession() {
+    return restoreSupabaseSession();
   },
 
   async loginViaEmailPassword(email, password) {
@@ -52,7 +66,9 @@ export const authClient = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    if (result.access_token) this.setToken(result.access_token);
+    if (result.access_token) {
+      this.setToken(result.access_token, result.refresh_token);
+    }
     return result;
   },
 
@@ -95,8 +111,9 @@ export const authClient = {
     console.warn('OAuth login will be configured with Supabase Auth.');
   },
 
-  logout(redirectUrl) {
-    this.setToken(null);
+  async logout(redirectUrl) {
+    await logoutPeaceAuth();
+    syncPeaceAuthFromSession(null);
     if (redirectUrl) window.location.href = redirectUrl;
   },
 

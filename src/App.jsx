@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'r
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import AdminMfaGate from '@/components/auth/AdminMfaGate';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import AppSplashMark from './components/church/AppSplashMark';
@@ -91,7 +92,8 @@ const AuthenticatedApp = () => {
 
       {/* Admin (protected) */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<AdminLayout />}>
+        <Route element={<AdminMfaGate />}>
+          <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="/admin/forms" element={<AdminForms />} />
@@ -100,6 +102,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/daily-walk" element={<AdminDailyWalk />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          </Route>
         </Route>
       </Route>
 

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Bell, Send } from "lucide-react";
 import { format } from "date-fns";
 import { base44 } from "@/api/base44Client";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+import { adminFetch } from "@/lib/admin-fetch";
 
 const emptyForm = {
   devotion_date: "",
@@ -20,17 +19,7 @@ function easternToday() {
 }
 
 async function adminPushRequest(path) {
-  const token = localStorage.getItem("peace_auth_token");
-  const response = await fetch(`${API_BASE}/push/${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || "Request failed");
-  return payload;
+  return adminFetch(`/push/${path}`, { method: "POST" });
 }
 
 export default function AdminDailyWalk() {

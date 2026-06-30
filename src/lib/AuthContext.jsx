@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabase';
+import { syncPeaceAuthFromSession } from '@/lib/auth-session';
 
 const AuthContext = createContext();
 
@@ -16,12 +18,23 @@ export const AuthProvider = ({ children }) => {
     checkAppState();
   }, []);
 
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      syncPeaceAuthFromSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const checkAppState = async () => {
     setIsLoadingPublicSettings(false);
     setAuthError(null);
 
     const token = localStorage.getItem('peace_auth_token');
     if (token) {
+      await base44.auth.restoreSession();
       await checkUserAuth();
     } else {
       setIsLoadingAuth(false);
@@ -50,10 +63,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    base44.auth.logout(shouldRedirect ? window.location.origin : undefined);
+    await base44.auth.logout(shouldRedirect ? window.location.origin : undefined);
   };
 
   const navigateToLogin = () => {

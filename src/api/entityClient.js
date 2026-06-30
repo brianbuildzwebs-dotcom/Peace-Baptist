@@ -1,3 +1,6 @@
+import { getPeaceAccessToken } from '@/lib/auth-session';
+import { notifyAdminMfaRequired } from '@/lib/mfa';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 function buildQuery({ filter, sort, limit } = {}) {
@@ -12,7 +15,7 @@ function buildQuery({ filter, sort, limit } = {}) {
 }
 
 async function request(path, options = {}) {
-  const token = localStorage.getItem('peace_auth_token');
+  const token = await getPeaceAccessToken();
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
@@ -28,6 +31,9 @@ async function request(path, options = {}) {
       error.data = await response.json();
     } catch {
       error.data = null;
+    }
+    if (error.data?.code === 'mfa_required') {
+      notifyAdminMfaRequired();
     }
     throw error;
   }

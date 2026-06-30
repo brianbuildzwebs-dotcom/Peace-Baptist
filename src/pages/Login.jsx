@@ -1,27 +1,80 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
+import MfaChallenge from "@/components/auth/MfaChallenge";
+import { getMfaAssuranceLevel, needsMfaChallenge } from "@/lib/mfa";
+import { syncPeaceAuthFromSession } from "@/lib/auth-session";
+import { withTimeout } from "@/lib/with-timeout";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+
+async function verifyAdminRole(accessToken) {
+  const response = await fetch(`${API_BASE}/auth/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || "Could not verify admin access");
+  }
+  if (payload.role !== "admin") {
+    throw new Error("Admin access required");
+  }
+  return payload;
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mfaStep, setMfaStep] = useState(false);
+
+  const finishLogin = async () => {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.access_token) {
+      throw new Error("Sign-in did not complete. Please try again.");
+    }
+
+    await verifyAdminRole(session.access_token);
+    syncPeaceAuthFromSession(session);
+    window.location.href = "/admin";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
+      const { data, error: signInError } = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        15000,
+        "Sign-in timed out. Check your connection and try again."
+      );
+      if (signInError) throw signInError;
+
+      await verifyAdminRole(data.session?.access_token);
+
+      const level = await withTimeout(
+        getMfaAssuranceLevel(),
+        10000,
+        "Security check timed out. Refresh the page and try again."
+      );
+      if (needsMfaChallenge(level)) {
+        syncPeaceAuthFromSession(data.session);
+        setMfaStep(true);
+        return;
+      }
+
+      syncPeaceAuthFromSession(data.session);
       window.location.href = "/admin";
     } catch (err) {
+      await supabase.auth.signOut();
       setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
@@ -29,8 +82,18 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    console.warn("OAuth login will be configured with Supabase Auth.");
   };
+
+  if (mfaStep) {
+    return (
+      <MfaChallenge
+        onVerified={async () => {
+          await finishLogin();
+        }}
+      />
+    );
+  }
 
   return (
     <AuthLayout

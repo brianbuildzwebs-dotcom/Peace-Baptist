@@ -1,5 +1,7 @@
 import { createEntityClient } from './entityClient';
 import { authClient } from './authClient';
+import { getPeaceAccessToken } from '@/lib/auth-session';
+import { notifyAdminMfaRequired } from '@/lib/mfa';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -42,7 +44,7 @@ export const base44 = {
   integrations: {
     Core: {
       async UploadFile({ file }) {
-        const token = localStorage.getItem('peace_auth_token');
+        const token = await getPeaceAccessToken();
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
         let binary = '';
@@ -65,6 +67,9 @@ export const base44 = {
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (payload.code === 'mfa_required') {
+            notifyAdminMfaRequired();
+          }
           throw new Error(payload.error || payload.message || 'Upload failed');
         }
         return payload;

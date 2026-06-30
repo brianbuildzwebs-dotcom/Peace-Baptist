@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Save, Upload, Image, Link } from "lucide-react";
+import { Save, Upload, Image, Link, Shield } from "lucide-react";
+import MfaSettings from "@/components/auth/MfaSettings";
 import { base44 } from "@/api/base44Client";
 import { SITE_IMAGE_FIELDS } from "@/hooks/useSiteImages";
 import { churchInfo } from "@/lib/churchInfo";
@@ -130,6 +131,15 @@ export default function AdminSettings() {
             </div>
           );
         })}
+      </div>
+
+      <div className="bg-white/5 rounded-2xl p-6 border border-white/5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Shield size={16} className="text-gold" />
+          <h3 className="text-white font-semibold">Admin Security</h3>
+        </div>
+        <p className="text-white/30 text-xs -mt-2">Two-factor authentication is required for all admin actions.</p>
+        <MfaSettings variant="admin" />
       </div>
 
       <div className="bg-white/5 rounded-2xl p-6 border border-white/5 space-y-6">
