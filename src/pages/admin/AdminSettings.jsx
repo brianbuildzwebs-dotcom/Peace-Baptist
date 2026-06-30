@@ -3,7 +3,7 @@ import { Save, Upload, Image, Link, Settings } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const DEFAULT_SETTINGS = [
-  { key: "live_stream_url", label: "Live Stream YouTube URL", value: "", hint: "e.g. https://www.youtube.com/embed/VIDEOID or a playlist embed URL" },
+  { key: "live_stream_url", label: "Live Stream Embed URL (fallback)", value: "", hint: "Only used if Simple Streamz is not configured in churchInfo.js. Paste an iframe src URL." },
   { key: "sermon_playlist_url", label: "Sermon Playlist YouTube Embed URL", value: "", hint: "e.g. https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID" },
   { key: "worship_playlist_url", label: "Worship Music Playlist URL (hearthis.at or embed)", value: "", hint: "Paste full hearthis.at URL or iframe src" },
   { key: "google_maps_embed", label: "Google Maps Embed URL", value: "", hint: "From Google Maps → Share → Embed → copy the src URL only" },

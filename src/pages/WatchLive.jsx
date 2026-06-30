@@ -5,12 +5,16 @@ import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
 import LiveChat from "@/components/watch/LiveChat";
+import SimpleStreamzPlayer from "@/components/watch/SimpleStreamzPlayer";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function WatchLive() {
   const [media, setMedia] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [liveUrl, setLiveUrl] = useState("");
+  const { liveStream } = churchInfo;
+  const hasStreamzPlayer = liveStream?.channelId && liveStream?.embedBase;
 
   useEffect(() => {
     base44.entities.MediaItem.filter({ type: "sermon" }, "-date", 20)
@@ -18,10 +22,12 @@ export default function WatchLive() {
       .catch(() => {})
       .finally(() => setLoading(false));
 
-    base44.entities.SiteSettings.filter({ key: "live_stream_url" })
-      .then((rows) => { if (rows[0]) setLiveUrl(rows[0].value); })
-      .catch(() => {});
-  }, []);
+    if (!hasStreamzPlayer) {
+      base44.entities.SiteSettings.filter({ key: "live_stream_url" })
+        .then((rows) => { if (rows[0]) setLiveUrl(rows[0].value); })
+        .catch(() => {});
+    }
+  }, [hasStreamzPlayer]);
 
   const filtered = media.filter((m) =>
     (m.title || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -48,27 +54,36 @@ export default function WatchLive() {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Video Player */}
             <div className="lg:col-span-3">
-              <div className="relative rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl">
-                {liveUrl ? (
-                  <iframe
-                    src={liveUrl}
-                    title="Live Stream"
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
+              {hasStreamzPlayer ? (
+                <div className="relative shadow-2xl">
+                  <SimpleStreamzPlayer
+                    channelId={liveStream.channelId}
+                    embedBase={liveStream.embedBase}
                   />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-navy-light">
-                    <div className="text-center px-8">
-                      <div className="w-20 h-20 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
-                        <Play size={32} className="text-gold ml-1" />
+                </div>
+              ) : (
+                <div className="relative rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl">
+                  {liveUrl ? (
+                    <iframe
+                      src={liveUrl}
+                      title="Live Stream"
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-navy-light">
+                      <div className="text-center px-8">
+                        <div className="w-20 h-20 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4">
+                          <Play size={32} className="text-gold ml-1" />
+                        </div>
+                        <p className="text-white/60 text-sm">Live stream will appear here during services</p>
+                        <p className="text-white/40 text-xs mt-2">Configure your Simple Streamz channel in site settings</p>
                       </div>
-                      <p className="text-white/60 text-sm">Live stream will appear here during services</p>
-                      <p className="text-white/40 text-xs mt-2">Admin: go to Settings → paste your YouTube live URL</p>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
               <div className="mt-4 flex items-center gap-4 text-white/60 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />

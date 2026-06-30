@@ -30,6 +30,11 @@ export const churchInfo = {
     reference: "Hebrews 10:25",
     text: "Not forsaking the assembling of ourselves together, as the manner of some is; but exhorting one another: and so much the more, as ye see the day approaching.",
   },
+  liveStream: {
+    provider: "simple-streamz",
+    channelId: "dd12abe211fe4011bb83",
+    embedBase: "https://simple-stream-core.brianbuildzwebs.workers.dev",
+  },
   images: {
     hero: "/images/hero-sanctuary.jpg",
     welcome: "/images/church-exterior.jpg",

@@ -115,3 +115,23 @@
     transform: scale(1.06);
   }
 }
+
+@media (max-width: 926px), (orientation: landscape) and (max-height: 520px) {
+  .simple-streamz-embed {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+  }
+
+  .simple-streamz-embed iframe {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    display: block !important;
+  }
+}
