@@ -9,7 +9,6 @@ const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
   { label: "Watch Live", path: "/watch-live" },
-  { label: "Bible Believers Broadcast", path: "/bible-believers-broadcast" },
   { label: "Media", path: "/media" },
   { label: "Events", path: "/events" },
   { label: "Ministries", path: "/ministries" },
