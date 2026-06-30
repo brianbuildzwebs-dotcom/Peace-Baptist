@@ -1,8 +1,9 @@
 import React from "react";
-import { Phone, MapPin, Clock } from "lucide-react";
+import { Phone, MapPin, Clock, Smartphone } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
+import { isStandaloneApp } from "@/lib/pwaInstall";
 
-export default function TopBar() {
+export default function TopBar({ onOpenInstall }) {
   return (
     <div className="bg-navy-dark border-b border-white/10 text-white/80 text-xs sm:text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,7 +17,17 @@ export default function TopBar() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1 md:flex-none md:ml-auto">
+          <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 md:flex-none md:ml-auto">
+            {!isStandaloneApp() && onOpenInstall && (
+              <button
+                type="button"
+                onClick={onOpenInstall}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/15 text-gold hover:bg-gold/25 transition-colors shrink-0 text-xs font-semibold"
+              >
+                <Smartphone size={13} />
+                Get the App
+              </button>
+            )}
             <a
               href={churchInfo.mapsUrl}
               target="_blank"

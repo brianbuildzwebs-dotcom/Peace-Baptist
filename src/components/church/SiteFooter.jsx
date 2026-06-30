@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Heart, Facebook, Youtube } from "lucide-react";
 import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
+import { isStandaloneApp } from "@/lib/pwaInstall";
 
-export default function SiteFooter() {
+export default function SiteFooter({ onOpenInstall }) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -87,6 +88,17 @@ export default function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {!isStandaloneApp() && onOpenInstall && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={onOpenInstall}
+                    className="text-gold hover:text-gold-light transition-colors text-sm font-medium"
+                  >
+                    Get the App
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

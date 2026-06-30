@@ -1,0 +1,112 @@
+import React, { useEffect, useState } from "react";
+import { X, Download, Share, PlusSquare, Smartphone } from "lucide-react";
+import { isIosDevice, isStandaloneApp } from "@/lib/pwaInstall";
+
+export default function InstallAppModal({ open, onClose }) {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+  const ios = isIosDevice();
+
+  useEffect(() => {
+    if (!open) return;
+    setInstalled(isStandaloneApp());
+
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        aria-label="Close"
+      />
+      <div className="relative w-full max-w-md bg-navy border border-gold/30 rounded-2xl shadow-2xl p-6 text-white">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/40 hover:text-white"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gold flex items-center justify-center">
+            <Smartphone size={22} className="text-navy" />
+          </div>
+          <div>
+            <h2 className="font-heading text-xl font-bold">Peace Baptist App</h2>
+            <p className="text-white/50 text-sm">No app store — install from your browser</p>
+          </div>
+        </div>
+
+        {installed ? (
+          <p className="text-gold text-sm mb-4">You&apos;re already using the installed app. Enjoy Daily Walk, live stream, and prayer request alerts.</p>
+        ) : ios ? (
+          <ol className="space-y-4 text-sm text-white/80 mb-6">
+            <li className="flex gap-3">
+              <span className="w-6 h-6 rounded-full bg-gold/20 text-gold text-xs font-bold flex items-center justify-center shrink-0">1</span>
+              <span>Tap <Share size={14} className="inline text-gold mx-0.5" /> <strong>Share</strong> at the bottom of Safari.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="w-6 h-6 rounded-full bg-gold/20 text-gold text-xs font-bold flex items-center justify-center shrink-0">2</span>
+              <span>Scroll and tap <PlusSquare size={14} className="inline text-gold mx-0.5" /> <strong>Add to Home Screen</strong>.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="w-6 h-6 rounded-full bg-gold/20 text-gold text-xs font-bold flex items-center justify-center shrink-0">3</span>
+              <span>Tap <strong>Add</strong>, then open Peace Baptist from your home screen.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="w-6 h-6 rounded-full bg-gold/20 text-gold text-xs font-bold flex items-center justify-center shrink-0">4</span>
+              <span>Enable notifications when prompted for Daily Walk and prayer request alerts.</span>
+            </li>
+          </ol>
+        ) : (
+          <>
+            <p className="text-white/70 text-sm mb-4">
+              Install Peace Baptist on your home screen for quick access to worship, Daily Walk, and prayer requests.
+            </p>
+            {deferredPrompt ? (
+              <button
+                type="button"
+                onClick={handleInstall}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-navy font-semibold rounded-xl hover:bg-gold-light"
+              >
+                <Download size={18} /> Install now
+              </button>
+            ) : (
+              <p className="text-white/50 text-sm">
+                Open the browser menu (⋮) and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+              </p>
+            )}
+          </>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full mt-4 py-2.5 text-white/50 text-sm hover:text-white"
+        >
+          {installed ? "Close" : "Maybe later"}
+        </button>
+      </div>
+    </div>
+  );
+}

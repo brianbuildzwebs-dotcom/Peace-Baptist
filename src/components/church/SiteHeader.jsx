@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Smartphone } from "lucide-react";
+import { isStandaloneApp } from "@/lib/pwaInstall";
 import { motion, AnimatePresence } from "framer-motion";
 import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
@@ -17,7 +18,7 @@ const navLinks = [
   { label: "Contact", path: "/contact" },
 ];
 
-export default function SiteHeader() {
+export default function SiteHeader({ onOpenInstall }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -69,6 +70,16 @@ export default function SiteHeader() {
                   {link.label}
                 </Link>
               ))}
+              {!isStandaloneApp() && onOpenInstall && (
+                <button
+                  type="button"
+                  onClick={onOpenInstall}
+                  className="ml-1 flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-full border border-gold/40 text-gold hover:bg-gold/10 transition-all"
+                >
+                  <Smartphone size={15} />
+                  Get App
+                </button>
+              )}
               {churchInfo.showGiving && (
                 <Link
                   to="/give"
@@ -126,6 +137,16 @@ export default function SiteHeader() {
                   transition={{ delay: navLinks.length * 0.04 }}
                   className="mt-4 space-y-3"
                 >
+                  {!isStandaloneApp() && onOpenInstall && (
+                    <button
+                      type="button"
+                      onClick={() => { setMobileOpen(false); onOpenInstall(); }}
+                      className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gold/15 border border-gold/40 text-gold font-bold text-lg rounded-xl"
+                    >
+                      <Smartphone size={20} />
+                      Get the App
+                    </button>
+                  )}
                   {churchInfo.showGiving && (
                     <Link
                       to="/give"

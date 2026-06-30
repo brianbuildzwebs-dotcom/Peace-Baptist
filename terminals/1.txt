@@ -1,0 +1,13 @@
+---
+pid: 9228
+cwd: "C:\Users\Brian\Downloads\Peace-Baptist"
+command: "Start-Sleep -Seconds 45; $body = '{\"email\":\"test@test.com\",\"password\":\"test\"}'; foreach ($u in @(\"https://www.peacebaptist.net/api/health\",\"https://www.peacebaptist.net/api/auth/login\",\"https://www.peacebaptist.net/api/entities/Ministry\")) { Write-Output \"--- $u\"; try { if ($u -like \"*login*\") { $r = Invoke-WebRequest -Uri $u -Method POST -Body $body -ContentType \"application/json\" -UseBasicParsing } else { $r = Invoke-WebRequest -Uri $u -UseBasicParsing }; Write-Output $r.Content.Substring(0,[Math]::Min(250,$r.Content.Length)) } catch { Write-Output $_.ErrorDetails.Message } }"
+started_at: 2026-06-30T06:21:02.265Z
+running_for_ms: 46575000 
+---
+--- https://www.peacebaptist.net/api/health
+{"ok":true,"supabase":true,"supabaseProjectRef":"lhohgaxxgvbwkijleaaq","site":" https://peacebaptist.net ","checks":{"hasSupabaseUrl":true,"hasServiceRole":true,"hasAnonKey":true}}
+--- https://www.peacebaptist.net/api/auth/login
+{"error":"Invalid API key"}
+--- https://www.peacebaptist.net/api/entities/Ministry
+{"error":"Invalid API key"}
