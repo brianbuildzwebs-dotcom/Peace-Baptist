@@ -17,7 +17,7 @@ export const churchInfo = {
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=320+Military+Cutoff+Rd+Wilmington+NC+28405",
   social: {
     facebook: "https://www.facebook.com/p/Peace-Baptist-Church-100068974954914/",
-    youtube: "https://www.youtube.com/peacebaptistchurch",
+    youtube: "https://www.youtube.com/@PeaceBaptistChurch1975",
     instagram: null,
   },
   serviceTimes: [
