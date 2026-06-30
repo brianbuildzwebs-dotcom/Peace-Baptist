@@ -1,5 +1,8 @@
+import { isIosDevice, isStandaloneApp } from '@/lib/pwaInstall';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const TOPICS_KEY = 'pbc_push_topics';
+const ENABLED_KEY = 'pbc_notify_enabled';
 
 function normalizeVapidPublicKey(raw) {
   return String(raw || '')
@@ -32,6 +35,18 @@ export function isPushSupported() {
     && 'serviceWorker' in navigator
     && 'PushManager' in window
     && 'Notification' in window;
+}
+
+/** iPhone/iPad: web push only works when opened from the Home Screen app (iOS 16.4+). */
+export function needsPwaForPush() {
+  return isIosDevice() && !isStandaloneApp();
+}
+
+export function canPromptForPush() {
+  if (typeof window === 'undefined') return false;
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return false;
+  if (needsPwaForPush()) return true;
+  return isPushSupported();
 }
 
 export function getSavedTopics() {
@@ -97,6 +112,44 @@ export async function hasActivePushSubscription() {
   }
 }
 
+export function clearStalePushEnabledFlag() {
+  try {
+    localStorage.removeItem(ENABLED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Re-register an existing browser subscription with the server (e.g. after DB reset). */
+export async function refreshPushSubscriptionIfNeeded() {
+  if (!isPushSupported()) return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription?.endpoint) return false;
+
+    const status = await fetchPushStatus();
+    if (!status.configured || !status.publicKey) return false;
+
+    const res = await fetch(`${API_BASE}/push/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: subscription.toJSON(),
+        topics: getSavedTopics(),
+      }),
+    });
+
+    if (res.ok) {
+      localStorage.setItem(ENABLED_KEY, '1');
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function subscribeToPush(topics = getSavedTopics()) {
   if (!isPushSupported()) throw new Error('Push notifications are not supported on this device.');
 
@@ -153,6 +206,7 @@ export async function subscribeToPush(topics = getSavedTopics()) {
   }
 
   saveTopics(topics);
+  localStorage.setItem(ENABLED_KEY, '1');
   return { ok: true, topics };
 }
 

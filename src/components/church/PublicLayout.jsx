@@ -28,7 +28,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <SiteFooter onOpenInstall={handleGetApp} />
-      <NotificationPrompt />
+      <NotificationPrompt onOpenInstall={openInstall} />
       <InstallAppModal open={installOpen} onClose={() => setInstallOpen(false)} />
     </div>
   );

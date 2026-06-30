@@ -1,19 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Bell, Check, X } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Bell, Check, Smartphone, X } from "lucide-react";
 import {
+  canPromptForPush,
+  clearStalePushEnabledFlag,
   fetchPushStatus,
   getPushPermission,
   getSavedTopics,
   hasActivePushSubscription,
-  isPushSupported,
+  needsPwaForPush,
+  refreshPushSubscriptionIfNeeded,
   subscribeToPush,
 } from "@/lib/pushNotifications";
 
 const DISMISS_KEY = "pbc_notify_prompt_dismissed";
-const ENABLED_KEY = "pbc_notify_enabled";
 
-export default function NotificationPrompt() {
+export default function NotificationPrompt({ onOpenInstall }) {
   const [visible, setVisible] = useState(false);
+  const [installFirst, setInstallFirst] = useState(false);
   const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,36 +30,60 @@ export default function NotificationPrompt() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  useEffect(() => {
-    if (!isPushSupported()) return undefined;
+  const evaluatePrompt = useCallback(async () => {
+    if (!canPromptForPush()) {
+      setVisible(false);
+      return;
+    }
 
-    let cancelled = false;
+    const iosNeedsInstall = needsPwaForPush();
+    setInstallFirst(iosNeedsInstall);
 
-    const loadState = async () => {
-      const [subscribed, status] = await Promise.all([
-        hasActivePushSubscription(),
-        fetchPushStatus().catch(() => ({ configured: false })),
-      ]);
+    const [subscribed, status] = await Promise.all([
+      hasActivePushSubscription(),
+      fetchPushStatus().catch(() => ({ configured: false })),
+    ]);
 
-      if (cancelled) return;
+    setServerReady(status.configured);
 
-      setServerReady(status.configured);
+    if (subscribed) {
+      await refreshPushSubscriptionIfNeeded();
+      setVisible(false);
+      return;
+    }
 
-      if (subscribed || localStorage.getItem(ENABLED_KEY)) {
-        setVisible(false);
-        return;
-      }
+    clearStalePushEnabledFlag();
 
-      const dismissed = sessionStorage.getItem(DISMISS_KEY);
-      const perm = await getPushPermission();
-      if (!dismissed && perm !== "denied") setVisible(true);
-    };
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    if (dismissed) {
+      setVisible(false);
+      return;
+    }
 
-    loadState();
-    return () => {
-      cancelled = true;
-    };
+    if (iosNeedsInstall) {
+      setVisible(true);
+      return;
+    }
+
+    const perm = await getPushPermission();
+    if (perm === "denied") {
+      setVisible(false);
+      return;
+    }
+
+    setVisible(true);
   }, []);
+
+  useEffect(() => {
+    evaluatePrompt();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") evaluatePrompt();
+    };
+
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [evaluatePrompt]);
 
   const toggleTopic = (topic) => {
     setTopics((prev) => (
@@ -72,6 +99,12 @@ export default function NotificationPrompt() {
 
     (async () => {
       try {
+        if (needsPwaForPush()) {
+          onOpenInstall?.();
+          setError("Add Peace Baptist to your Home Screen, then open the app from that icon and tap Enable notifications again.");
+          return;
+        }
+
         if (serverReady === false) {
           const status = await fetchPushStatus();
           if (!status.configured) {
@@ -84,7 +117,6 @@ export default function NotificationPrompt() {
         }
 
         await subscribeToPush(topics.length ? topics : ["daily_walk", "prayer", "live"]);
-        localStorage.setItem(ENABLED_KEY, "1");
         sessionStorage.setItem(DISMISS_KEY, "1");
         setVisible(false);
         setToast("Notifications enabled");
@@ -102,13 +134,13 @@ export default function NotificationPrompt() {
     setVisible(false);
   };
 
-  if (!isPushSupported()) return null;
+  if (!canPromptForPush()) return null;
 
   return (
     <>
       {toast && (
         <div
-          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-4 py-2.5 bg-navy border border-gold/30 rounded-full shadow-xl text-white text-sm"
+          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[55] flex items-center gap-2 px-4 py-2.5 bg-navy border border-gold/30 rounded-full shadow-xl text-white text-sm"
           role="status"
         >
           <Check size={16} className="text-gold shrink-0" />
@@ -117,7 +149,7 @@ export default function NotificationPrompt() {
       )}
 
       {visible && (
-        <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 md:left-auto md:right-4 z-40 max-w-md mx-auto md:mx-0 pointer-events-auto">
+        <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 md:left-auto md:right-4 z-[55] max-w-md mx-auto md:mx-0 pointer-events-auto">
           <div className="bg-navy border border-gold/30 rounded-2xl shadow-2xl p-5 text-white">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
@@ -125,48 +157,65 @@ export default function NotificationPrompt() {
                   <Bell size={16} /> Stay connected
                 </div>
                 <p className="text-white/70 text-sm mt-1">
-                  Get the Daily Walk each morning, prayer request updates, and live service alerts.
+                  {installFirst
+                    ? "On iPhone, add Peace Baptist to your Home Screen first — then you can turn on Daily Walk, prayer, and live stream alerts."
+                    : "Get the Daily Walk each morning, prayer request updates, and live service alerts."}
                 </p>
               </div>
-              <button type="button" onClick={dismiss} className="text-white/40 hover:text-white shrink-0 p-1" aria-label="Dismiss">
+              <button type="button" onClick={dismiss} className="text-white/40 hover:text-white shrink-0 p-1 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Dismiss">
                 <X size={18} />
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-4 text-xs">
-              {[
-                { id: "daily_walk", label: "Daily Walk" },
-                { id: "prayer", label: "Prayer Requests" },
-                { id: "live", label: "Live stream" },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => toggleTopic(item.id)}
-                  disabled={loading}
-                  className={`px-3 py-1.5 rounded-full border transition-colors min-h-[36px] ${
-                    topics.includes(item.id)
-                      ? "bg-gold/20 border-gold text-gold"
-                      : "border-white/20 text-white/50"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+            {!installFirst && (
+              <div className="flex flex-wrap gap-2 mb-4 text-xs">
+                {[
+                  { id: "daily_walk", label: "Daily Walk" },
+                  { id: "prayer", label: "Prayer Requests" },
+                  { id: "live", label: "Live stream" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => toggleTopic(item.id)}
+                    disabled={loading}
+                    className={`px-3 py-1.5 rounded-full border transition-colors min-h-[36px] ${
+                      topics.includes(item.id)
+                        ? "bg-gold/20 border-gold text-gold"
+                        : "border-white/20 text-white/50"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {error && <p className="text-red-300 text-xs mb-3">{error}</p>}
 
-            <button
-              type="button"
-              onClick={handleEnable}
-              disabled={loading || topics.length === 0}
-              className="w-full py-3 min-h-[44px] bg-gold text-navy font-semibold rounded-xl text-sm hover:bg-gold-light transition-colors disabled:opacity-50"
-            >
-              {loading ? "Setting up…" : "Enable notifications"}
-            </button>
+            {installFirst ? (
+              <button
+                type="button"
+                onClick={() => onOpenInstall?.()}
+                className="w-full py-3 min-h-[44px] bg-gold text-navy font-semibold rounded-xl text-sm hover:bg-gold-light transition-colors flex items-center justify-center gap-2"
+              >
+                <Smartphone size={16} /> How to add to Home Screen
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleEnable}
+                disabled={loading || topics.length === 0}
+                className="w-full py-3 min-h-[44px] bg-gold text-navy font-semibold rounded-xl text-sm hover:bg-gold-light transition-colors disabled:opacity-50"
+              >
+                {loading ? "Setting up…" : "Enable notifications"}
+              </button>
+            )}
+
             <p className="text-white/40 text-[11px] mt-2 text-center">
-              iPhone: open from your Home Screen icon first for best results.
+              {installFirst
+                ? "After installing, open the church app from your Home Screen — the enable button will appear there."
+                : "Each phone must enable alerts separately. Open from your Home Screen icon on iPhone."}
             </p>
           </div>
         </div>

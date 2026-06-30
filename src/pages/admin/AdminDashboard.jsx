@@ -51,8 +51,18 @@ export default function AdminDashboard() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || "Send failed");
-      setLivePushStatus(`Live alert sent to ${payload.sent || 0} of ${payload.total || 0} subscriber(s).`);
-      if (typeof payload.total === "number") setSubscriberCount(payload.total);
+      const sent = payload.sent || 0;
+      const total = payload.total || 0;
+      if (sent === 0) {
+        setLivePushStatus(
+          total === 0
+            ? "No devices subscribed yet. On each phone: open peacebaptist.net, enable notifications (iPhone: add to Home Screen first, then open the app icon)."
+            : `Sent to 0 of ${total} subscriber(s). Check that the other phone enabled alerts and includes the Live stream topic.`
+        );
+      } else {
+        setLivePushStatus(`Live alert sent to ${sent} of ${total} subscriber(s).`);
+      }
+      if (typeof total === "number") setSubscriberCount(total);
     } catch (err) {
       setLivePushStatus(err.message);
     }
@@ -94,7 +104,11 @@ export default function AdminDashboard() {
           <p className="text-white/40 text-sm mt-1">
             Notify members when Sunday service is live on the website.
             {subscriberCount != null && (
-              <span className="block mt-1 text-gold/80">{subscriberCount} device(s) subscribed</span>
+              <span className={`block mt-1 ${subscriberCount === 0 ? "text-amber-300" : "text-gold/80"}`}>
+                {subscriberCount === 0
+                  ? "0 devices subscribed — members must enable alerts on each phone."
+                  : `${subscriberCount} device(s) subscribed`}
+              </span>
             )}
           </p>
         </div>
