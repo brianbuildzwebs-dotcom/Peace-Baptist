@@ -1,39 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Clock, Search, Calendar, User, BookOpen } from "lucide-react";
+import { Play, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
 import LiveChat from "@/components/watch/LiveChat";
 import SimpleStreamzPlayer from "@/components/watch/SimpleStreamzPlayer";
 import { churchInfo } from "@/lib/churchInfo";
 
 export default function WatchLive() {
-  const [media, setMedia] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
   const [liveUrl, setLiveUrl] = useState("");
-  const { liveStream } = churchInfo;
+  const { liveStream, pastServicesPlaylist } = churchInfo;
   const hasStreamzPlayer = liveStream?.channelId && liveStream?.embedBase;
+  const playlistEmbed = pastServicesPlaylist?.embedUrl;
 
   useEffect(() => {
-    base44.entities.MediaItem.filter({ type: "sermon" }, "-date", 20)
-      .then(setMedia)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-
     if (!hasStreamzPlayer) {
       base44.entities.SiteSettings.filter({ key: "live_stream_url" })
         .then((rows) => { if (rows[0]) setLiveUrl(rows[0].value); })
         .catch(() => {});
     }
   }, [hasStreamzPlayer]);
-
-  const filtered = media.filter((m) =>
-    (m.title || "").toLowerCase().includes(search.toLowerCase()) ||
-    (m.speaker || "").toLowerCase().includes(search.toLowerCase()) ||
-    (m.series || "").toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div>
@@ -100,67 +86,44 @@ export default function WatchLive() {
         </div>
       </section>
 
-      {/* Sermon Archive */}
+      {/* Past Services Playlist */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading label="Sermon Library" title="Past Services" subtitle="Watch or re-watch any of our past sermons and worship services." />
+          <SectionHeading
+            label="Sermon Library"
+            title="Past Services"
+            subtitle="Browse and watch recordings from our past worship services and sermons."
+          />
 
-          {/* Search */}
-          <div className="max-w-md mx-auto mb-12">
-            <div className="relative">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search sermons by title, speaker, or series..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 focus:border-gold focus:ring-1 focus:ring-gold outline-none text-sm"
-              />
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-12 text-gray-400">Loading sermons...</div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No sermons found. Add sermons from the admin dashboard.</p>
+          {playlistEmbed ? (
+            <div className="max-w-5xl mx-auto">
+              <div className="rounded-2xl overflow-hidden shadow-xl aspect-video bg-black">
+                <iframe
+                  src={playlistEmbed}
+                  title="Past Services Playlist"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+              {pastServicesPlaylist?.url && (
+                <div className="mt-6 text-center">
+                  <a
+                    href={pastServicesPlaylist.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-navy hover:text-gold transition-colors"
+                  >
+                    <ExternalLink size={16} />
+                    Open full playlist on YouTube
+                  </a>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filtered.map((item, i) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="group cursor-pointer"
-                >
-                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-navy/5 mb-4 shadow-sm">
-                    {item.thumbnail_url ? (
-                      <img src={item.thumbnail_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-navy/10 to-navy/5 flex items-center justify-center">
-                        <Play size={32} className="text-navy/20" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/40 transition-colors flex items-center justify-center">
-                      <div className="w-14 h-14 rounded-full bg-gold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity scale-75 group-hover:scale-100 duration-300">
-                        <Play size={20} className="text-navy ml-0.5" />
-                      </div>
-                    </div>
-                    {item.duration && (
-                      <span className="absolute bottom-2 right-2 text-xs bg-black/70 text-white px-2 py-1 rounded">{item.duration}</span>
-                    )}
-                  </div>
-                  <h3 className="font-heading text-lg font-bold text-navy group-hover:text-gold transition-colors">{item.title}</h3>
-                  <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
-                    {item.speaker && <span>{item.speaker}</span>}
-                    {item.date && <span>· {format(new Date(item.date), "MMM d, yyyy")}</span>}
-                  </div>
-                  {item.series && <span className="text-xs text-gold font-medium">{item.series}</span>}
-                </motion.div>
-              ))}
+            <div className="text-center py-12">
+              <p className="text-gray-500">Past services playlist coming soon.</p>
             </div>
           )}
         </div>

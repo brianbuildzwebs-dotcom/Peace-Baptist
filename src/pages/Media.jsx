@@ -4,6 +4,7 @@ import { Play, Search, Music, BookOpen, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function Media() {
   const [media, setMedia] = useState([]);
@@ -22,8 +23,12 @@ export default function Media() {
       .finally(() => setLoading(false));
 
     base44.entities.SiteSettings.filter({ key: "sermon_playlist_url" })
-      .then((rows) => { if (rows[0]) setSermonPlaylistUrl(rows[0].value); })
-      .catch(() => {});
+      .then((rows) => {
+        setSermonPlaylistUrl(rows[0]?.value || churchInfo.pastServicesPlaylist?.embedUrl || "");
+      })
+      .catch(() => {
+        setSermonPlaylistUrl(churchInfo.pastServicesPlaylist?.embedUrl || "");
+      });
 
     base44.entities.SiteSettings.filter({ key: "worship_playlist_url" })
       .then((rows) => { if (rows[0]) setWorshipPlaylistUrl(rows[0].value); })

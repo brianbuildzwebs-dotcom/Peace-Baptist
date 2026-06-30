@@ -35,6 +35,10 @@ export const churchInfo = {
     channelId: "dd12abe211fe4011bb83",
     embedBase: "https://simple-stream-core.brianbuildzwebs.workers.dev",
   },
+  pastServicesPlaylist: {
+    embedUrl: "https://www.youtube.com/embed/videoseries?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
+    url: "https://www.youtube.com/playlist?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
+  },
   images: {
     hero: "/images/hero-sanctuary.jpg",
     welcome: "/images/church-exterior.jpg",
