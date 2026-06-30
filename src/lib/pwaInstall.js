@@ -15,11 +15,6 @@ function notifyInstallListeners() {
 }
 
 function markInstalled() {
-  try {
-    localStorage.setItem(INSTALLED_KEY, '1');
-  } catch {
-    /* ignore storage errors */
-  }
   notifyUIStateListeners();
 }
 
@@ -32,6 +27,19 @@ function notifyUIStateListeners() {
       /* ignore listener errors */
     }
   });
+}
+
+function clearStaleInstalledFlag() {
+  if (typeof window === 'undefined' || isStandaloneApp()) return false;
+  try {
+    if (localStorage.getItem(INSTALLED_KEY) === '1') {
+      localStorage.removeItem(INSTALLED_KEY);
+      return true;
+    }
+  } catch {
+    /* ignore storage errors */
+  }
+  return false;
 }
 
 if (typeof window !== 'undefined') {
@@ -57,8 +65,15 @@ if (typeof window !== 'undefined') {
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') notifyUIStateListeners();
+    if (document.visibilityState === 'visible') {
+      clearStaleInstalledFlag();
+      notifyUIStateListeners();
+    }
   });
+
+  if (clearStaleInstalledFlag()) {
+    queueMicrotask(() => notifyUIStateListeners());
+  }
 }
 
 export function isIosDevice() {
@@ -74,17 +89,22 @@ export function isStandaloneApp() {
 }
 
 export function isAppInstalled() {
-  return isStandaloneApp() || localStorage.getItem(INSTALLED_KEY) === '1';
+  return isStandaloneApp();
 }
 
 export function getInstallUIState() {
+  const hadStaleFlag = clearStaleInstalledFlag();
   const installed = isAppInstalled();
-  return {
+  const state = {
     installed,
-    standalone: isStandaloneApp(),
+    standalone: installed,
     hideInstallPromo: installed,
     canNativeInstall: Boolean(deferredInstallPrompt) && !installed,
   };
+  if (hadStaleFlag) {
+    queueMicrotask(() => notifyUIStateListeners());
+  }
+  return state;
 }
 
 export function onInstallUIStateChange(listener) {
