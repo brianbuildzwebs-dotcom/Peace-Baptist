@@ -1,5 +1,4 @@
-import { getSupabaseAuth } from '../lib/supabase.js';
-import { getSupabaseAdmin } from '../lib/supabase.js';
+import { getSupabaseAdmin, isSupabaseConfigured } from '../lib/supabase.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,17 +10,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Email and password required' });
   }
 
-  const authClient = getSupabaseAuth();
-  const admin = getSupabaseAdmin();
-
-  if (!authClient || !admin) {
+  if (!isSupabaseConfigured()) {
     return res.status(503).json({
       error: 'Auth not configured',
-      message: 'Add Supabase environment variables in Vercel.',
+      message: 'Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel, then redeploy.',
     });
   }
 
-  const { data, error } = await authClient.auth.signInWithPassword({ email, password });
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin.auth.signInWithPassword({ email, password });
 
   if (error) {
     return res.status(401).json({ error: error.message || 'Invalid credentials' });
