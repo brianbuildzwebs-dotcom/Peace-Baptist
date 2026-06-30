@@ -1,11 +1,9 @@
-import { sendNotification } from '../lib/email.js';
+import { sendNotification } from '../email.js';
 
-export default async function handler(req, res) {
+export async function handleFunction(req, res, name) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  const { name } = req.query;
 
   if (name === 'notifyNewPrayer' && req.body) {
     await sendNotification('prayer', req.body);

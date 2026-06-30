@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '../lib/supabase.js';
+import { isSupabaseConfigured } from '../supabase.js';
 
 function getSupabaseProjectRef() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
@@ -6,7 +6,7 @@ function getSupabaseProjectRef() {
   return match?.[1] || null;
 }
 
-export default async function handler(req, res) {
+export async function handleHealth(req, res) {
   return res.status(200).json({
     ok: true,
     supabase: isSupabaseConfigured(),
