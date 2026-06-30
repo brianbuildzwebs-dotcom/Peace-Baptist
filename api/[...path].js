@@ -5,11 +5,18 @@ import { handleEntityCollection, handleEntityById } from './lib/handlers/entitie
 import { handleFunction } from './lib/handlers/functions.js';
 import { handleUpload } from './lib/handlers/upload.js';
 
+function getPathSegments(query) {
+  const raw = query.path;
+  if (raw == null || raw === '') return [];
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  return String(raw).split('/').filter(Boolean);
+}
+
 export default async function handler(req, res) {
-  const segments = Array.isArray(req.query.path) ? req.query.path : [];
+  const segments = getPathSegments(req.query);
 
   if (segments.length === 0) {
-    return res.status(404).json({ error: 'Not found' });
+    return res.status(404).json({ error: 'Not found', hint: 'No API path segments' });
   }
 
   const [root, second, third] = segments;
