@@ -60,7 +60,9 @@ export async function handleAuthAction(req, res, action) {
 
     case 'reset-password-request': {
       const { email } = req.body || {};
-      const siteUrl = process.env.SITE_URL || 'https://peacebaptist.net';
+      let siteUrl = String(process.env.SITE_URL || 'https://peacebaptist.net').trim().replace(/\/$/, '');
+      if (!/^https?:\/\//i.test(siteUrl)) siteUrl = `https://${siteUrl}`;
+      siteUrl = siteUrl.replace(/\s+/g, '');
       const { error } = await authClient.auth.resetPasswordForEmail(email, {
         redirectTo: `${siteUrl}/reset-password`,
       });

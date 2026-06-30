@@ -2,7 +2,25 @@ import webpush from 'web-push';
 import { getSupabaseAdmin } from './supabase.js';
 
 const CHURCH_TIMEZONE = 'America/New_York';
-const SITE_URL = (process.env.SITE_URL || 'https://peacebaptist.net').replace(/\/$/, '');
+
+function normalizeSiteUrl(raw) {
+  let cleaned = String(raw || 'https://peacebaptist.net').trim().replace(/\/$/, '');
+  if (!/^https?:\/\//i.test(cleaned)) {
+    cleaned = `https://${cleaned.replace(/^\/+/, '')}`;
+  }
+  return cleaned.replace(/\s+/g, '');
+}
+
+const SITE_URL = normalizeSiteUrl(process.env.SITE_URL);
+
+function buildPushUrl(path) {
+  const route = String(path || '/').trim();
+  if (/^https?:\/\//i.test(route)) {
+    return route.replace(/\s+/g, '');
+  }
+  const suffix = route.startsWith('/') ? route : `/${route}`;
+  return `${SITE_URL}${suffix}`;
+}
 
 let vapidConfigured = false;
 
@@ -141,7 +159,7 @@ export async function sendTopicPush(topic, { title, body, url, tag }) {
   const payload = JSON.stringify({
     title,
     body,
-    url: url?.startsWith('http') ? url : `${SITE_URL}${url || '/'}`,
+    url: buildPushUrl(url),
     tag: tag || topic,
   });
 
