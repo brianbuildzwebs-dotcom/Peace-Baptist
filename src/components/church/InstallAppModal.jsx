@@ -2,40 +2,36 @@ import React, { useEffect, useState } from "react";
 import { X, Download, Share, PlusSquare, Smartphone } from "lucide-react";
 import {
   getDeferredInstallPrompt,
+  handleGetAppClick,
   isIosDevice,
-  isInstallInProgress,
   isStandaloneApp,
   onInstallPromptChange,
-  promptInstall,
 } from "@/lib/pwaInstall";
 
 export default function InstallAppModal({ open, onClose }) {
   const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const [installed, setInstalled] = useState(false);
-  const [installing, setInstalling] = useState(false);
   const ios = isIosDevice();
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     setInstalled(isStandaloneApp());
     return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
   }, [open]);
 
   if (!open) return null;
 
-  const handleInstall = async () => {
-    if (!canInstall || installing || isInstallInProgress()) return;
-    setInstalling(true);
-    try {
-      const result = await promptInstall();
-      if (result?.outcome === "accepted") onClose();
-    } finally {
-      setInstalling(false);
+  const handleInstall = () => {
+    const result = handleGetAppClick({ onShowInstructions: () => {} });
+    if (result.prompted) {
+      result.choice?.then((choice) => {
+        if (choice?.outcome === "accepted") onClose();
+      });
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
       <button
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -46,7 +42,7 @@ export default function InstallAppModal({ open, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/40 hover:text-white"
+          className="absolute top-4 right-4 text-white/40 hover:text-white p-2"
           aria-label="Close"
         >
           <X size={20} />
@@ -92,10 +88,9 @@ export default function InstallAppModal({ open, onClose }) {
               <button
                 type="button"
                 onClick={handleInstall}
-                disabled={installing}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-navy font-semibold rounded-xl hover:bg-gold-light disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 py-3 min-h-[48px] bg-gold text-navy font-semibold rounded-xl hover:bg-gold-light active:scale-[0.98]"
               >
-                <Download size={18} /> {installing ? "Installing…" : "Install now"}
+                <Download size={18} /> Install now
               </button>
             ) : (
               <p className="text-white/50 text-sm">
@@ -108,7 +103,7 @@ export default function InstallAppModal({ open, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="w-full mt-4 py-2.5 text-white/50 text-sm hover:text-white"
+          className="w-full mt-4 py-2.5 min-h-[44px] text-white/50 text-sm hover:text-white"
         >
           {installed ? "Close" : "Maybe later"}
         </button>

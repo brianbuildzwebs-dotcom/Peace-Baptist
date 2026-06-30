@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import {
   getDeferredInstallPrompt,
+  handleGetAppClick,
   isIosDevice,
-  isInstallInProgress,
   isStandaloneApp,
   onInstallPromptChange,
-  promptInstall,
 } from "@/lib/pwaInstall";
 
 const DISMISS_KEY = "pbc_pwa_install_dismissed_session";
@@ -14,10 +13,9 @@ const DISMISS_KEY = "pbc_pwa_install_dismissed_session";
 export default function PwaInstallBanner({ onOpenInstall }) {
   const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const [visible, setVisible] = useState(false);
-  const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
-    if (isStandaloneApp() || sessionStorage.getItem(DISMISS_KEY)) return;
+    if (isStandaloneApp() || sessionStorage.getItem(DISMISS_KEY)) return undefined;
     setVisible(true);
     return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
   }, []);
@@ -27,21 +25,10 @@ export default function PwaInstallBanner({ onOpenInstall }) {
     setVisible(false);
   };
 
-  const install = async () => {
-    if (installing || isInstallInProgress()) return;
-
-    if (canInstall) {
-      setInstalling(true);
-      try {
-        const result = await promptInstall();
-        if (result?.outcome === "accepted") dismiss();
-      } finally {
-        setInstalling(false);
-      }
-      return;
-    }
-
-    onOpenInstall?.();
+  const install = () => {
+    handleGetAppClick({
+      onShowInstructions: () => onOpenInstall?.(),
+    });
   };
 
   if (!visible || isStandaloneApp()) return null;
@@ -65,12 +52,11 @@ export default function PwaInstallBanner({ onOpenInstall }) {
           <button
             type="button"
             onClick={install}
-            disabled={installing}
-            className="px-3 py-1.5 bg-gold text-navy text-xs font-semibold rounded-lg hover:bg-gold-light disabled:opacity-60"
+            className="px-4 py-2.5 min-h-[44px] bg-gold text-navy text-xs font-semibold rounded-lg hover:bg-gold-light active:scale-[0.98]"
           >
-            {installing ? "Installing…" : ios ? "How to install" : canInstall ? "Install" : "Get the app"}
+            {ios ? "How to install" : canInstall ? "Install" : "Get the app"}
           </button>
-          <button type="button" onClick={dismiss} className="text-white/40 hover:text-white" aria-label="Dismiss">
+          <button type="button" onClick={dismiss} className="text-white/40 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Dismiss">
             <X size={16} />
           </button>
         </div>
