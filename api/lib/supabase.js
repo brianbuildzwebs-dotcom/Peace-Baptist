@@ -2,18 +2,37 @@ import { createClient } from '@supabase/supabase-js';
 
 let adminClient = null;
 
+function env(name) {
+  const value = process.env[name];
+  return typeof value === 'string' ? value.trim() : value;
+}
+
+export function getSupabaseUrl() {
+  return env('SUPABASE_URL') || env('VITE_SUPABASE_URL') || null;
+}
+
+export function getSupabaseProjectRef() {
+  const match = (getSupabaseUrl() || '').match(/https:\/\/([^.]+)\.supabase\.co/);
+  return match?.[1] || null;
+}
+
+export function getSupabaseServiceRoleKey() {
+  return env('SUPABASE_SERVICE_ROLE_KEY') || null;
+}
+
+export function getSupabaseAnonKey() {
+  return env('SUPABASE_ANON_KEY') || env('VITE_SUPABASE_ANON_KEY') || null;
+}
+
 export function isSupabaseConfigured() {
-  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return Boolean(url && key);
+  return Boolean(getSupabaseUrl() && getSupabaseServiceRoleKey());
 }
 
 export function getSupabaseAdmin() {
   if (adminClient) return adminClient;
 
-  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+  const url = getSupabaseUrl();
+  const key = getSupabaseServiceRoleKey();
   if (!url || !key) return null;
 
   adminClient = createClient(url, key, {
@@ -24,9 +43,8 @@ export function getSupabaseAdmin() {
 }
 
 export function getSupabaseAuth() {
-  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
+  const url = getSupabaseUrl();
+  const anonKey = getSupabaseAnonKey();
   if (!url || !anonKey) return null;
 
   return createClient(url, anonKey, {

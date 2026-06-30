@@ -1,4 +1,4 @@
-import { getSupabaseAdmin, isSupabaseConfigured } from '../supabase.js';
+import { getSupabaseAdmin, getSupabaseAuth, isSupabaseConfigured } from '../supabase.js';
 
 export async function handleLogin(req, res) {
   if (req.method !== 'POST') {
@@ -17,13 +17,21 @@ export async function handleLogin(req, res) {
     });
   }
 
-  const admin = getSupabaseAdmin();
-  const { data, error } = await admin.auth.signInWithPassword({ email, password });
+  const authClient = getSupabaseAuth() || getSupabaseAdmin();
+  if (!authClient) {
+    return res.status(503).json({
+      error: 'Auth not configured',
+      message: 'Add SUPABASE_URL and SUPABASE_ANON_KEY (or SERVICE_ROLE_KEY) in Vercel, then redeploy.',
+    });
+  }
+
+  const { data, error } = await authClient.auth.signInWithPassword({ email, password });
 
   if (error) {
     return res.status(401).json({ error: error.message || 'Invalid credentials' });
   }
 
+  const admin = getSupabaseAdmin();
   const { data: profile } = await admin
     .from('profiles')
     .select('role')
