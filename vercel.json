@@ -19,7 +19,11 @@
       "has": [{ "type": "host", "value": "peacebaptist.net" }],
       "destination": "https://www.peacebaptist.net/:path*",
       "permanent": true
-    }
+    },
+    { "source": "/adnin", "destination": "/admin", "permanent": false },
+    { "source": "/adnin/:path*", "destination": "/admin", "permanent": false },
+    { "source": "/admim", "destination": "/admin", "permanent": false },
+    { "source": "/admim/:path*", "destination": "/admin", "permanent": false }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api?path=$1" },

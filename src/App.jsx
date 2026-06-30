@@ -84,6 +84,12 @@ const AuthenticatedApp = () => {
         <Route path="/daily-walk" element={<DailyWalk />} />
       </Route>
 
+      {/* Common admin URL typos */}
+      <Route path="/adnin" element={<Navigate to="/admin" replace />} />
+      <Route path="/adnin/*" element={<Navigate to="/admin" replace />} />
+      <Route path="/admim" element={<Navigate to="/admin" replace />} />
+      <Route path="/admim/*" element={<Navigate to="/admin" replace />} />
+
       {/* Auth pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
