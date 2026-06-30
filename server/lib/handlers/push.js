@@ -22,19 +22,41 @@ function authorizeCron(req) {
 export async function handlePushVapidPublicKey(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const key = getVapidPublicKey();
+  const configured = isPushConfigured();
   if (!key) {
     return res.status(503).json({
       error: 'VAPID_PUBLIC_KEY is missing or invalid in Vercel. Paste only the public key from npm run generate-vapid-keys.',
       configured: false,
     });
   }
-  return res.status(200).json({ publicKey: key, configured: true });
+  return res.status(200).json({ publicKey: key, configured });
+}
+
+export async function handlePushStatus(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const publicKey = getVapidPublicKey();
+  const configured = isPushConfigured();
+  if (!configured) {
+    return res.status(503).json({
+      configured: false,
+      publicKey: publicKey || null,
+      error: publicKey
+        ? 'VAPID_PRIVATE_KEY is missing or invalid in Vercel. Paste only the private key from the same npm run generate-vapid-keys output as the public key.'
+        : 'VAPID_PUBLIC_KEY is missing or invalid in Vercel. Paste only the public key from npm run generate-vapid-keys.',
+    });
+  }
+  return res.status(200).json({ configured: true, publicKey });
 }
 
 export async function handlePushSubscribe(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!isPushConfigured()) {
-    return res.status(503).json({ error: 'Push not configured' });
+    const hasPublic = Boolean(getVapidPublicKey());
+    return res.status(503).json({
+      error: hasPublic
+        ? 'VAPID_PRIVATE_KEY is missing or invalid in Vercel. Use the private key from the same npm run generate-vapid-keys output as VAPID_PUBLIC_KEY.'
+        : 'VAPID_PUBLIC_KEY is missing or invalid in Vercel.',
+    });
   }
 
   const { subscription, topics } = req.body || {};

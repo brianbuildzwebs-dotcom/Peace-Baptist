@@ -23,6 +23,10 @@ function urlBase64ToUint8Array(base64String) {
   return output;
 }
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function isPushSupported() {
   return typeof window !== 'undefined'
     && 'serviceWorker' in navigator
@@ -47,7 +51,21 @@ export function saveTopics(topics) {
 
 export async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return null;
-  return navigator.serviceWorker.register('/sw.js', { scope: '/' });
+  const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+  await waitForServiceWorkerReady(registration);
+  return registration;
+}
+
+async function waitForServiceWorkerReady(registration, attempts = 12) {
+  if (registration?.active) return registration;
+
+  for (let i = 0; i < attempts; i += 1) {
+    const ready = await navigator.serviceWorker.ready.catch(() => null);
+    if (ready?.active) return ready;
+    await delay(250);
+  }
+
+  return registration;
 }
 
 export async function getPushPermission() {
@@ -55,26 +73,54 @@ export async function getPushPermission() {
   return Notification.permission;
 }
 
+export async function fetchPushStatus() {
+  const res = await fetch(`${API_BASE}/push/status`);
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return {
+      configured: false,
+      publicKey: null,
+      error: payload.error || 'Push is not configured on the server yet.',
+    };
+  }
+  return payload;
+}
+
+export async function hasActivePushSubscription() {
+  if (!isPushSupported()) return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    return Boolean(subscription?.endpoint);
+  } catch {
+    return false;
+  }
+}
+
 export async function subscribeToPush(topics = getSavedTopics()) {
   if (!isPushSupported()) throw new Error('Push notifications are not supported on this device.');
 
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') throw new Error('Notification permission was not granted.');
-
-  const keyRes = await fetch(`${API_BASE}/push/vapid-public-key`);
-  const keyPayload = await keyRes.json().catch(() => ({}));
-  if (!keyRes.ok || !keyPayload.publicKey) {
-    throw new Error(keyPayload.error || 'Push is not configured on the server yet.');
+  const status = await fetchPushStatus();
+  if (!status.configured || !status.publicKey) {
+    throw new Error(
+      status.error
+        || 'Push is not configured on the server. An admin needs to set matching VAPID keys in Vercel and redeploy.'
+    );
   }
 
   const registration = await registerServiceWorker();
-  if (!registration) throw new Error('Could not register the app service worker.');
+  if (!registration?.pushManager) {
+    throw new Error('Could not register the app service worker. Try again in a moment.');
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') throw new Error('Notification permission was not granted.');
 
   let subscription = await registration.pushManager.getSubscription();
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(keyPayload.publicKey),
+      applicationServerKey: urlBase64ToUint8Array(status.publicKey),
     });
   }
 
@@ -88,7 +134,15 @@ export async function subscribeToPush(topics = getSavedTopics()) {
   });
 
   const subPayload = await subRes.json().catch(() => ({}));
-  if (!subRes.ok) throw new Error(subPayload.error || 'Failed to save subscription.');
+  if (!subRes.ok) {
+    const message = subPayload.error || 'Failed to save subscription.';
+    if (message === 'Push not configured') {
+      throw new Error(
+        'Push is not fully configured on the server. Set both VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in Vercel (from the same npm run generate-vapid-keys output), then redeploy.'
+      );
+    }
+    throw new Error(message);
+  }
 
   saveTopics(topics);
   return { ok: true, topics };

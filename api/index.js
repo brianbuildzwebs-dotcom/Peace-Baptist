@@ -10,6 +10,7 @@ import {
   handlePushSendLive,
   handlePushSubscribe,
   handlePushUnsubscribe,
+  handlePushStatus,
   handlePushVapidPublicKey,
 } from '../server/lib/handlers/push.js';
 
@@ -60,6 +61,7 @@ export default async function handler(req, res) {
 
     if (root === 'push') {
       if (second === 'vapid-public-key') return handlePushVapidPublicKey(req, res);
+      if (second === 'status') return handlePushStatus(req, res);
       if (second === 'subscribe') return handlePushSubscribe(req, res);
       if (second === 'unsubscribe') return handlePushUnsubscribe(req, res);
       if (second === 'send-live') return handlePushSendLive(req, res);

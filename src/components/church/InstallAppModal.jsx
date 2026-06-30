@@ -1,32 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { X, Download, Share, PlusSquare, Smartphone } from "lucide-react";
-import { isIosDevice, isStandaloneApp } from "@/lib/pwaInstall";
+import {
+  getDeferredInstallPrompt,
+  isIosDevice,
+  isInstallInProgress,
+  isStandaloneApp,
+  onInstallPromptChange,
+  promptInstall,
+} from "@/lib/pwaInstall";
 
 export default function InstallAppModal({ open, onClose }) {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const [installed, setInstalled] = useState(false);
+  const [installing, setInstalling] = useState(false);
   const ios = isIosDevice();
 
   useEffect(() => {
     if (!open) return;
     setInstalled(isStandaloneApp());
-
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
   }, [open]);
 
   if (!open) return null;
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    onClose();
+    if (!canInstall || installing || isInstallInProgress()) return;
+    setInstalling(true);
+    try {
+      const result = await promptInstall();
+      if (result?.outcome === "accepted") onClose();
+    } finally {
+      setInstalling(false);
+    }
   };
 
   return (
@@ -83,13 +88,14 @@ export default function InstallAppModal({ open, onClose }) {
             <p className="text-white/70 text-sm mb-4">
               Install Peace Baptist on your home screen for quick access to worship, Daily Walk, and prayer requests.
             </p>
-            {deferredPrompt ? (
+            {canInstall ? (
               <button
                 type="button"
                 onClick={handleInstall}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-navy font-semibold rounded-xl hover:bg-gold-light"
+                disabled={installing}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-navy font-semibold rounded-xl hover:bg-gold-light disabled:opacity-60"
               >
-                <Download size={18} /> Install now
+                <Download size={18} /> {installing ? "Installing…" : "Install now"}
               </button>
             ) : (
               <p className="text-white/50 text-sm">

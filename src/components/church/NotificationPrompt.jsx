@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Bell, BellOff, X } from "lucide-react";
 import {
+  fetchPushStatus,
   getPushPermission,
   getSavedTopics,
+  hasActivePushSubscription,
   isPushSupported,
   subscribeToPush,
   unsubscribeFromPush,
@@ -15,15 +17,34 @@ export default function NotificationPrompt() {
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [serverReady, setServerReady] = useState(null);
   const [topics, setTopics] = useState(getSavedTopics());
+  const enablingRef = useRef(false);
 
   useEffect(() => {
     if (!isPushSupported()) return;
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    getPushPermission().then((perm) => {
-      setEnabled(perm === "granted");
-      if (!dismissed && perm !== "granted") setVisible(true);
-    });
+
+    let cancelled = false;
+
+    const loadState = async () => {
+      const [perm, subscribed, status] = await Promise.all([
+        getPushPermission(),
+        hasActivePushSubscription(),
+        fetchPushStatus().catch(() => ({ configured: false })),
+      ]);
+
+      if (cancelled) return;
+
+      setServerReady(status.configured);
+      setEnabled(subscribed);
+      const dismissed = sessionStorage.getItem(DISMISS_KEY);
+      if (!dismissed && !subscribed && perm !== "denied") setVisible(true);
+    };
+
+    loadState();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleTopic = (topic) => {
@@ -33,9 +54,23 @@ export default function NotificationPrompt() {
   };
 
   const handleEnable = async () => {
+    if (loading || enablingRef.current) return;
+    enablingRef.current = true;
     setLoading(true);
     setError("");
+
     try {
+      if (serverReady === false) {
+        const status = await fetchPushStatus();
+        if (!status.configured) {
+          throw new Error(
+            status.error
+              || "Push is not configured on the server yet. An admin needs to set VAPID keys in Vercel."
+          );
+        }
+        setServerReady(true);
+      }
+
       await subscribeToPush(topics.length ? topics : ["daily_walk", "prayer", "live"]);
       setEnabled(true);
       setVisible(false);
@@ -43,14 +78,17 @@ export default function NotificationPrompt() {
       setError(err.message || "Could not enable notifications.");
     } finally {
       setLoading(false);
+      enablingRef.current = false;
     }
   };
 
   const handleDisable = async () => {
+    if (loading) return;
     setLoading(true);
     try {
       await unsubscribeFromPush();
       setEnabled(false);
+      setVisible(true);
     } finally {
       setLoading(false);
     }
@@ -75,7 +113,7 @@ export default function NotificationPrompt() {
             type="button"
             onClick={handleDisable}
             disabled={loading}
-            className="text-xs text-white/50 hover:text-white flex items-center gap-1"
+            className="text-xs text-white/50 hover:text-white flex items-center gap-1 disabled:opacity-50"
           >
             <BellOff size={14} /> Turn off
           </button>
@@ -113,6 +151,7 @@ export default function NotificationPrompt() {
               key={item.id}
               type="button"
               onClick={() => toggleTopic(item.id)}
+              disabled={loading}
               className={`px-3 py-1.5 rounded-full border transition-colors ${
                 topics.includes(item.id)
                   ? "bg-gold/20 border-gold text-gold"
@@ -132,10 +171,10 @@ export default function NotificationPrompt() {
           disabled={loading || topics.length === 0}
           className="w-full py-2.5 bg-gold text-navy font-semibold rounded-xl text-sm hover:bg-gold-light transition-colors disabled:opacity-50"
         >
-          {loading ? "Enabling…" : "Enable notifications"}
+          {loading ? "Setting up…" : "Enable notifications"}
         </button>
         <p className="text-white/40 text-[11px] mt-2 text-center">
-          iPhone: Add this site to your Home Screen first for best results.
+          iPhone: Add this site to your Home Screen first, then enable notifications from the installed app.
         </p>
       </div>
     </div>

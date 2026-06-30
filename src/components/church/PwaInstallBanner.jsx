@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
-import { isIosDevice, isStandaloneApp } from "@/lib/pwaInstall";
+import {
+  getDeferredInstallPrompt,
+  isIosDevice,
+  isInstallInProgress,
+  isStandaloneApp,
+  onInstallPromptChange,
+  promptInstall,
+} from "@/lib/pwaInstall";
 
 const DISMISS_KEY = "pbc_pwa_install_dismissed_session";
 
 export default function PwaInstallBanner({ onOpenInstall }) {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const [visible, setVisible] = useState(false);
+  const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
     if (isStandaloneApp() || sessionStorage.getItem(DISMISS_KEY)) return;
-
     setVisible(true);
-
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
   }, []);
 
   const dismiss = () => {
@@ -28,13 +28,19 @@ export default function PwaInstallBanner({ onOpenInstall }) {
   };
 
   const install = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      setDeferredPrompt(null);
-      dismiss();
+    if (installing || isInstallInProgress()) return;
+
+    if (canInstall) {
+      setInstalling(true);
+      try {
+        const result = await promptInstall();
+        if (result?.outcome === "accepted") dismiss();
+      } finally {
+        setInstalling(false);
+      }
       return;
     }
+
     onOpenInstall?.();
   };
 
@@ -59,9 +65,10 @@ export default function PwaInstallBanner({ onOpenInstall }) {
           <button
             type="button"
             onClick={install}
-            className="px-3 py-1.5 bg-gold text-navy text-xs font-semibold rounded-lg hover:bg-gold-light"
+            disabled={installing}
+            className="px-3 py-1.5 bg-gold text-navy text-xs font-semibold rounded-lg hover:bg-gold-light disabled:opacity-60"
           >
-            {ios ? "How to install" : "Install"}
+            {installing ? "Installing…" : ios ? "How to install" : canInstall ? "Install" : "Get the app"}
           </button>
           <button type="button" onClick={dismiss} className="text-white/40 hover:text-white" aria-label="Dismiss">
             <X size={16} />
