@@ -39,6 +39,11 @@ export const churchInfo = {
     embedUrl: "https://www.youtube.com/embed/videoseries?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
     url: "https://www.youtube.com/playlist?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
   },
+  bibleBelieversBroadcast: {
+    title: "Bible Believers Broadcast",
+    embedUrl: "https://hearthis.at/set/521575/embed/",
+    pageUrl: "https://hearthis.at/set/521575/",
+  },
   googleMapsEmbed:
     "https://maps.google.com/maps?q=320+Military+Cutoff+Rd,+Wilmington,+NC+28405&hl=en&z=14&output=embed",
   ministries: [

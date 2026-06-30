@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Search, Music, BookOpen, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Play, Search, Radio, BookOpen } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
@@ -13,7 +14,6 @@ export default function Media() {
   const [search, setSearch] = useState("");
   const [speaker, setSpeaker] = useState("");
   const [sermonPlaylistUrl, setSermonPlaylistUrl] = useState("");
-  const [worshipPlaylistUrl, setWorshipPlaylistUrl] = useState("");
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   useEffect(() => {
@@ -30,9 +30,6 @@ export default function Media() {
         setSermonPlaylistUrl(churchInfo.pastServicesPlaylist?.embedUrl || "");
       });
 
-    base44.entities.SiteSettings.filter({ key: "worship_playlist_url" })
-      .then((rows) => { if (rows[0]) setWorshipPlaylistUrl(rows[0].value); })
-      .catch(() => {});
   }, []);
 
   const speakers = [...new Set(media.filter(m => m.speaker).map(m => m.speaker))];
@@ -65,9 +62,9 @@ export default function Media() {
             <button onClick={() => setTab("sermon")} className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${tab === "sermon" ? "bg-navy text-white" : "text-gray-600 hover:bg-gray-100"}`}>
               <BookOpen size={16} /> Sermon Playlists
             </button>
-            <button onClick={() => setTab("worship")} className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${tab === "worship" ? "bg-navy text-white" : "text-gray-600 hover:bg-gray-100"}`}>
-              <Music size={16} /> Worship Music
-            </button>
+            <Link to="/bible-believers-broadcast" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all text-gray-600 hover:bg-gray-100 hover:text-navy">
+              <Radio size={16} /> Bible Believers Broadcast
+            </Link>
             <button onClick={() => setTab("special")} className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${tab === "special" ? "bg-navy text-white" : "text-gray-600 hover:bg-gray-100"}`}>
               <Play size={16} /> Special Events
             </button>
@@ -83,24 +80,6 @@ export default function Media() {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            </div>
-          )}
-
-          {/* Worship Playlist Embed */}
-          {tab === "worship" && worshipPlaylistUrl && (
-            <div className="mb-10 rounded-2xl overflow-hidden border border-gray-200 shadow">
-              <iframe
-                src={worshipPlaylistUrl}
-                title="Worship Music Playlist"
-                className="w-full"
-                height="300"
-                allow="autoplay"
-                frameBorder="0"
-              />
-              <div className="p-3 bg-gray-50 flex items-center gap-2 text-xs text-gray-400">
-                <ExternalLink size={12} />
-                <span>Streaming via external music service</span>
-              </div>
             </div>
           )}
 

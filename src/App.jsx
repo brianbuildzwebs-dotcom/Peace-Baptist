@@ -13,6 +13,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import WatchLive from './pages/WatchLive';
 import Media from './pages/Media';
+import BibleBelieversBroadcast from './pages/BibleBelieversBroadcast';
 import Events from './pages/Events';
 import PrayerRequests from './pages/PrayerRequests';
 import Give from './pages/Give';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
         <Route path="/about" element={<About />} />
         <Route path="/watch-live" element={<WatchLive />} />
         <Route path="/media" element={<Media />} />
+        <Route path="/bible-believers-broadcast" element={<BibleBelieversBroadcast />} />
         <Route path="/events" element={<Events />} />
         <Route path="/prayer-requests" element={<PrayerRequests />} />
         <Route path="/give" element={<Give />} />
