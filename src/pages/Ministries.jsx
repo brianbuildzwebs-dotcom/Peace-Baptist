@@ -59,7 +59,7 @@ export default function Ministries() {
           <img src={WORSHIP_IMG} alt="Worship service" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 to-navy/60" />
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-hero-offset">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="text-gold text-xs font-bold tracking-[0.3em] uppercase">Serve & Grow</span>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white mt-4">Our Ministries</h1>

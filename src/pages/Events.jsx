@@ -22,7 +22,7 @@ export default function Events() {
   return (
     <div>
       {/* Hero */}
-      <section className="navy-gradient pt-28 pb-16">
+      <section className="navy-gradient page-hero-offset pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="text-gold text-xs font-bold tracking-[0.3em] uppercase">Events</span>

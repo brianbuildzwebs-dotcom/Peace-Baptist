@@ -93,4 +93,25 @@
   .navy-gradient {
     background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
   }
+  .page-hero-offset {
+    padding-top: 8.5rem;
+  }
+  @media (min-width: 640px) {
+    .page-hero-offset {
+      padding-top: 9.5rem;
+    }
+  }
+  .hero-ken-burns {
+    animation: hero-ken-burns 24s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+}
+
+@keyframes hero-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
 }

@@ -5,9 +5,9 @@ import { base44 } from "@/api/base44Client";
 import SectionHeading from "./SectionHeading";
 
 const fallbackTestimonials = [
-  { name: "Sarah Johnson", quote: "Peace Baptist changed our family's life. The warmth and authenticity of this congregation is unlike anything we've experienced. We truly found our spiritual home.", role: "Member since 2018" },
-  { name: "David & Lisa Chen", quote: "From the moment we walked in, we felt welcomed. The biblical teaching has strengthened our faith and the community has become our extended family.", role: "Members since 2020" },
-  { name: "Marcus Williams", quote: "Pastor Shepard's preaching is powerful and convicting. The youth ministry has been transformative for my teenagers. This church walks the talk.", role: "Member since 2015" },
+  { name: "Longtime Member", quote: "Peace Baptist has been our church home for years. The preaching is faithful, the people are genuine, and our children have grown up loving the Lord here.", role: "Wilmington, NC" },
+  { name: "Church Family", quote: "From the moment we visited, we felt welcomed. The King James preaching strengthened our faith and this congregation became our extended family.", role: "Member" },
+  { name: "Youth Parent", quote: "Pastor Shepard's preaching is powerful and biblical. The youth ministry has been a blessing for our teenagers. This church lives what it teaches.", role: "Member" },
 ];
 
 export default function TestimonialsCarousel() {
@@ -24,23 +24,24 @@ export default function TestimonialsCarousel() {
   const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
 
   useEffect(() => {
-    const interval = setInterval(next, 6000);
+    const interval = setInterval(next, 7000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
   const t = testimonials[current];
 
   return (
-    <section className="py-24 navy-gradient text-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 sm:py-28 navy-gradient text-white relative overflow-hidden">
+      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_top_right,_#C5A059_0%,_transparent_50%)]" />
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           label="Testimonials"
           title="Voices of Faith"
-          subtitle="Hear from members of our church family about their journey with Christ."
+          subtitle="Hear from members of our church family about their walk with Christ."
           light
         />
         <div className="relative mt-12">
-          <Quote size={48} className="text-gold/20 mb-6" />
+          <Quote size={48} className="text-gold/20 mb-6 mx-auto sm:mx-0" />
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
@@ -48,10 +49,10 @@ export default function TestimonialsCarousel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="text-center"
+              className="text-center sm:text-left"
             >
               <p className="text-xl sm:text-2xl font-heading italic text-white/90 leading-relaxed mb-8">
-                "{t.quote}"
+                &ldquo;{t.quote}&rdquo;
               </p>
               <div>
                 <div className="font-semibold text-gold text-lg">{t.name}</div>
@@ -60,8 +61,8 @@ export default function TestimonialsCarousel() {
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <button onClick={prev} className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+          <div className="flex items-center justify-center sm:justify-start gap-4 mt-10">
+            <button onClick={prev} aria-label="Previous testimonial" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
               <ChevronLeft size={18} />
             </button>
             <div className="flex gap-2">
@@ -69,11 +70,12 @@ export default function TestimonialsCarousel() {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${i === current ? "bg-gold w-6" : "bg-white/30"}`}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                  className={`h-2 rounded-full transition-all ${i === current ? "bg-gold w-6" : "bg-white/30 w-2"}`}
                 />
               ))}
             </div>
-            <button onClick={next} className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+            <button onClick={next} aria-label="Next testimonial" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
               <ChevronRight size={18} />
             </button>
           </div>

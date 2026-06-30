@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Search, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ChurchLogo from "./ChurchLogo";
+import { churchInfo } from "@/lib/churchInfo";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -10,8 +12,7 @@ const navLinks = [
   { label: "Media", path: "/media" },
   { label: "Events", path: "/events" },
   { label: "Ministries", path: "/ministries" },
-  { label: "Prayer Requests", path: "/prayer-requests" },
-  { label: "Blog", path: "/blog" },
+  { label: "Prayer", path: "/prayer-requests" },
   { label: "Contact", path: "/contact" },
 ];
 
@@ -21,7 +22,7 @@ export default function SiteHeader() {
   const location = useLocation();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 50);
+    const handler = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
@@ -33,31 +34,27 @@ export default function SiteHeader() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`transition-all duration-500 ${
           scrolled
             ? "glass-morphism shadow-lg shadow-black/10"
-            : "bg-transparent"
+            : "bg-navy/40 backdrop-blur-sm"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
+          <div className="flex items-center justify-between h-16 lg:h-[4.5rem]">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center">
-                <span className="text-navy font-heading font-bold text-lg">P</span>
-              </div>
+              <ChurchLogo size={42} className="group-hover:scale-105 transition-transform duration-300" />
               <div>
-                <span className={`font-heading font-bold text-lg tracking-wide ${scrolled ? 'text-white' : 'text-white'}`}>
-                  Peace Baptist
+                <span className="font-heading font-bold text-lg tracking-wide text-white block leading-tight">
+                  {churchInfo.shortName}
                 </span>
-                <span className={`hidden sm:block text-xs tracking-widest uppercase ${scrolled ? 'text-gold-light' : 'text-gold-light'}`}>
+                <span className="hidden sm:block text-[10px] tracking-[0.2em] uppercase text-gold-light">
                   Church
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden xl:flex items-center gap-1">
+            <nav className="hidden xl:flex items-center gap-0.5">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -73,16 +70,16 @@ export default function SiteHeader() {
               ))}
               <Link
                 to="/give"
-                className="ml-3 px-6 py-2.5 bg-gold text-navy font-semibold text-sm rounded-full hover:bg-gold-light transition-all duration-300 shadow-lg shadow-gold/20"
+                className="ml-2 px-6 py-2.5 bg-gold text-navy font-semibold text-sm rounded-full hover:bg-gold-light transition-all duration-300 shadow-lg shadow-gold/20"
               >
                 Give
               </Link>
             </nav>
 
-            {/* Mobile toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="xl:hidden text-white p-2"
+              className="xl:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -90,28 +87,27 @@ export default function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -12 }}
             className="fixed inset-0 z-40 xl:hidden"
           >
             <div className="absolute inset-0 bg-navy/95 backdrop-blur-xl" />
-            <div className="relative pt-24 px-6 pb-8 h-full overflow-y-auto">
-              <nav className="flex flex-col gap-2">
+            <div className="relative pt-28 px-6 pb-8 h-full overflow-y-auto">
+              <nav className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.path}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -16 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: i * 0.04 }}
                   >
                     <Link
                       to={link.path}
-                      className={`block px-4 py-3 text-lg font-medium rounded-xl transition-all ${
+                      className={`block px-4 py-3.5 text-lg font-medium rounded-xl transition-all ${
                         isActive(link.path)
                           ? "text-gold bg-white/10"
                           : "text-white/80 hover:text-gold hover:bg-white/5"
@@ -122,10 +118,10 @@ export default function SiteHeader() {
                   </motion.div>
                 ))}
                 <motion.div
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: navLinks.length * 0.05 }}
-                  className="mt-4"
+                  transition={{ delay: navLinks.length * 0.04 }}
+                  className="mt-4 space-y-3"
                 >
                   <Link
                     to="/give"
@@ -133,6 +129,12 @@ export default function SiteHeader() {
                   >
                     Give Online
                   </Link>
+                  <a
+                    href={`tel:${churchInfo.phoneTel}`}
+                    className="block text-center px-6 py-3 border border-white/20 text-white/80 rounded-xl text-sm"
+                  >
+                    Call {churchInfo.phone}
+                  </a>
                 </motion.div>
               </nav>
             </div>

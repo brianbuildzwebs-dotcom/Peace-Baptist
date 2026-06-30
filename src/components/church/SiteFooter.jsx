@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock, Heart, Facebook, Youtube, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Heart, Facebook, Youtube } from "lucide-react";
+import ChurchLogo from "./ChurchLogo";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function SiteFooter() {
   const [email, setEmail] = useState("");
@@ -11,15 +13,19 @@ export default function SiteFooter() {
     if (email) { setSubscribed(true); setEmail(""); }
   };
 
+  const socialLinks = [
+    { icon: Facebook, href: churchInfo.social.facebook, label: "Facebook" },
+    { icon: Youtube, href: churchInfo.social.youtube, label: "YouTube" },
+  ].filter((s) => s.href);
+
   return (
     <footer className="bg-navy text-white">
-      {/* Stay Connected */}
       <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="font-heading text-3xl font-bold mb-3">Stay Connected</h3>
             <p className="text-white/60 mb-8">
-              Join our community and receive weekly encouragement, event updates, and sermon highlights.
+              Get encouragement, service reminders, and updates from Peace Baptist Church.
             </p>
             {subscribed ? (
               <div className="flex items-center justify-center gap-2 text-gold">
@@ -48,26 +54,21 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center">
-                <span className="text-navy font-heading font-bold text-lg">P</span>
-              </div>
+              <ChurchLogo size={40} />
               <div>
-                <div className="font-heading font-bold text-lg">Peace Baptist</div>
+                <div className="font-heading font-bold text-lg">{churchInfo.shortName}</div>
                 <div className="text-xs text-gold tracking-widest uppercase">Church</div>
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed">
-              An independent, fundamental Baptist church in Wilmington, NC, devoted to the King James Bible and dynamic preaching since 1975.
+              An independent, fundamental Baptist church in Wilmington, NC — devoted to the King James Bible and dynamic preaching since 1975.
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="font-heading font-bold text-lg mb-6 text-gold">Quick Links</h4>
             <ul className="space-y-3">
@@ -88,81 +89,72 @@ export default function SiteFooter() {
             </ul>
           </div>
 
-          {/* Service Times */}
           <div>
             <h4 className="font-heading font-bold text-lg mb-6 text-gold">Service Times</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Clock size={16} className="text-gold mt-1 shrink-0" />
-                <div>
-                  <div className="text-sm font-medium">Sunday School</div>
-                  <div className="text-white/60 text-sm">9:30 AM</div>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock size={16} className="text-gold mt-1 shrink-0" />
-                <div>
-                  <div className="text-sm font-medium">Sunday Morning Worship</div>
-                  <div className="text-white/60 text-sm">10:30 AM</div>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock size={16} className="text-gold mt-1 shrink-0" />
-                <div>
-                  <div className="text-sm font-medium">Sunday Evening Service</div>
-                  <div className="text-white/60 text-sm">6:00 PM</div>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock size={16} className="text-gold mt-1 shrink-0" />
-                <div>
-                  <div className="text-sm font-medium">Wednesday Bible Study</div>
-                  <div className="text-white/60 text-sm">7:00 PM</div>
-                </div>
-              </li>
+              {churchInfo.serviceTimes.map((service) => (
+                <li key={service.label} className="flex items-start gap-3">
+                  <Clock size={16} className="text-gold mt-1 shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium">{service.label}</div>
+                    <div className="text-white/60 text-sm">{service.time}</div>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h4 className="font-heading font-bold text-lg mb-6 text-gold">Contact Us</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin size={16} className="text-gold mt-1 shrink-0" />
-                <span className="text-white/60 text-sm">320 Military Cutoff Rd<br />Wilmington, NC 28405</span>
+                <a
+                  href={churchInfo.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/60 hover:text-gold text-sm transition-colors"
+                >
+                  {churchInfo.address.street}<br />{churchInfo.address.city}, {churchInfo.address.state} {churchInfo.address.zip}
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={16} className="text-gold shrink-0" />
-                <a href="tel:+19107914034" className="text-white/60 hover:text-gold text-sm transition-colors">(910) 791-4034</a>
+                <a href={`tel:${churchInfo.phoneTel}`} className="text-white/60 hover:text-gold text-sm transition-colors">
+                  {churchInfo.phone}
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={16} className="text-gold shrink-0" />
-                <a href="mailto:peacebible@bellsouth.net" className="text-white/60 hover:text-gold text-sm transition-colors">peacebible@bellsouth.net</a>
+                <a href={`mailto:${churchInfo.email}`} className="text-white/60 hover:text-gold text-sm transition-colors">
+                  {churchInfo.email}
+                </a>
               </li>
             </ul>
-            <div className="flex gap-4 mt-6">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
-                <Facebook size={18} />
-              </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
-                <Youtube size={18} />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
-                <Instagram size={18} />
-              </a>
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex gap-3 mt-6">
+                {socialLinks.map(({ icon: Icon, href, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-gold hover:text-navy transition-all"
+                  >
+                    <Icon size={18} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/40 text-sm">&copy; {new Date().getFullYear()} Peace Baptist Church. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="/about" className="text-white/40 hover:text-gold text-sm transition-colors">Privacy Policy</Link>
-            <Link to="/about" className="text-white/40 hover:text-gold text-sm transition-colors">Terms of Service</Link>
-          </div>
+          <p className="text-white/40 text-sm">&copy; {new Date().getFullYear()} {churchInfo.name}. All rights reserved.</p>
+          <p className="text-white/30 text-xs">320 Military Cutoff Rd · Wilmington, NC</p>
         </div>
       </div>
     </footer>
