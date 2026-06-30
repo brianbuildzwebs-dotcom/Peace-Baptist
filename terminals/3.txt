@@ -1,7 +1,0 @@
----
-pid: 19848
-cwd: "C:\Users\Brian\Downloads\Peace-Baptist"
-command: "Start-Sleep -Seconds 60; $html = (Invoke-WebRequest -Uri \"https://www.peacebaptist.net/prayer-requests\" -UseBasicParsing).Content; if ($html -match 'index-([A-Za-z0-9]+)\\.js') { $bundle = $matches[0]; $js = (Invoke-WebRequest -Uri \"https://www.peacebaptist.net/assets/$bundle\" -UseBasicParsing).Content; Write-Output \"Bundle: $bundle\"; Write-Output \"Hide my name: $($js.Contains('Hide my name'))\"; Write-Output \"loadPublicPrayers: $($js.Contains('loadPublicPrayers'))\" }"
-started_at: 2026-06-30T07:26:06.693Z
-running_for_ms: 42675013 
----

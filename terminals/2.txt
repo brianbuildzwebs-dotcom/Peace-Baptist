@@ -1,9 +1,0 @@
----
-pid: 11408
-cwd: "C:\Users\Brian\Downloads\Peace-Baptist"
-command: "Start-Sleep -Seconds 45; $r = Invoke-WebRequest -Uri \"https://www.peacebaptist.net/prayer-requests\" -UseBasicParsing; if ($r.Content -match 'index-([A-Za-z0-9]+)\\.js') { \"Bundle: $($matches[0])\" }; @(\"Hide my name\",\"loadPublicPrayers\") | ForEach-Object { $found = $r.Content.Contains($_); \"$_ : $found\" }"
-started_at: 2026-06-30T07:25:11.232Z
-running_for_ms: 42730008 
----
-Hide my name : False
-loadPublicPrayers : False
