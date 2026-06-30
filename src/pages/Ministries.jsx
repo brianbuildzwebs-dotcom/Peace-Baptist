@@ -4,8 +4,7 @@ import { Users, Clock, ArrowRight, X, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SectionHeading from "@/components/church/SectionHeading";
 import SignaturePad from "@/components/church/SignaturePad";
-
-const WORSHIP_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/b10062a2a_generated_d06a9cbb.png";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function Ministries() {
   const [ministries, setMinistries] = useState([]);
@@ -56,7 +55,7 @@ export default function Ministries() {
     <div>
       <section className="relative h-[50vh] min-h-[400px] flex items-center">
         <div className="absolute inset-0">
-          <img src={WORSHIP_IMG} alt="Worship service" className="w-full h-full object-cover" />
+          <img src={churchInfo.images.worship} alt="Peace Baptist Church sanctuary" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 to-navy/60" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-hero-offset">

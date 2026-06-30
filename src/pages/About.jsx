@@ -2,11 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Heart, Users, Globe, Shield, Star } from "lucide-react";
 import SectionHeading from "@/components/church/SectionHeading";
-
-const PASTOR_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/f4b111e89_Rudy-Shepard.webp";
-const COMMUNITY_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/46b6067d7_generated_5000933d.png";
-const BIBLE_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/12dd4b96b_generated_ae10f41a.png";
-const PEACE_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/39e1a28f5_generated_721db83b.png";
+import { churchInfo } from "@/lib/churchInfo";
 
 const values = [
   { icon: BookOpen, title: "Biblical Authority", desc: "We believe the Bible is the inspired, inerrant Word of God and our sole authority for faith and practice." },
@@ -18,7 +14,7 @@ const values = [
 ];
 
 const staff = [
-  { name: "Pastor Rudy Shepard", role: "Senior Pastor", bio: "Founded Peace Baptist in 1975 and has faithfully led the congregation for 50 years. Now 77, his dedication to God and Wilmington is unwavering.", image: PASTOR_IMG },
+  { name: "Pastor Rudy Shepard", role: "Senior Pastor", bio: "Founded Peace Baptist in 1975 and has faithfully led the congregation for 50 years. Now 77, his dedication to God and Wilmington is unwavering.", image: churchInfo.images.pastor },
   { name: "Sunday School", role: "9:30 AM Sunday", bio: "Bible study for all ages before the morning worship service." },
   { name: "Children's Church", role: "Master Clubs", bio: "Dedicated programs for children, nurturing their faith in a fun and engaging environment." },
   { name: "Peace Teens", role: "Youth Ministry", bio: "Active youth group helping teenagers grow in their faith and build lasting friendships." },
@@ -32,7 +28,7 @@ export default function About() {
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[400px] flex items-center">
         <div className="absolute inset-0">
-          <img src={PEACE_IMG} alt="Serene lake at dawn" className="w-full h-full object-cover" />
+          <img src={churchInfo.images.aboutHero} alt="Peace Baptist Church exterior" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-navy/80 to-navy/60" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 page-hero-offset">
@@ -57,8 +53,8 @@ export default function About() {
               </div>
             </motion.div>
             <motion.div {...fade} className="grid grid-cols-2 gap-4">
-              <img src={BIBLE_IMG} alt="Open Bible" className="rounded-2xl shadow-lg h-64 object-cover w-full" />
-              <img src={COMMUNITY_IMG} alt="Church community" className="rounded-2xl shadow-lg h-64 object-cover w-full mt-8" />
+              <img src={churchInfo.images.aboutSanctuary} alt="Peace Baptist Church sanctuary" className="rounded-2xl shadow-lg h-64 object-cover w-full" />
+              <img src={churchInfo.images.aboutBuilding} alt="Peace Baptist Church building" className="rounded-2xl shadow-lg h-64 object-cover w-full mt-8" />
             </motion.div>
           </div>
         </div>
@@ -69,7 +65,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div {...fade} className="order-2 lg:order-1">
-              <img src={PASTOR_IMG} alt="Pastor Rudy Shepard" className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover" />
+              <img src={churchInfo.images.pastor} alt="Pastor Rudy Shepard" className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover" />
             </motion.div>
             <motion.div {...fade} className="order-1 lg:order-2">
               <SectionHeading label="Our Pastor" title="Pastor Rudy Shepard" center={false} />

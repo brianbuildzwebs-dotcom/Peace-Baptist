@@ -30,4 +30,15 @@ export const churchInfo = {
     reference: "Hebrews 10:25",
     text: "Not forsaking the assembling of ourselves together, as the manner of some is; but exhorting one another: and so much the more, as ye see the day approaching.",
   },
+  images: {
+    hero: "/images/hero-sanctuary.jpg",
+    welcome: "/images/church-exterior.jpg",
+    aboutHero: "/images/church-exterior.jpg",
+    aboutBuilding: "/images/church-building.jpg",
+    aboutSanctuary: "/images/hero-sanctuary.jpg",
+    churchSign: "/images/church-sign.jpg",
+    worship: "/images/hero-sanctuary.jpg",
+    nursery: "/images/nursery.jpg",
+    pastor: "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/f4b111e89_Rudy-Shepard.webp",
+  },
 };

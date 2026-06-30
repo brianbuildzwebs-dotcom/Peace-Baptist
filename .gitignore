@@ -33,3 +33,7 @@ dist-ssr
 
 # Local editor/MCP tooling
 mcps/
+
+# Raw photo uploads (keep only renamed site images)
+public/images/IMG_*
+public/images/*.mp4

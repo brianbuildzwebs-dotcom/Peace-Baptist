@@ -4,14 +4,12 @@ import { motion } from "framer-motion";
 import { Play, Clock, Calendar, BookOpen, Heart, MapPin } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
 
-const HERO_IMG = "https://media.base44.com/images/public/6a41a8ed40c77c0dcdea5394/643f6b9e7_generated_13528674.png";
-
 export default function HeroSection() {
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={HERO_IMG}
+          src={churchInfo.images.hero}
           alt="Peace Baptist Church sanctuary"
           className="w-full h-full object-cover hero-ken-burns"
         />

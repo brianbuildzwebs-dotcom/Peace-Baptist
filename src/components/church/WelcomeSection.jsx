@@ -27,7 +27,7 @@ export default function WelcomeSection() {
           >
             <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-gold/20 to-transparent -z-10" />
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-navy/10 ring-1 ring-black/5">
-              <img src={COMMUNITY_IMG} alt="Peace Baptist Church fellowship" className="w-full h-[420px] object-cover" />
+              <img src={churchInfo.images.welcome} alt="Peace Baptist Church building with cross" className="w-full h-[420px] object-cover" />
             </div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -37,7 +37,7 @@ export default function WelcomeSection() {
               className="absolute -bottom-8 -right-2 sm:right-6 bg-white rounded-2xl shadow-xl p-6 max-w-xs border border-gold/20"
             >
               <div className="flex items-center gap-3 mb-3">
-                <img src={PASTOR_IMG} alt={churchInfo.pastor} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/30" />
+                <img src={churchInfo.images.pastor} alt={churchInfo.pastor} className="w-12 h-12 rounded-full object-cover ring-2 ring-gold/30" />
                 <div>
                   <div className="font-heading font-bold text-sm text-navy">{churchInfo.pastor}</div>
                   <div className="text-xs text-gold">Senior Pastor</div>
