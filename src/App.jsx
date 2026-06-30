@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -37,10 +37,14 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+const AuthenticatedApp = () => {
+  const { pathname } = useLocation();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const isAuthRoute = AUTH_ROUTES.includes(pathname);
+
+  if ((isLoadingPublicSettings || isLoadingAuth) && !isAuthRoute) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-navy">
         <div className="text-center">
