@@ -14,6 +14,12 @@ create table if not exists public.profiles (
   created_date timestamptz not null default now()
 );
 
+-- If profiles already existed from an older Supabase template, add missing columns.
+alter table public.profiles add column if not exists email text;
+alter table public.profiles add column if not exists full_name text;
+alter table public.profiles add column if not exists role text default 'user';
+alter table public.profiles add column if not exists created_date timestamptz default now();
+
 alter table public.profiles enable row level security;
 
 create policy "Profiles readable by owner"

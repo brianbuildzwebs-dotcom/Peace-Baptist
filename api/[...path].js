@@ -5,15 +5,22 @@ import { handleEntityCollection, handleEntityById } from './lib/handlers/entitie
 import { handleFunction } from './lib/handlers/functions.js';
 import { handleUpload } from './lib/handlers/upload.js';
 
-function getPathSegments(query) {
-  const raw = query.path;
-  if (raw == null || raw === '') return [];
-  if (Array.isArray(raw)) return raw.filter(Boolean);
-  return String(raw).split('/').filter(Boolean);
+function getPathSegments(req) {
+  const raw = req.query?.path;
+  if (raw != null && raw !== '') {
+    if (Array.isArray(raw)) return raw.filter(Boolean);
+    return String(raw).split('/').filter(Boolean);
+  }
+
+  const url = req.url || '';
+  const match = url.match(/\/api\/([^?]+)/);
+  if (match?.[1]) return match[1].split('/').filter(Boolean);
+
+  return [];
 }
 
 export default async function handler(req, res) {
-  const segments = getPathSegments(req.query);
+  const segments = getPathSegments(req);
 
   if (segments.length === 0) {
     return res.status(404).json({ error: 'Not found', hint: 'No API path segments' });
