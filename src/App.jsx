@@ -19,6 +19,7 @@ import PrayerRequests from './pages/PrayerRequests';
 import Give from './pages/Give';
 import Contact from './pages/Contact';
 import Ministries from './pages/Ministries';
+import DailyWalk from './pages/DailyWalk';
 
 // Layouts
 import PublicLayout from './components/church/PublicLayout';
@@ -31,6 +32,7 @@ import AdminForms from './pages/admin/AdminForms';
 import AdminPrayers from './pages/admin/AdminPrayers';
 import AdminMedia from './pages/admin/AdminMedia';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminDailyWalk from './pages/admin/AdminDailyWalk';
 
 // Auth pages
 import Login from './pages/Login';
@@ -81,6 +83,7 @@ const AuthenticatedApp = () => {
         <Route path="/give" element={<Give />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/ministries" element={<Ministries />} />
+        <Route path="/daily-walk" element={<DailyWalk />} />
       </Route>
 
       {/* Auth pages */}
@@ -97,6 +100,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/forms" element={<AdminForms />} />
           <Route path="/admin/prayers" element={<AdminPrayers />} />
           <Route path="/admin/media" element={<AdminMedia />} />
+          <Route path="/admin/daily-walk" element={<AdminDailyWalk />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>

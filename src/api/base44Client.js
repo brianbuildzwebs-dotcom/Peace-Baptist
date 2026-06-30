@@ -12,6 +12,7 @@ export const base44 = {
     Event: createEntityClient('Event'),
 
     PrayerRequest: createEntityClient('PrayerRequest'),
+    DailyDevotion: createEntityClient('DailyDevotion'),
     MediaItem: createEntityClient('MediaItem'),
     Ministry: createEntityClient('Ministry'),
     ContactMessage: createEntityClient('ContactMessage'),

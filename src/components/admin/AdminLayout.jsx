@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Calendar, FileText, Heart, Play, Settings, Menu, X, LogOut, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Calendar, FileText, Heart, Play, Settings, Menu, X, LogOut, ChevronLeft, BookOpen } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { label: "Events", path: "/admin/events", icon: Calendar },
   { label: "Forms", path: "/admin/forms", icon: FileText },
   { label: "Prayer Requests", path: "/admin/prayers", icon: Heart },
+  { label: "Daily Walk", path: "/admin/daily-walk", icon: BookOpen },
   { label: "Media", path: "/admin/media", icon: Play },
 ];
 

@@ -36,6 +36,11 @@ export const ENTITY_CONFIG = {
     publicCreate: true,
     notify: 'prayer',
   },
+  DailyDevotion: {
+    table: 'daily_devotions',
+    publicRead: true,
+    publicCreate: false,
+  },
   CustomForm: {
     table: 'custom_forms',
     publicRead: false,

@@ -4,6 +4,14 @@ import { handleMe, handleAuthAction } from './lib/handlers/auth.js';
 import { handleEntityCollection, handleEntityById } from './lib/handlers/entities.js';
 import { handleFunction } from './lib/handlers/functions.js';
 import { handleUpload } from './lib/handlers/upload.js';
+import {
+  handlePushCronDailyWalk,
+  handlePushSendDailyWalkNow,
+  handlePushSendLive,
+  handlePushSubscribe,
+  handlePushUnsubscribe,
+  handlePushVapidPublicKey,
+} from './lib/handlers/push.js';
 
 function getPathSegments(req) {
   const raw = req.query?.path;
@@ -48,6 +56,16 @@ export default async function handler(req, res) {
 
     if (root === 'functions' && second) {
       return handleFunction(req, res, second);
+    }
+
+    if (root === 'push') {
+      if (second === 'vapid-public-key') return handlePushVapidPublicKey(req, res);
+      if (second === 'subscribe') return handlePushSubscribe(req, res);
+      if (second === 'unsubscribe') return handlePushUnsubscribe(req, res);
+      if (second === 'send-live') return handlePushSendLive(req, res);
+      if (second === 'send-daily-walk') return handlePushSendDailyWalkNow(req, res);
+      if (second === 'cron' && third === 'daily-walk') return handlePushCronDailyWalk(req, res);
+      return res.status(404).json({ error: 'Not found' });
     }
 
     return res.status(404).json({ error: 'Not found' });

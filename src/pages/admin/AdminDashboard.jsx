@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Heart, FileText, Play, Users, TrendingUp, Eye, Send } from "lucide-react";
+import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ events: 0, prayers: 0, submissions: 0, media: 0, contacts: 0, giving: 0 });
   const [recentPrayers, setRecentPrayers] = useState([]);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
+  const [livePushStatus, setLivePushStatus] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -23,6 +26,26 @@ export default function AdminDashboard() {
       setRecentPrayers(rPrayers);
     });
   }, []);
+
+  const sendLiveAlert = async () => {
+    if (!confirm("Send a live stream notification to all subscribers?")) return;
+    setLivePushStatus("Sending…");
+    try {
+      const token = localStorage.getItem("peace_auth_token");
+      const response = await fetch(`${API_BASE}/push/send-live`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || "Send failed");
+      setLivePushStatus(`Live alert sent to ${payload.sent || 0} device(s).`);
+    } catch (err) {
+      setLivePushStatus(err.message);
+    }
+  };
 
   const cards = [
     { label: "Upcoming Events", value: stats.events, icon: Calendar, color: "text-blue-400" },
@@ -53,6 +76,21 @@ export default function AdminDashboard() {
           </motion.div>
         ))}
       </div>
+
+      <div className="bg-white/5 rounded-2xl p-6 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-white font-heading font-bold">Live stream alert</h3>
+          <p className="text-white/40 text-sm mt-1">Notify members when Sunday service is live on the website.</p>
+        </div>
+        <button
+          type="button"
+          onClick={sendLiveAlert}
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl text-sm font-semibold hover:bg-red-500/30 shrink-0"
+        >
+          <Radio size={16} /> We&apos;re Live — Send Push
+        </button>
+      </div>
+      {livePushStatus && <p className="text-white/50 text-sm">{livePushStatus}</p>}
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Prayer Requests */}

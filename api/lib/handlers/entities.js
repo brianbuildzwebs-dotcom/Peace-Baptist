@@ -39,6 +39,10 @@ export async function handleEntityCollection(req, res, entity) {
         filter.is_public = true;
       }
 
+      if (!isAdmin && entity === 'DailyDevotion') {
+        filter.status = 'published';
+      }
+
       const rows = await listEntities(entity, { filter, sort, limit });
       return res.status(200).json(rows);
     } catch (err) {

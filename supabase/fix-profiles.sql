@@ -1,5 +1,6 @@
 -- Fix an existing Supabase starter "profiles" table for Peace Baptist admin login.
--- Run in SQL Editor on the peacebaptist320@gmail.com Supabase project.
+-- Run in SQL Editor on your Peace Baptist Supabase project.
+-- To change admin login later, use set-admin.sql instead.
 
 -- 1) See what you have
 select table_schema, table_name
@@ -12,7 +13,17 @@ from information_schema.columns
 where table_schema = 'public' and table_name = 'profiles'
 order by ordinal_position;
 
--- 2) Add columns our app expects (safe if they already exist)
+-- 2) Fix legacy role constraint (old Supabase templates use different allowed values)
+alter table public.profiles drop constraint if exists profiles_role_check;
+
+update public.profiles
+set role = 'user'
+where role is null or role not in ('user', 'admin');
+
+alter table public.profiles
+  add constraint profiles_role_check check (role in ('user', 'admin'));
+
+-- 3) Add columns our app expects (safe if they already exist)
 alter table public.profiles add column if not exists email text;
 alter table public.profiles add column if not exists full_name text;
 alter table public.profiles add column if not exists role text default 'user';
@@ -44,7 +55,7 @@ update public.profiles p
 set role = 'admin'
 from auth.users u
 where p.id = u.id
-  and u.email = 'peacebaptist320@gmail.com';
+  and u.email = 'YOUR_ADMIN_EMAIL';
 
 -- 5) Verify
 select
@@ -55,4 +66,4 @@ select
   p.role
 from auth.users u
 left join public.profiles p on p.id = u.id
-where u.email = 'peacebaptist320@gmail.com';
+where u.email = 'YOUR_ADMIN_EMAIL';

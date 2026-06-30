@@ -1,6 +1,7 @@
 import { getEntityConfig } from './entityConfig.js';
 import { getSupabaseAdmin } from './supabase.js';
 import { sendNotification } from './email.js';
+import { notifyNewPrayerRequest } from './push.js';
 
 function parseSort(sort) {
   if (!sort) return { column: 'created_date', ascending: false };
@@ -86,6 +87,11 @@ export async function createEntity(entity, body) {
   const row = toApiRow(data, entity);
   if (config.notify) {
     await sendNotification(config.notify, row);
+    if (config.notify === 'prayer') {
+      notifyNewPrayerRequest(row).catch((err) => {
+        console.warn('Prayer push notification failed:', err.message || err);
+      });
+    }
   }
   return row;
 }
