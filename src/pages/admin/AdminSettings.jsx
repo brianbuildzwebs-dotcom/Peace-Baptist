@@ -4,9 +4,9 @@ import { base44 } from "@/api/base44Client";
 
 const DEFAULT_SETTINGS = [
   { key: "live_stream_url", label: "Live Stream Embed URL (fallback)", value: "", hint: "Only used if Simple Streamz is not configured in churchInfo.js. Paste an iframe src URL." },
-  { key: "sermon_playlist_url", label: "Sermon Playlist YouTube Embed URL", value: "", hint: "e.g. https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID" },
+  { key: "sermon_playlist_url", label: "Sermon Playlist YouTube Embed URL (optional override)", value: "", hint: "Default playlist is in churchInfo.js. Paste here only to override." },
   { key: "worship_playlist_url", label: "Worship Music Playlist URL (hearthis.at or embed)", value: "", hint: "Paste full hearthis.at URL or iframe src" },
-  { key: "google_maps_embed", label: "Google Maps Embed URL", value: "", hint: "From Google Maps → Share → Embed → copy the src URL only" },
+  { key: "google_maps_embed", label: "Google Maps Embed URL (optional override)", value: "", hint: "Default map is in churchInfo.js. Paste embed src URL here to override." },
   { key: "facebook_url", label: "Facebook Page URL", value: "", hint: "e.g. https://www.facebook.com/yourchurch" },
   { key: "youtube_url", label: "YouTube Channel URL", value: "", hint: "e.g. https://www.youtube.com/@yourchurch" },
   { key: "instagram_url", label: "Instagram URL", value: "", hint: "e.g. https://www.instagram.com/yourchurch" },

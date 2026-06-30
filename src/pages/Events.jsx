@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, Clock, Users, Grid3X3, List, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar, MapPin, Clock, Users, Grid3X3, List, X, ArrowRight, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import SectionHeading from "@/components/church/SectionHeading";
 import EventRSVPPanel from "@/components/church/EventRSVPPanel";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -47,9 +49,42 @@ export default function Events() {
           {loading ? (
             <div className="text-center py-16 text-gray-400">Loading events...</div>
           ) : events.length === 0 ? (
-            <div className="text-center py-16">
-              <Calendar size={48} className="text-gray-200 mx-auto mb-4" />
-              <p className="text-gray-500">No upcoming events. Check back soon!</p>
+            <div className="max-w-3xl mx-auto">
+              <div className="rounded-3xl border border-gray-100 bg-cloud p-8 sm:p-12 text-center shadow-sm mb-10">
+                <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mx-auto mb-6">
+                  <Calendar size={28} className="text-gold" />
+                </div>
+                <h3 className="font-heading text-2xl font-bold text-navy mb-3">Join Us This Week</h3>
+                <p className="text-gray-600 mb-8">
+                  Our regular service schedule is below. Special events will appear here once added in the admin dashboard.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-4 text-left mb-8">
+                  {churchInfo.serviceTimes.map((service) => (
+                    <div key={service.label} className="rounded-2xl bg-white border border-gray-100 p-4">
+                      <p className="font-semibold text-navy">{service.label}</p>
+                      <p className="text-gold text-sm font-medium mt-1">{service.time}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a
+                    href={churchInfo.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gold text-navy font-bold rounded-full hover:bg-gold-light transition-colors"
+                  >
+                    <MapPin size={16} />
+                    Get Directions
+                  </a>
+                  <Link
+                    to="/watch-live"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border border-navy/15 text-navy font-medium rounded-full hover:border-gold hover:text-gold transition-colors"
+                  >
+                    <Play size={16} />
+                    Watch Live <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : view === "grid" ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">

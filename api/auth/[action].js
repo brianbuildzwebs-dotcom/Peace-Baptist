@@ -1,23 +1,64 @@
-const NOT_CONFIGURED = {
-  error: 'Auth not configured yet',
-  message: 'Admin auth will be enabled when Supabase is connected.',
-};
+import { getSupabaseAuth } from '../lib/supabase.js';
 
 export default async function handler(req, res) {
   const { action } = req.query;
 
-  if (req.method !== 'POST' && action !== 'me') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const authClient = getSupabaseAuth();
+  if (!authClient) {
+    return res.status(503).json({
+      error: 'Auth not configured',
+      message: 'Add Supabase environment variables in Vercel.',
+    });
   }
 
   switch (action) {
     case 'register':
+      return res.status(403).json({
+        error: 'Registration disabled',
+        message: 'Admin accounts are created in Supabase. Contact the site administrator.',
+      });
+
     case 'verify-otp':
-    case 'resend-otp':
-    case 'reset-password-request':
-    case 'reset-password':
-    case 'login':
-      return res.status(501).json(NOT_CONFIGURED);
+    case 'resend-otp': {
+      const { email, otpCode } = req.body || {};
+      if (action === 'resend-otp') {
+        const { error } = await authClient.auth.resend({ type: 'signup', email });
+        if (error) return res.status(400).json({ error: error.message });
+        return res.status(200).json({ success: true });
+      }
+      const { data, error } = await authClient.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: 'signup',
+      });
+      if (error) return res.status(400).json({ error: error.message });
+      return res.status(200).json({
+        access_token: data.session?.access_token,
+        user: data.user,
+      });
+    }
+
+    case 'reset-password-request': {
+      const { email } = req.body || {};
+      const siteUrl = process.env.SITE_URL || 'https://peacebaptist.net';
+      const { error } = await authClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/reset-password`,
+      });
+      if (error) return res.status(400).json({ error: error.message });
+      return res.status(200).json({ success: true });
+    }
+
+    case 'reset-password': {
+      return res.status(400).json({
+        error: 'Use the reset link from your email',
+        message: 'Password reset is completed through the Supabase email link.',
+      });
+    }
+
     default:
       return res.status(404).json({ error: 'Unknown auth action' });
   }

@@ -39,6 +39,59 @@ export const churchInfo = {
     embedUrl: "https://www.youtube.com/embed/videoseries?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
     url: "https://www.youtube.com/playlist?list=PLVNXaOHxtsylMo4TqKj2rN-ZI3luGg_x3",
   },
+  googleMapsEmbed:
+    "https://maps.google.com/maps?q=320+Military+Cutoff+Rd,+Wilmington,+NC+28405&hl=en&z=14&output=embed",
+  ministries: [
+    {
+      id: "sunday-school",
+      name: "Sunday School",
+      description:
+        "Bible-centered classes for all ages before morning worship. A great way to grow in Scripture and fellowship.",
+      leader: "Church Staff",
+      meeting_time: "Sundays at 9:30 AM",
+      image_url: "/images/hero-sanctuary.jpg",
+      status: "active",
+    },
+    {
+      id: "youth",
+      name: "Youth Ministry",
+      description:
+        "Teaching and activities for young people to grow in faith, build friendships, and serve the Lord.",
+      leader: "Youth Leaders",
+      meeting_time: "Sunday & Wednesday",
+      image_url: "/images/hero-sanctuary.jpg",
+      status: "active",
+    },
+    {
+      id: "nursery",
+      name: "Nursery",
+      description:
+        "A safe, caring environment for infants and toddlers during worship services.",
+      leader: "Nursery Volunteers",
+      meeting_time: "During all services",
+      image_url: "/images/nursery.jpg",
+      status: "active",
+    },
+    {
+      id: "outreach",
+      name: "Soul Winning & Outreach",
+      description:
+        "Door-to-door visitation, community outreach, and sharing the Gospel throughout Wilmington.",
+      leader: "Pastor Rudy Shepard",
+      meeting_time: "Ongoing",
+      image_url: "/images/church-exterior.jpg",
+      status: "active",
+    },
+    {
+      id: "bus",
+      name: "Bus Ministry",
+      description: "Transportation ministry helping families attend church services.",
+      leader: "Bus Captain",
+      meeting_time: "Sundays",
+      image_url: "/images/church-building.jpg",
+      status: "active",
+    },
+  ],
   images: {
     hero: "/images/hero-sanctuary.jpg",
     welcome: "/images/church-exterior.jpg",

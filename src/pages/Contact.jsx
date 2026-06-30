@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { churchInfo } from "@/lib/churchInfo";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
@@ -11,8 +12,12 @@ export default function Contact() {
 
   useEffect(() => {
     base44.entities.SiteSettings.filter({ key: "google_maps_embed" })
-      .then((rows) => { if (rows[0]?.value) setMapsUrl(rows[0].value); })
-      .catch(() => {});
+      .then((rows) => {
+        setMapsUrl(rows[0]?.value || churchInfo.googleMapsEmbed || "");
+      })
+      .catch(() => {
+        setMapsUrl(churchInfo.googleMapsEmbed || "");
+      });
   }, []);
 
   const handleSubmit = async (e) => {

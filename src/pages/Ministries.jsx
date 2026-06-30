@@ -20,8 +20,12 @@ export default function Ministries() {
 
   useEffect(() => {
     base44.entities.Ministry.filter({ status: "active" })
-      .then(setMinistries)
-      .catch(() => {})
+      .then((data) => {
+        setMinistries(data.length > 0 ? data : churchInfo.ministries || []);
+      })
+      .catch(() => {
+        setMinistries(churchInfo.ministries || []);
+      })
       .finally(() => setLoading(false));
   }, []);
 
