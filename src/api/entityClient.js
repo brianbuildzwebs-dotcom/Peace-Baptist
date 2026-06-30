@@ -64,9 +64,27 @@ function createEntityClient(entityName) {
       return request(`${basePath}/${id}`, { method: 'DELETE' });
     },
 
-    subscribe(_callback) {
-      // Realtime will be wired up with Supabase later.
-      return () => {};
+    subscribe(callback, { intervalMs = 15000, filter = {}, sort, limit } = {}) {
+      let knownIds = new Set();
+
+      const poll = async () => {
+        try {
+          const rows = await request(`${basePath}${buildQuery({ filter, sort, limit })}`);
+          const list = Array.isArray(rows) ? rows : [];
+          for (const row of list) {
+            if (!knownIds.has(row.id)) {
+              callback({ type: "create", data: row });
+            }
+          }
+          knownIds = new Set(list.map((row) => row.id));
+        } catch {
+          // ignore polling errors
+        }
+      };
+
+      poll();
+      const interval = setInterval(poll, intervalMs);
+      return () => clearInterval(interval);
     },
   };
 }

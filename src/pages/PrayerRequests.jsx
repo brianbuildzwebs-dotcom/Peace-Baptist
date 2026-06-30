@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Heart, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -16,34 +16,43 @@ export default function PrayerRequests() {
   const [submitting, setSubmitting] = useState(false);
   const [publicPrayers, setPublicPrayers] = useState([]);
 
-  // Load public prayer requests and subscribe to real-time updates
-  useEffect(() => {
-    base44.entities.PrayerRequest.filter({ is_public: true }, "-created_date", 20)
-      .then(setPublicPrayers)
-      .catch(() => {});
-
-    const unsub = base44.entities.PrayerRequest.subscribe((event) => {
-      if (event.type === "create" && event.data?.is_public) {
-        setPublicPrayers((prev) => [event.data, ...prev]);
-      }
-    });
-    return unsub;
+  const loadPublicPrayers = useCallback(async () => {
+    try {
+      const rows = await base44.entities.PrayerRequest.filter({ is_public: true }, "-created_date", 20);
+      setPublicPrayers(rows);
+      return rows;
+    } catch {
+      return [];
+    }
   }, []);
+
+  // Load prayer wall and poll for live updates from other visitors
+  useEffect(() => {
+    loadPublicPrayers();
+    const interval = setInterval(loadPublicPrayers, 10000);
+    return () => clearInterval(interval);
+  }, [loadPublicPrayers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    const isPublicPost = !isAnonymous; // non-anonymous posts appear publicly
-    await base44.entities.PrayerRequest.create({
-      name: isAnonymous ? "" : name,
-      email: isAnonymous ? "" : email,
-      request,
-      category,
-      is_anonymous: isAnonymous,
-      is_public: isPublicPost,
-    });
-    setSubmitting(false);
-    setSubmitted(true);
+    try {
+      await base44.entities.PrayerRequest.create({
+        name: isAnonymous ? "" : name,
+        email: isAnonymous ? "" : email,
+        request,
+        category,
+        is_anonymous: isAnonymous,
+        is_public: true,
+      });
+      // Reload wall immediately — same fetch a full page refresh uses
+      await loadPublicPrayers();
+      setSubmitted(true);
+    } catch {
+      // keep form visible on failure
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -86,7 +95,7 @@ export default function PrayerRequests() {
                   <div className="flex items-center gap-3 mb-4">
                     <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                       <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} className="rounded border-gray-300 text-gold focus:ring-gold" />
-                      Submit anonymously
+                      Hide my name on the prayer wall
                     </label>
                   </div>
 
