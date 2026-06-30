@@ -1,4 +1,5 @@
 export const churchInfo = {
+  showGiving: false,
   name: "Peace Baptist Church",
   shortName: "Peace Baptist",
   tagline: "Wilmington, NC · Est. 1975",

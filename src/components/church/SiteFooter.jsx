@@ -77,7 +77,7 @@ export default function SiteFooter() {
                 { label: "Watch Live", path: "/watch-live" },
                 { label: "Events", path: "/events" },
                 { label: "Prayer Requests", path: "/prayer-requests" },
-                { label: "Give Online", path: "/give" },
+                ...(churchInfo.showGiving ? [{ label: "Give Online", path: "/give" }] : []),
                 { label: "Contact Us", path: "/contact" },
               ].map((link) => (
                 <li key={link.path}>

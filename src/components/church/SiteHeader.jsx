@@ -68,12 +68,14 @@ export default function SiteHeader() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/give"
-                className="ml-2 px-6 py-2.5 bg-gold text-navy font-semibold text-sm rounded-full hover:bg-gold-light transition-all duration-300 shadow-lg shadow-gold/20"
-              >
-                Give
-              </Link>
+              {churchInfo.showGiving && (
+                <Link
+                  to="/give"
+                  className="ml-2 px-6 py-2.5 bg-gold text-navy font-semibold text-sm rounded-full hover:bg-gold-light transition-all duration-300 shadow-lg shadow-gold/20"
+                >
+                  Give
+                </Link>
+              )}
             </nav>
 
             <button
@@ -123,12 +125,14 @@ export default function SiteHeader() {
                   transition={{ delay: navLinks.length * 0.04 }}
                   className="mt-4 space-y-3"
                 >
-                  <Link
-                    to="/give"
-                    className="block text-center px-6 py-4 bg-gold text-navy font-bold text-lg rounded-xl"
-                  >
-                    Give Online
-                  </Link>
+                  {churchInfo.showGiving && (
+                    <Link
+                      to="/give"
+                      className="block text-center px-6 py-4 bg-gold text-navy font-bold text-lg rounded-xl"
+                    >
+                      Give Online
+                    </Link>
+                  )}
                   <a
                     href={`tel:${churchInfo.phoneTel}`}
                     className="block text-center px-6 py-3 border border-white/20 text-white/80 rounded-xl text-sm"
