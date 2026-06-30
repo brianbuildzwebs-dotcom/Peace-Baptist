@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Smartphone } from "lucide-react";
-import { isStandaloneApp } from "@/lib/pwaInstall";
+import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 import { motion, AnimatePresence } from "framer-motion";
 import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
@@ -19,6 +19,7 @@ const navLinks = [
 ];
 
 export default function SiteHeader({ onOpenInstall }) {
+  const { hideInstallPromo } = usePwaInstallState();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -70,7 +71,7 @@ export default function SiteHeader({ onOpenInstall }) {
                   {link.label}
                 </Link>
               ))}
-              {!isStandaloneApp() && onOpenInstall && (
+              {!hideInstallPromo && onOpenInstall && (
                 <button
                   type="button"
                   onClick={onOpenInstall}
@@ -137,7 +138,7 @@ export default function SiteHeader({ onOpenInstall }) {
                   transition={{ delay: navLinks.length * 0.04 }}
                   className="mt-4 space-y-3"
                 >
-                  {!isStandaloneApp() && onOpenInstall && (
+                  {!hideInstallPromo && onOpenInstall && (
                     <button
                       type="button"
                       onClick={() => { setMobileOpen(false); onOpenInstall(); }}

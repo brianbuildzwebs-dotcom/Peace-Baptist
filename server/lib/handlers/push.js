@@ -1,5 +1,6 @@
 import { requireAdmin } from '../auth.js';
 import {
+  countPushSubscriptions,
   deletePushSubscription,
   getVapidPublicKey,
   isPushConfigured,
@@ -46,6 +47,19 @@ export async function handlePushStatus(req, res) {
     });
   }
   return res.status(200).json({ configured: true, publicKey });
+}
+
+export async function handlePushSubscriberCount(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const admin = await requireAdmin(req, res);
+  if (!admin) return;
+
+  try {
+    const count = await countPushSubscriptions();
+    return res.status(200).json({ count });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Count failed' });
+  }
 }
 
 export async function handlePushSubscribe(req, res) {

@@ -1,9 +1,11 @@
 import React from "react";
 import { Phone, MapPin, Clock, Smartphone } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
-import { isStandaloneApp } from "@/lib/pwaInstall";
+import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 
 export default function TopBar({ onOpenInstall }) {
+  const { hideInstallPromo } = usePwaInstallState();
+
   return (
     <div className="bg-navy-dark border-b border-white/10 text-white/80 text-xs sm:text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,7 +20,7 @@ export default function TopBar({ onOpenInstall }) {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 md:flex-none md:ml-auto">
-            {!isStandaloneApp() && onOpenInstall && (
+            {!hideInstallPromo && onOpenInstall && (
               <button
                 type="button"
                 onClick={onOpenInstall}

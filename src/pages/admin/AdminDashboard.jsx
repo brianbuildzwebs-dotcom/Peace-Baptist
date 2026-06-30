@@ -10,8 +10,17 @@ export default function AdminDashboard() {
   const [recentPrayers, setRecentPrayers] = useState([]);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const [livePushStatus, setLivePushStatus] = useState("");
+  const [subscriberCount, setSubscriberCount] = useState(null);
 
   useEffect(() => {
+    const token = localStorage.getItem("peace_auth_token");
+    fetch(`${API_BASE}/push/subscriber-count`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.json())
+      .then((d) => setSubscriberCount(d.count ?? 0))
+      .catch(() => setSubscriberCount(null));
+
     Promise.all([
       base44.entities.Event.filter({ status: "upcoming" }).then(d => d.length).catch(() => 0),
       base44.entities.PrayerRequest.filter({ status: "new" }).then(d => d.length).catch(() => 0),
@@ -41,7 +50,8 @@ export default function AdminDashboard() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || "Send failed");
-      setLivePushStatus(`Live alert sent to ${payload.sent || 0} device(s).`);
+      setLivePushStatus(`Live alert sent to ${payload.sent || 0} of ${payload.total || 0} subscriber(s).`);
+      if (typeof payload.total === "number") setSubscriberCount(payload.total);
     } catch (err) {
       setLivePushStatus(err.message);
     }
@@ -80,7 +90,12 @@ export default function AdminDashboard() {
       <div className="bg-white/5 rounded-2xl p-6 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-white font-heading font-bold">Live stream alert</h3>
-          <p className="text-white/40 text-sm mt-1">Notify members when Sunday service is live on the website.</p>
+          <p className="text-white/40 text-sm mt-1">
+            Notify members when Sunday service is live on the website.
+            {subscriberCount != null && (
+              <span className="block mt-1 text-gold/80">{subscriberCount} device(s) subscribed</span>
+            )}
+          </p>
         </div>
         <button
           type="button"

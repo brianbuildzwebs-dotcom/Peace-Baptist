@@ -1,5 +1,7 @@
+const INSTALLED_KEY = 'pbc_pwa_installed';
 let deferredInstallPrompt = null;
 const installListeners = new Set();
+const uiStateListeners = new Set();
 let installInProgress = false;
 
 function notifyInstallListeners() {
@@ -12,16 +14,50 @@ function notifyInstallListeners() {
   });
 }
 
+function markInstalled() {
+  try {
+    localStorage.setItem(INSTALLED_KEY, '1');
+  } catch {
+    /* ignore storage errors */
+  }
+  notifyUIStateListeners();
+}
+
+function notifyUIStateListeners() {
+  const state = getInstallUIState();
+  uiStateListeners.forEach((listener) => {
+    try {
+      listener(state);
+    } catch {
+      /* ignore listener errors */
+    }
+  });
+}
+
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
     notifyInstallListeners();
+    notifyUIStateListeners();
   });
 
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
+    markInstalled();
     notifyInstallListeners();
+  });
+
+  const displayModes = ['standalone', 'fullscreen', 'minimal-ui'];
+  displayModes.forEach((mode) => {
+    const mq = window.matchMedia(`(display-mode: ${mode})`);
+    const onChange = () => notifyUIStateListeners();
+    mq.addEventListener?.('change', onChange);
+    mq.addListener?.(onChange);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') notifyUIStateListeners();
   });
 }
 
@@ -30,8 +66,31 @@ export function isIosDevice() {
 }
 
 export function isStandaloneApp() {
+  if (typeof window === 'undefined') return false;
   return window.matchMedia('(display-mode: standalone)').matches
+    || window.matchMedia('(display-mode: fullscreen)').matches
+    || window.matchMedia('(display-mode: minimal-ui)').matches
     || window.navigator.standalone === true;
+}
+
+export function isAppInstalled() {
+  return isStandaloneApp() || localStorage.getItem(INSTALLED_KEY) === '1';
+}
+
+export function getInstallUIState() {
+  const installed = isAppInstalled();
+  return {
+    installed,
+    standalone: isStandaloneApp(),
+    hideInstallPromo: installed,
+    canNativeInstall: Boolean(deferredInstallPrompt) && !installed,
+  };
+}
+
+export function onInstallUIStateChange(listener) {
+  uiStateListeners.add(listener);
+  listener(getInstallUIState());
+  return () => uiStateListeners.delete(listener);
 }
 
 export function canUseNativeInstallPrompt() {
@@ -75,6 +134,7 @@ export function triggerInstallPrompt() {
     .then((result) => {
       if (result.outcome === 'accepted') {
         deferredInstallPrompt = null;
+        markInstalled();
         notifyInstallListeners();
       }
       return result;
@@ -94,7 +154,7 @@ export async function promptInstall() {
 }
 
 export function handleGetAppClick({ onShowInstructions } = {}) {
-  if (isStandaloneApp()) return { handled: true, installed: true };
+  if (isAppInstalled()) return { handled: true, installed: true };
 
   if (isIosDevice()) {
     onShowInstructions?.();

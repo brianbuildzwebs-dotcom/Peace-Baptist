@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { X, Download, Share, PlusSquare, Smartphone } from "lucide-react";
+import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 import {
   getDeferredInstallPrompt,
   handleGetAppClick,
   isIosDevice,
-  isStandaloneApp,
   onInstallPromptChange,
 } from "@/lib/pwaInstall";
 
 export default function InstallAppModal({ open, onClose }) {
+  const { hideInstallPromo } = usePwaInstallState();
   const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
-  const [installed, setInstalled] = useState(false);
   const ios = isIosDevice();
 
   useEffect(() => {
     if (!open) return undefined;
-    setInstalled(isStandaloneApp());
     return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
   }, [open]);
 
@@ -58,7 +57,7 @@ export default function InstallAppModal({ open, onClose }) {
           </div>
         </div>
 
-        {installed ? (
+        {hideInstallPromo ? (
           <p className="text-gold text-sm mb-4">You&apos;re already using the installed app. Enjoy Daily Walk, live stream, and prayer request alerts.</p>
         ) : ios ? (
           <ol className="space-y-4 text-sm text-white/80 mb-6">
@@ -105,7 +104,7 @@ export default function InstallAppModal({ open, onClose }) {
           onClick={onClose}
           className="w-full mt-4 py-2.5 min-h-[44px] text-white/50 text-sm hover:text-white"
         >
-          {installed ? "Close" : "Maybe later"}
+          {hideInstallPromo ? "Close" : "Maybe later"}
         </button>
       </div>
     </div>

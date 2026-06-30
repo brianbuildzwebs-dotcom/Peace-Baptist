@@ -116,13 +116,21 @@ export async function subscribeToPush(topics = getSavedTopics()) {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') throw new Error('Notification permission was not granted.');
 
-  let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(status.publicKey),
-    });
+  // Replace any stale subscription (e.g. after VAPID key rotation or browser vs installed app).
+  const existing = await registration.pushManager.getSubscription();
+  if (existing) {
+    await fetch(`${API_BASE}/push/unsubscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: existing.endpoint }),
+    }).catch(() => {});
+    await existing.unsubscribe().catch(() => {});
   }
+
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(status.publicKey),
+  });
 
   const subRes = await fetch(`${API_BASE}/push/subscribe`, {
     method: 'POST',

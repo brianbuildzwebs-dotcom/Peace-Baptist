@@ -8,6 +8,7 @@ import {
   handlePushCronDailyWalk,
   handlePushSendDailyWalkNow,
   handlePushSendLive,
+  handlePushSubscriberCount,
   handlePushSubscribe,
   handlePushUnsubscribe,
   handlePushStatus,
@@ -63,6 +64,7 @@ export default async function handler(req, res) {
       if (second === 'vapid-public-key') return handlePushVapidPublicKey(req, res);
       if (second === 'status') return handlePushStatus(req, res);
       if (second === 'subscribe') return handlePushSubscribe(req, res);
+      if (second === 'subscriber-count') return handlePushSubscriberCount(req, res);
       if (second === 'unsubscribe') return handlePushUnsubscribe(req, res);
       if (second === 'send-live') return handlePushSendLive(req, res);
       if (second === 'send-daily-walk') return handlePushSendDailyWalkNow(req, res);

@@ -119,6 +119,16 @@ export async function deletePushSubscription(endpoint) {
   await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint);
 }
 
+export async function countPushSubscriptions() {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
+  const { count, error } = await supabase
+    .from('push_subscriptions')
+    .select('*', { count: 'exact', head: true });
+  if (error) throw error;
+  return count || 0;
+}
+
 export async function sendTopicPush(topic, { title, body, url, tag }) {
   if (!configureVapid()) {
     console.warn('Web push skipped: VAPID keys not configured');
@@ -147,7 +157,7 @@ export async function sendTopicPush(topic, { title, body, url, tag }) {
       sent += 1;
     } catch (err) {
       failed += 1;
-      if (err.statusCode === 404 || err.statusCode === 410) {
+      if (err.statusCode === 401 || err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 410) {
         await removeSubscription(sub.id);
       }
       console.warn('Push delivery failed:', err.statusCode || err.message);

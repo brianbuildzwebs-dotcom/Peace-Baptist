@@ -1,37 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
+import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 import {
-  getDeferredInstallPrompt,
   handleGetAppClick,
   isIosDevice,
-  isStandaloneApp,
   onInstallPromptChange,
 } from "@/lib/pwaInstall";
 
 const DISMISS_KEY = "pbc_pwa_install_dismissed_session";
 
 export default function PwaInstallBanner({ onOpenInstall }) {
-  const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
-  const [visible, setVisible] = useState(false);
+  const { hideInstallPromo, canNativeInstall } = usePwaInstallState();
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(DISMISS_KEY) === "1");
+  const [canInstall, setCanInstall] = useState(canNativeInstall);
 
-  useEffect(() => {
-    if (isStandaloneApp() || sessionStorage.getItem(DISMISS_KEY)) return undefined;
-    setVisible(true);
-    return onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt)));
-  }, []);
+  useEffect(() => onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt))), []);
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, "1");
-    setVisible(false);
+    setDismissed(true);
   };
 
   const install = () => {
-    handleGetAppClick({
+    const result = handleGetAppClick({
       onShowInstructions: () => onOpenInstall?.(),
     });
+    if (result.installed || result.prompted) {
+      result.choice?.then((choice) => {
+        if (choice?.outcome === "accepted") setDismissed(true);
+      });
+    }
   };
 
-  if (!visible || isStandaloneApp()) return null;
+  if (hideInstallPromo || dismissed) return null;
 
   const ios = isIosDevice();
 
