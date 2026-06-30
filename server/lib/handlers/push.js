@@ -23,7 +23,10 @@ export async function handlePushVapidPublicKey(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const key = getVapidPublicKey();
   if (!key) {
-    return res.status(503).json({ error: 'Push not configured', configured: false });
+    return res.status(503).json({
+      error: 'VAPID_PUBLIC_KEY is missing or invalid in Vercel. Paste only the public key from npm run generate-vapid-keys.',
+      configured: false,
+    });
   }
   return res.status(200).json({ publicKey: key, configured: true });
 }

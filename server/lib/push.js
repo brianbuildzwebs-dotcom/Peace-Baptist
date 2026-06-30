@@ -8,8 +8,8 @@ let vapidConfigured = false;
 
 function configureVapid() {
   if (vapidConfigured) return true;
-  const publicKey = process.env.VAPID_PUBLIC_KEY?.trim();
-  const privateKey = process.env.VAPID_PRIVATE_KEY?.trim();
+  const publicKey = getVapidPublicKey();
+  const privateKey = getVapidPrivateKey();
   const subject = process.env.VAPID_SUBJECT?.trim() || `mailto:${process.env.ADMIN_EMAIL || 'peacebible@bellsouth.net'}`;
   if (!publicKey || !privateKey) return false;
   webpush.setVapidDetails(subject, publicKey, privateKey);
@@ -17,12 +17,26 @@ function configureVapid() {
   return true;
 }
 
+function normalizeVapidKey(raw) {
+  if (!raw) return null;
+  const cleaned = String(raw)
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\s+/g, '');
+  if (!/^[A-Za-z0-9_-]{80,90}$/.test(cleaned)) return null;
+  return cleaned;
+}
+
 export function getVapidPublicKey() {
-  return process.env.VAPID_PUBLIC_KEY?.trim() || null;
+  return normalizeVapidKey(process.env.VAPID_PUBLIC_KEY);
+}
+
+export function getVapidPrivateKey() {
+  return normalizeVapidKey(process.env.VAPID_PRIVATE_KEY);
 }
 
 export function isPushConfigured() {
-  return Boolean(getVapidPublicKey() && process.env.VAPID_PRIVATE_KEY?.trim());
+  return Boolean(getVapidPublicKey() && getVapidPrivateKey());
 }
 
 function easternHour() {
@@ -125,7 +139,9 @@ export async function sendTopicPush(topic, { title, body, url, tag }) {
 }
 
 export async function notifyNewPrayerRequest(row) {
-  const label = row.is_anonymous ? 'A new anonymous prayer request was shared.' : 'A new prayer request was shared on the prayer wall.';
+  const label = row.is_anonymous
+    ? 'A new anonymous prayer request was shared.'
+    : 'A new prayer request was shared.';
   return sendTopicPush('prayer', {
     title: 'Peace Baptist — Prayer Request',
     body: label,

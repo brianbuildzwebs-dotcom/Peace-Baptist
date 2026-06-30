@@ -1,9 +1,22 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const TOPICS_KEY = 'pbc_push_topics';
 
+function normalizeVapidPublicKey(raw) {
+  return String(raw || '')
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\s+/g, '');
+}
+
 function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const normalized = normalizeVapidPublicKey(base64String);
+  if (!/^[A-Za-z0-9_-]{80,90}$/.test(normalized)) {
+    throw new Error(
+      'Push is misconfigured on the server. The VAPID public key in Vercel must be the key only — not a command or extra text.'
+    );
+  }
+  const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
+  const base64 = (normalized + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw = window.atob(base64);
   const output = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);

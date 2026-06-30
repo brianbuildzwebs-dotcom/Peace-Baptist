@@ -70,7 +70,7 @@ export default function NotificationPrompt() {
           <div className="flex items-center gap-2 text-gold text-sm font-semibold mb-2">
             <Bell size={16} /> Notifications on
           </div>
-          <p className="text-white/60 text-xs mb-3">You&apos;ll receive Daily Walk, prayer, and live stream alerts.</p>
+          <p className="text-white/60 text-xs mb-3">You&apos;ll receive Daily Walk, prayer request, and live stream alerts.</p>
           <button
             type="button"
             onClick={handleDisable}
@@ -95,7 +95,7 @@ export default function NotificationPrompt() {
               <Bell size={16} /> Stay connected
             </div>
             <p className="text-white/70 text-sm mt-1">
-              Get the Daily Walk each morning, prayer wall updates, and live service alerts.
+              Get the Daily Walk each morning, prayer request updates, and live service alerts.
             </p>
           </div>
           <button type="button" onClick={dismiss} className="text-white/40 hover:text-white shrink-0" aria-label="Dismiss">
@@ -106,7 +106,7 @@ export default function NotificationPrompt() {
         <div className="flex flex-wrap gap-2 mb-4 text-xs">
           {[
             { id: "daily_walk", label: "Daily Walk" },
-            { id: "prayer", label: "Prayer" },
+            { id: "prayer", label: "Prayer Requests" },
             { id: "live", label: "Live stream" },
           ].map((item) => (
             <button
