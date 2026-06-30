@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from './lib/supabase.js';
+import { isSupabaseConfigured } from '../lib/supabase.js';
 
 export default async function handler(req, res) {
   return res.status(200).json({
