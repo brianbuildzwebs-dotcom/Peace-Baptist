@@ -33,7 +33,7 @@ export default function AdminLayout() {
             </div>
             <div>
               <div className="text-white font-heading font-bold text-sm">Peace Baptist</div>
-              <div className="text-gold/60 text-xs">Admin Dashboard · v2026.07.01</div>
+              <div className="text-gold/60 text-xs">Admin Dashboard · v2026.07.02</div>
             </div>
           </Link>
         </div>

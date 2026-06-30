@@ -13,6 +13,14 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "peacebaptist.net" }],
+      "destination": "https://www.peacebaptist.net/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api?path=$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

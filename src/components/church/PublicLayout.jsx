@@ -18,13 +18,13 @@ export default function PublicLayout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="fixed top-0 left-0 right-0 z-50">
+    <div className="min-h-screen flex flex-col overflow-x-hidden w-full max-w-full">
+      <div className="fixed top-0 left-0 right-0 z-50 w-full max-w-full">
         <PwaInstallBanner onOpenInstall={openInstall} />
         <TopBar onOpenInstall={handleGetApp} />
         <SiteHeader onOpenInstall={handleGetApp} />
       </div>
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         <Outlet />
       </main>
       <SiteFooter onOpenInstall={handleGetApp} />

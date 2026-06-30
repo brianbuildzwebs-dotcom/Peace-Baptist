@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock, Heart, Facebook, Youtube } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Heart, Facebook, Youtube, Bell } from "lucide-react";
+import { canPromptForPush, openNotificationPrompt } from "@/lib/pushNotifications";
 import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
 import { usePwaInstallState } from "@/hooks/usePwaInstallState";
@@ -89,6 +90,17 @@ export default function SiteFooter({ onOpenInstall }) {
                   </Link>
                 </li>
               ))}
+              {canPromptForPush() && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={openNotificationPrompt}
+                    className="text-gold hover:text-gold-light transition-colors text-sm font-medium inline-flex items-center gap-1.5"
+                  >
+                    <Bell size={14} /> Enable push alerts
+                  </button>
+                </li>
+              )}
               {!hideInstallPromo && onOpenInstall && (
                 <li>
                   <button

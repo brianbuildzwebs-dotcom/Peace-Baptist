@@ -11,6 +11,7 @@ import {
   needsPwaForPush,
   refreshPushSubscriptionIfNeeded,
   requestNotificationPermissionFromGesture,
+  SHOW_NOTIFICATION_PROMPT_EVENT,
   subscribeToPush,
 } from "@/lib/pushNotifications";
 
@@ -81,8 +82,17 @@ export default function NotificationPrompt({ onOpenInstall }) {
       if (document.visibilityState === "visible") evaluatePrompt();
     };
 
+    const onShowPrompt = () => {
+      sessionStorage.removeItem(DISMISS_KEY);
+      evaluatePrompt();
+    };
+
     document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    window.addEventListener(SHOW_NOTIFICATION_PROMPT_EVENT, onShowPrompt);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener(SHOW_NOTIFICATION_PROMPT_EVENT, onShowPrompt);
+    };
   }, [evaluatePrompt]);
 
   const toggleTopic = (topic) => {
@@ -138,7 +148,11 @@ export default function NotificationPrompt({ onOpenInstall }) {
         );
         sessionStorage.setItem(DISMISS_KEY, "1");
         setVisible(false);
-        setToast("Notifications enabled");
+        setToast(
+          needsPwaForPush() || /iphone|ipad|ipod|android/i.test(navigator.userAgent)
+            ? "Alerts enabled on this device"
+            : "Notifications enabled"
+        );
       } catch (err) {
         setError(err.message || "Could not enable notifications.");
       } finally {

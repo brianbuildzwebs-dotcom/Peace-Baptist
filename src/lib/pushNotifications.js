@@ -3,6 +3,8 @@ import { isIosDevice, isStandaloneApp } from '@/lib/pwaInstall';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const TOPICS_KEY = 'pbc_push_topics';
 const ENABLED_KEY = 'pbc_notify_enabled';
+const DISMISS_KEY = 'pbc_notify_prompt_dismissed';
+export const SHOW_NOTIFICATION_PROMPT_EVENT = 'pbc-show-notification-prompt';
 
 function normalizeVapidPublicKey(raw) {
   return String(raw || '')
@@ -90,12 +92,29 @@ export async function getPushPermission() {
 
 export function getNotificationPermissionHelp(permission = Notification?.permission) {
   if (permission === 'denied') {
-    return 'Notifications are blocked for this site. In Chrome: click the lock icon in the address bar → Site settings → Notifications → Allow. Then refresh and tap Enable again. On iPhone: Settings → Notifications → Peace Baptist → Allow Notifications.';
+    if (isIosDevice()) {
+      return 'Notifications are blocked. On iPhone: Settings → Notifications → Peace Baptist → Allow Notifications. Also open the site from your Home Screen app (not Safari), then tap Enable push alerts in the footer.';
+    }
+    return 'Notifications are blocked for this site. Click the lock icon in the address bar → Site settings → Notifications → Allow, then refresh and try again.';
   }
   if (permission === 'default') {
     return 'Tap Allow when your browser asks for notification permission. If no prompt appears, check that notifications are not blocked in your browser or device settings.';
   }
+  if (needsPwaForPush()) {
+    return 'On iPhone, add Peace Baptist to your Home Screen and open the app from that icon before enabling alerts.';
+  }
   return 'Notification permission was not granted.';
+}
+
+export function openNotificationPrompt() {
+  try {
+    sessionStorage.removeItem(DISMISS_KEY);
+  } catch {
+    /* ignore */
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(SHOW_NOTIFICATION_PROMPT_EVENT));
+  }
 }
 
 /**
