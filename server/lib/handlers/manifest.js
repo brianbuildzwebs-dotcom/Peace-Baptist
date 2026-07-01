@@ -34,8 +34,17 @@ export async function handleManifest(req, res) {
 
   const splash = await getSplashImageUrl();
 
+  const origin = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host || 'www.peacebaptist.net'}`;
+
   const manifest = {
     ...BASE_MANIFEST,
+    related_applications: [
+      {
+        platform: 'webapp',
+        url: `${origin}/api/manifest`,
+      },
+    ],
+    prefer_related_applications: false,
     icons: [
       {
         src: splash,
@@ -53,6 +62,6 @@ export async function handleManifest(req, res) {
   };
 
   res.setHeader('Content-Type', 'application/manifest+json');
-  res.setHeader('Cache-Control', 'public, max-age=300');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   return res.status(200).json(manifest);
 }

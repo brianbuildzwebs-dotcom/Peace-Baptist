@@ -13,7 +13,9 @@ import { churchInfo } from "@/lib/churchInfo";
 export default function InstallAppModal({ open, onClose }) {
   const { getImage } = useSiteImages();
   const splash = getImage("splash") || churchInfo.images.splash;
-  const { hideInstallPromo } = usePwaInstallState();
+  const { hideInstallPromo, standalone, relatedWebAppInstalled } = usePwaInstallState();
+  const alreadyInstalled = hideInstallPromo;
+  const installedButInBrowser = alreadyInstalled && !standalone;
   const [canInstall, setCanInstall] = useState(Boolean(getDeferredInstallPrompt()));
   const ios = isIosDevice();
 
@@ -63,7 +65,19 @@ export default function InstallAppModal({ open, onClose }) {
           </div>
         </div>
 
-        {hideInstallPromo ? (
+        {installedButInBrowser ? (
+          <div className="text-sm text-white/80 mb-6 space-y-3">
+            <p className="text-gold font-medium">Peace Baptist is already on your phone.</p>
+            <p>
+              Open it from your <strong>home screen icon</strong> — not this browser tab — for the full app experience and push alerts.
+            </p>
+            {relatedWebAppInstalled && (
+              <p className="text-white/50 text-xs">
+                After changing the splash image in admin, remove the old home screen icon and add the app again so your phone picks up the new icon.
+              </p>
+            )}
+          </div>
+        ) : alreadyInstalled ? (
           <p className="text-gold text-sm mb-4">You&apos;re already using the installed app. Enjoy Daily Walk, live stream, and prayer request alerts.</p>
         ) : ios ? (
           <ol className="space-y-4 text-sm text-white/80 mb-6">

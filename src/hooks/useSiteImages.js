@@ -7,7 +7,7 @@ export const SITE_IMAGE_FIELDS = [
     label: 'App Splash / Home Screen Icon',
     imageKey: 'splash',
     squarePreview: true,
-    hint: 'Upload a square image (512×512 or larger). Shown when the app loads and as the phone home screen icon.',
+    hint: 'Upload a square image (512×512 or larger). Shown when the app loads and as the phone home screen icon. After changing this, members may need to remove the old home screen icon and add the app again.',
   },
   { key: 'hero_image_url', label: 'Homepage Hero', imageKey: 'hero' },
   { key: 'welcome_image_url', label: 'Welcome Section', imageKey: 'welcome' },

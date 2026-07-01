@@ -3,6 +3,8 @@ let deferredInstallPrompt = null;
 const installListeners = new Set();
 const uiStateListeners = new Set();
 let installInProgress = false;
+let relatedWebAppInstalled = false;
+let relatedAppsChecked = false;
 
 function notifyInstallListeners() {
   installListeners.forEach((listener) => {
@@ -52,6 +54,13 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
+    relatedWebAppInstalled = true;
+    relatedAppsChecked = true;
+    try {
+      localStorage.setItem(INSTALLED_KEY, '1');
+    } catch {
+      /* ignore */
+    }
     markInstalled();
     notifyInstallListeners();
   });
@@ -67,13 +76,39 @@ if (typeof window !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       clearStaleInstalledFlag();
-      notifyUIStateListeners();
+      refreshRelatedWebAppInstalled().finally(() => notifyUIStateListeners());
     }
   });
 
   if (clearStaleInstalledFlag()) {
     queueMicrotask(() => notifyUIStateListeners());
   }
+
+  refreshRelatedWebAppInstalled().finally(() => notifyUIStateListeners());
+}
+
+async function refreshRelatedWebAppInstalled() {
+  if (typeof navigator === 'undefined' || typeof navigator.getInstalledRelatedApps !== 'function') {
+    relatedAppsChecked = true;
+    return relatedWebAppInstalled;
+  }
+
+  try {
+    const relatedApps = await navigator.getInstalledRelatedApps();
+    relatedWebAppInstalled = Array.isArray(relatedApps) && relatedApps.length > 0;
+    relatedAppsChecked = true;
+    if (relatedWebAppInstalled) {
+      try {
+        localStorage.setItem(INSTALLED_KEY, '1');
+      } catch {
+        /* ignore */
+      }
+    }
+  } catch {
+    relatedAppsChecked = true;
+  }
+
+  return relatedWebAppInstalled;
 }
 
 export function isIosDevice() {
@@ -89,15 +124,22 @@ export function isStandaloneApp() {
 }
 
 export function isAppInstalled() {
-  return isStandaloneApp();
+  return isStandaloneApp() || relatedWebAppInstalled;
+}
+
+export function isRelatedWebAppInstalled() {
+  return relatedWebAppInstalled;
 }
 
 export function getInstallUIState() {
   const hadStaleFlag = clearStaleInstalledFlag();
-  const installed = isAppInstalled();
+  const standalone = isStandaloneApp();
+  const installed = standalone || relatedWebAppInstalled;
   const state = {
     installed,
-    standalone: installed,
+    standalone,
+    relatedWebAppInstalled,
+    relatedAppsChecked,
     hideInstallPromo: installed,
     canNativeInstall: Boolean(deferredInstallPrompt) && !installed,
   };

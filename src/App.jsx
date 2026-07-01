@@ -9,6 +9,7 @@ import AdminMfaGate from '@/components/auth/AdminMfaGate';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import AppSplashMark from './components/church/AppSplashMark';
+import { getCachedSplashUrl } from '@/lib/splashImage';
 
 // Public pages
 import Home from './pages/Home';
@@ -53,7 +54,7 @@ const AuthenticatedApp = () => {
   if ((isLoadingPublicSettings || isLoadingAuth) && !isAuthRoute) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-navy">
-        <AppSplashMark size={120} />
+        <AppSplashMark src={getCachedSplashUrl()} size={120} />
       </div>
     );
   }

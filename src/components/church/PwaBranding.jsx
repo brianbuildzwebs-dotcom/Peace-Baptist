@@ -1,17 +1,7 @@
 import { useEffect } from "react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { churchInfo } from "@/lib/churchInfo";
-
-function upsertLink(rel, href) {
-  if (!href) return;
-  let link = document.querySelector(`link[rel="${rel}"]`);
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = rel;
-    document.head.appendChild(link);
-  }
-  link.href = href;
-}
+import { applySplashToDocument, setCachedSplashUrl } from "@/lib/splashImage";
 
 export default function PwaBranding() {
   const { getImage } = useSiteImages();
@@ -19,8 +9,8 @@ export default function PwaBranding() {
 
   useEffect(() => {
     if (!splash) return;
-    upsertLink("apple-touch-icon", splash);
-    upsertLink("apple-touch-startup-image", splash);
+    setCachedSplashUrl(splash);
+    applySplashToDocument(splash);
   }, [splash]);
 
   return null;

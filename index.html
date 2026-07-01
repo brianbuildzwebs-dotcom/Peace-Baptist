@@ -18,6 +18,27 @@
     <meta name="apple-mobile-web-app-title" content="Peace Baptist" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="/images/church-exterior.jpg" />
+    <script>
+      (function () {
+        var key = 'pbc_splash_image_url';
+        var cached = null;
+        try { cached = localStorage.getItem(key); } catch (e) {}
+        if (cached) {
+          var icon = document.querySelector('link[rel="apple-touch-icon"]');
+          if (icon) icon.href = cached;
+        }
+        fetch('/api/manifest', { cache: 'no-store' })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (manifest) {
+            var url = manifest && manifest.icons && manifest.icons[0] && manifest.icons[0].src;
+            if (!url) return;
+            try { localStorage.setItem(key, url); } catch (e) {}
+            var link = document.querySelector('link[rel="apple-touch-icon"]');
+            if (link) link.href = url;
+          })
+          .catch(function () {});
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
