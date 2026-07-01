@@ -12,10 +12,11 @@ import {
   refreshPushSubscriptionIfNeeded,
   requestNotificationPermissionFromGesture,
   SHOW_NOTIFICATION_PROMPT_EVENT,
+  isNotificationPromptDismissed,
+  setNotificationPromptDismissed,
+  clearNotificationPromptDismissed,
   subscribeToPush,
 } from "@/lib/pushNotifications";
-
-const DISMISS_KEY = "pbc_notify_prompt_dismissed";
 
 export default function NotificationPrompt({ onOpenInstall }) {
   const [visible, setVisible] = useState(false);
@@ -58,8 +59,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
 
     clearStalePushEnabledFlag();
 
-    const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (dismissed) {
+    if (isNotificationPromptDismissed()) {
       setVisible(false);
       return;
     }
@@ -83,7 +83,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
     };
 
     const onShowPrompt = () => {
-      sessionStorage.removeItem(DISMISS_KEY);
+      clearNotificationPromptDismissed();
       evaluatePrompt();
     };
 
@@ -146,7 +146,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
           topics.length ? topics : ["daily_walk", "prayer", "live"],
           { permission }
         );
-        sessionStorage.setItem(DISMISS_KEY, "1");
+        setNotificationPromptDismissed();
         setVisible(false);
         setToast(
           needsPwaForPush() || /iphone|ipad|ipod|android/i.test(navigator.userAgent)
@@ -163,7 +163,7 @@ export default function NotificationPrompt({ onOpenInstall }) {
   };
 
   const dismiss = () => {
-    sessionStorage.setItem(DISMISS_KEY, "1");
+    setNotificationPromptDismissed();
     setVisible(false);
   };
 

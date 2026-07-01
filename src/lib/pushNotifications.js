@@ -5,6 +5,50 @@ const TOPICS_KEY = 'pbc_push_topics';
 const ENABLED_KEY = 'pbc_notify_enabled';
 const DISMISS_KEY = 'pbc_notify_prompt_dismissed';
 export const SHOW_NOTIFICATION_PROMPT_EVENT = 'pbc-show-notification-prompt';
+const alertStateListeners = new Set();
+
+function notifyPushAlertStateChange() {
+  alertStateListeners.forEach((listener) => {
+    try {
+      listener();
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+export function onPushAlertStateChange(listener) {
+  alertStateListeners.add(listener);
+  return () => alertStateListeners.delete(listener);
+}
+
+export function isNotificationPromptDismissed() {
+  try {
+    return localStorage.getItem(DISMISS_KEY) === '1' || sessionStorage.getItem(DISMISS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function setNotificationPromptDismissed() {
+  try {
+    localStorage.setItem(DISMISS_KEY, '1');
+    sessionStorage.setItem(DISMISS_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+  notifyPushAlertStateChange();
+}
+
+export function clearNotificationPromptDismissed() {
+  try {
+    localStorage.removeItem(DISMISS_KEY);
+    sessionStorage.removeItem(DISMISS_KEY);
+  } catch {
+    /* ignore */
+  }
+  notifyPushAlertStateChange();
+}
 
 function normalizeVapidPublicKey(raw) {
   return String(raw || '')
@@ -107,11 +151,7 @@ export function getNotificationPermissionHelp(permission = Notification?.permiss
 }
 
 export function openNotificationPrompt() {
-  try {
-    sessionStorage.removeItem(DISMISS_KEY);
-  } catch {
-    /* ignore */
-  }
+  clearNotificationPromptDismissed();
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(SHOW_NOTIFICATION_PROMPT_EVENT));
   }
@@ -183,6 +223,7 @@ export async function refreshPushSubscriptionIfNeeded() {
 
     if (res.ok) {
       localStorage.setItem(ENABLED_KEY, '1');
+      setNotificationPromptDismissed();
       return true;
     }
     return false;
@@ -250,6 +291,8 @@ export async function subscribeToPush(topics = getSavedTopics(), { permission: g
 
   saveTopics(topics);
   localStorage.setItem(ENABLED_KEY, '1');
+  setNotificationPromptDismissed();
+  notifyPushAlertStateChange();
   return { ok: true, topics };
 }
 

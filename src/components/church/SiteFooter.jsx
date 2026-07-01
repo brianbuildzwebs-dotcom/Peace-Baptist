@@ -5,9 +5,11 @@ import { canPromptForPush, openNotificationPrompt } from "@/lib/pushNotification
 import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
 import { usePwaInstallState } from "@/hooks/usePwaInstallState";
+import { usePushAlertState } from "@/hooks/usePushAlertState";
 
 export default function SiteFooter({ onOpenInstall }) {
   const { hideInstallPromo } = usePwaInstallState();
+  const { showFooterEnableLink } = usePushAlertState();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -90,7 +92,7 @@ export default function SiteFooter({ onOpenInstall }) {
                   </Link>
                 </li>
               ))}
-              {canPromptForPush() && (
+              {canPromptForPush() && showFooterEnableLink && (
                 <li>
                   <button
                     type="button"

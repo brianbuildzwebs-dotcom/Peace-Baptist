@@ -7,17 +7,35 @@ import {
   onInstallPromptChange,
 } from "@/lib/pwaInstall";
 
-const DISMISS_KEY = "pbc_pwa_install_dismissed_session";
+const DISMISS_KEY = "pbc_pwa_install_dismissed_until";
+
+function isInstallBannerDismissed() {
+  try {
+    const until = Number(localStorage.getItem(DISMISS_KEY) || 0);
+    return until > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function dismissInstallBanner() {
+  try {
+    const twoWeeks = Date.now() + 14 * 24 * 60 * 60 * 1000;
+    localStorage.setItem(DISMISS_KEY, String(twoWeeks));
+  } catch {
+    /* ignore */
+  }
+}
 
 export default function PwaInstallBanner({ onOpenInstall }) {
   const { hideInstallPromo, canNativeInstall } = usePwaInstallState();
-  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(DISMISS_KEY) === "1");
+  const [dismissed, setDismissed] = useState(isInstallBannerDismissed);
   const [canInstall, setCanInstall] = useState(canNativeInstall);
 
   useEffect(() => onInstallPromptChange((prompt) => setCanInstall(Boolean(prompt))), []);
 
   const dismiss = () => {
-    sessionStorage.setItem(DISMISS_KEY, "1");
+    dismissInstallBanner();
     setDismissed(true);
   };
 
