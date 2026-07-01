@@ -31,12 +31,16 @@
   ],
   "crons": [
     {
-      "path": "/api/push/cron/scheduled",
+      "path": "/api/push/cron/daily-walk",
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/push/cron/daily-walk",
+      "schedule": "0 12 * * *"
+    },
+    {
       "path": "/api/push/cron/scheduled",
-      "schedule": "30 14 * * 0"
+      "schedule": "0 * * * *"
     }
   ]
 }

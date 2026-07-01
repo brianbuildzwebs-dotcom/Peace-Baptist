@@ -8,6 +8,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
 
   useEffect(() => {
@@ -23,9 +24,15 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    await base44.entities.ContactMessage.create(form);
-    setSubmitting(false);
-    setSubmitted(true);
+    setError("");
+    try {
+      await base44.entities.ContactMessage.create({ ...form, _hp: "" });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not send your message. Please try again or call the church office.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -126,6 +133,9 @@ export default function Contact() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {error && (
+                    <p className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-navy mb-1">Full Name *</label>

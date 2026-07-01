@@ -1,13 +1,11 @@
-import { sendNotification } from '../email.js';
-
+/** Legacy Base44 function invocations — disabled for security. */
 export async function handleFunction(req, res, name) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (name === 'notifyNewPrayer' && req.body) {
-    await sendNotification('prayer', req.body);
-  }
-
-  return res.status(200).json({ success: true, function: name });
+  return res.status(403).json({
+    error: 'Function disabled',
+    message: `Server function "${name}" is not available. Use the public API instead.`,
+  });
 }

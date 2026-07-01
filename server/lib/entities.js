@@ -19,6 +19,23 @@ function applyFilter(query, filter = {}) {
   return q;
 }
 
+function normalizeEntityBody(entity, body = {}) {
+  const payload = { ...body };
+  delete payload._hp;
+  delete payload.website;
+  delete payload.company;
+
+  if (entity === 'GivingRecord') {
+    if (payload.email && !payload.donor_email) {
+      payload.donor_email = payload.email;
+    }
+    delete payload.email;
+    delete payload.frequency;
+  }
+
+  return payload;
+}
+
 function toApiRow(row, entity) {
   if (!row) return row;
   const result = { ...row };
@@ -81,7 +98,8 @@ export async function createEntity(entity, body) {
     throw err;
   }
 
-  const { data, error } = await supabase.from(config.table).insert(body).select('*').single();
+  const payload = normalizeEntityBody(entity, body);
+  const { data, error } = await supabase.from(config.table).insert(payload).select('*').single();
   if (error) throw error;
 
   const row = toApiRow(data, entity);

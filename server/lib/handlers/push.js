@@ -1,4 +1,5 @@
 import { requireAdmin } from '../auth.js';
+import { allowPushSubscribe } from '../rateLimit.js';
 import {
   countPushSubscriptions,
   deletePushSubscription,
@@ -79,6 +80,11 @@ export async function handlePushSubscribe(req, res) {
     return res.status(400).json({ error: 'Invalid subscription payload' });
   }
 
+  const allowed = await allowPushSubscribe(req);
+  if (!allowed) {
+    return res.status(429).json({ error: 'Too many new subscriptions. Please try again later.' });
+  }
+
   try {
     const row = await savePushSubscription({
       endpoint: subscription.endpoint,
@@ -132,7 +138,7 @@ export async function handlePushCronScheduled(req, res) {
   }
 
   try {
-    const result = await runScheduledPushes();
+    const result = await runScheduledPushes({ cronMode: true });
     return res.status(200).json({ ok: true, ...result });
   } catch (err) {
     console.error('Scheduled push cron:', err);

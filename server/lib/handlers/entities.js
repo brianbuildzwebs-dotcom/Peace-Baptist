@@ -10,6 +10,8 @@ import {
   canPublicCreate,
 } from '../entities.js';
 import { isSupabaseConfigured } from '../supabase.js';
+import { filterPublicSiteSettings } from '../publicSettings.js';
+import { allowPublicCreate, isHoneypotTriggered } from '../rateLimit.js';
 
 export async function handleEntityCollection(req, res, entity) {
   const config = getEntityConfig(entity);
@@ -43,7 +45,10 @@ export async function handleEntityCollection(req, res, entity) {
         filter.status = 'published';
       }
 
-      const rows = await listEntities(entity, { filter, sort, limit });
+      let rows = await listEntities(entity, { filter, sort, limit });
+      if (!isAdmin && entity === 'SiteSettings') {
+        rows = filterPublicSiteSettings(rows);
+      }
       return res.status(200).json(rows);
     } catch (err) {
       console.error(`GET ${entity}:`, err);
@@ -66,8 +71,31 @@ export async function handleEntityCollection(req, res, entity) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
+    const body = { ...(req.body || {}) };
+    delete body._hp;
+    delete body.website;
+    delete body.company;
+
+    if (!isAdmin && isHoneypotTriggered(req.body)) {
+      return res.status(201).json({ id: crypto.randomUUID(), accepted: true });
+    }
+
+    const rateLimits = {
+      ContactMessage: { max: 8, windowMinutes: 15 },
+      PrayerRequest: { max: 12, windowMinutes: 15 },
+      GivingRecord: { max: 8, windowMinutes: 15 },
+      FormSubmission: { max: 10, windowMinutes: 15 },
+    };
+    const limit = rateLimits[entity];
+    if (!isAdmin && limit) {
+      const allowed = await allowPublicCreate(entity, limit);
+      if (!allowed) {
+        return res.status(429).json({ error: 'Too many submissions. Please try again in a few minutes.' });
+      }
+    }
+
     try {
-      const row = await createEntity(entity, req.body || {});
+      const row = await createEntity(entity, body);
       return res.status(201).json(row);
     } catch (err) {
       console.error(`POST ${entity}:`, err);

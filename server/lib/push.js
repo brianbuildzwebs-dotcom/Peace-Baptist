@@ -330,13 +330,18 @@ async function saveScheduleSentLog(log) {
   await setSiteSettingValue('push_schedule_sent_log', 'Push schedule sent log', JSON.stringify(log));
 }
 
-function scheduleMatchesNow(schedule, now) {
+function scheduleMatchesNow(schedule, now, { cronMode = false } = {}) {
   if (!schedule?.enabled) return false;
   if (!Array.isArray(schedule.days) || !schedule.days.includes(now.day)) return false;
-  return Number(schedule.hour) === now.hour && Number(schedule.minute ?? 0) === now.minute;
+  if (Number(schedule.hour) !== now.hour) return false;
+  if (cronMode) {
+    const targetMinute = Number(schedule.minute ?? 0);
+    return now.minute >= targetMinute && now.minute < targetMinute + 15;
+  }
+  return Number(schedule.minute ?? 0) === now.minute;
 }
 
-export async function runScheduledPushes() {
+export async function runScheduledPushes({ cronMode = false } = {}) {
   const now = easternNow();
   const today = easternDateString();
   const schedules = await getPushSchedules();
@@ -344,7 +349,7 @@ export async function runScheduledPushes() {
   const results = [];
 
   for (const schedule of schedules) {
-    if (!scheduleMatchesNow(schedule, now)) continue;
+    if (!scheduleMatchesNow(schedule, now, { cronMode })) continue;
     if (sentLog[schedule.id] === today) {
       results.push({ scheduleId: schedule.id, skipped: true, reason: 'already_sent_today' });
       continue;

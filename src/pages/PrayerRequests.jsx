@@ -14,6 +14,7 @@ export default function PrayerRequests() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [publicPrayers, setPublicPrayers] = useState([]);
 
   const loadPublicPrayers = useCallback(async () => {
@@ -36,6 +37,7 @@ export default function PrayerRequests() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    setError("");
     try {
       await base44.entities.PrayerRequest.create({
         name: isAnonymous ? "" : name,
@@ -44,12 +46,12 @@ export default function PrayerRequests() {
         category,
         is_anonymous: isAnonymous,
         is_public: true,
+        _hp: "",
       });
-      // Reload wall immediately — same fetch a full page refresh uses
       await loadPublicPrayers();
       setSubmitted(true);
-    } catch {
-      // keep form visible on failure
+    } catch (err) {
+      setError(err.message || "Could not submit your prayer request. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -92,6 +94,9 @@ export default function PrayerRequests() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <p className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                  )}
                   <div className="flex items-center gap-3 mb-4">
                     <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                       <input type="checkbox" checked={isAnonymous} onChange={(e) => setIsAnonymous(e.target.checked)} className="rounded border-gray-300 text-gold focus:ring-gold" />

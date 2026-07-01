@@ -22,19 +22,30 @@ export default function Give() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const finalAmount = customAmount || amount;
 
   const handleSubmit = async () => {
     if (!finalAmount) return;
-    await base44.entities.GivingRecord.create({
-      donor_name: name,
-      email,
-      amount: parseFloat(finalAmount),
-      fund,
-      frequency,
-    });
-    setSubmitted(true);
+    setSubmitting(true);
+    setError("");
+    try {
+      await base44.entities.GivingRecord.create({
+        donor_name: name,
+        donor_email: email,
+        amount: parseFloat(finalAmount),
+        fund,
+        notes: frequency === "monthly" ? "Recurring preference: monthly" : "One-time gift",
+        _hp: "",
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not record your gift. Please try again or contact the church office.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -166,8 +177,15 @@ export default function Give() {
                   </p>
                   <div className="flex gap-4">
                     <button onClick={() => setStep(2)} className="flex-1 py-3 border border-gray-200 rounded-xl font-medium text-gray-600 hover:bg-gray-50">Back</button>
-                    <button onClick={handleSubmit} className="flex-1 py-3.5 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-colors">
-                      <Gift size={16} className="inline mr-2" />Complete Gift
+                    {error && (
+                      <p className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">{error}</p>
+                    )}
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="flex-1 py-3.5 bg-gold text-navy font-bold rounded-xl hover:bg-gold-light transition-colors disabled:opacity-50"
+                    >
+                      <Gift size={16} className="inline mr-2" />{submitting ? "Saving..." : "Complete Gift"}
                     </button>
                   </div>
                 </motion.div>
