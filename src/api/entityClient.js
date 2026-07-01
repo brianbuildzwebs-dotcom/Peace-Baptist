@@ -25,14 +25,17 @@ async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (!response.ok) {
-    const error = new Error(`API error: ${response.status}`);
-    error.status = response.status;
+    let data = null;
     try {
-      error.data = await response.json();
+      data = await response.json();
     } catch {
-      error.data = null;
+      data = null;
     }
-    if (error.data?.code === 'mfa_required') {
+    const message = data?.error || data?.message || `API error: ${response.status}`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    if (data?.code === 'mfa_required') {
       notifyAdminMfaRequired();
     }
     throw error;

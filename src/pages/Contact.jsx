@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { churchInfo } from "@/lib/churchInfo";
+import { emailValidationMessage, isValidEmail, normalizeEmail } from "@/lib/validators";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
@@ -23,10 +24,32 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
     setError("");
+
+    const emailError = emailValidationMessage(form.email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      email: normalizeEmail(form.email),
+      phone: form.phone.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+      _hp: "",
+    };
+
+    if (!payload.name || !payload.subject || !payload.message) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      await base44.entities.ContactMessage.create({ ...form, _hp: "" });
+      await base44.entities.ContactMessage.create(payload);
       setSubmitted(true);
     } catch (err) {
       setError(err.message || "Could not send your message. Please try again or call the church office.");
@@ -143,7 +166,23 @@ export default function Contact() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-navy mb-1">Email *</label>
-                      <input type="email" required value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gold focus:ring-1 focus:ring-gold outline-none text-sm" />
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        autoComplete="email"
+                        inputMode="email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        onBlur={() => {
+                          const msg = emailValidationMessage(form.email);
+                          if (msg) setError(msg);
+                        }}
+                        pattern="[^\s@]+@[^\s@]+\.[^\s@]{2,}"
+                        title="Enter a valid email address (example: name@example.com)"
+                        aria-invalid={form.email ? !isValidEmail(form.email) : undefined}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gold focus:ring-1 focus:ring-gold outline-none text-sm"
+                      />
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">

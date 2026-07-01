@@ -12,6 +12,7 @@ import {
 import { isSupabaseConfigured } from '../supabase.js';
 import { filterPublicSiteSettings } from '../publicSettings.js';
 import { allowPublicCreate, isHoneypotTriggered } from '../rateLimit.js';
+import { isValidEmail, normalizeEmail } from '../validators.js';
 
 export async function handleEntityCollection(req, res, entity) {
   const config = getEntityConfig(entity);
@@ -92,6 +93,24 @@ export async function handleEntityCollection(req, res, entity) {
       if (!allowed) {
         return res.status(429).json({ error: 'Too many submissions. Please try again in a few minutes.' });
       }
+    }
+
+    if (!isAdmin && entity === 'ContactMessage') {
+      if (!String(body.name || '').trim() || !String(body.message || '').trim()) {
+        return res.status(400).json({ error: 'Name and message are required.' });
+      }
+      if (!isValidEmail(body.email)) {
+        return res.status(400).json({ error: 'Enter a valid email address (example: name@example.com).' });
+      }
+      body.email = normalizeEmail(body.email);
+    }
+
+    if (!isAdmin && entity === 'GivingRecord' && body.donor_email && !isValidEmail(body.donor_email)) {
+      return res.status(400).json({ error: 'Enter a valid email address (example: name@example.com).' });
+    }
+
+    if (!isAdmin && entity === 'PrayerRequest' && body.email && !isValidEmail(body.email)) {
+      return res.status(400).json({ error: 'Enter a valid email address (example: name@example.com).' });
     }
 
     try {

@@ -2,6 +2,7 @@ import { getEntityConfig } from './entityConfig.js';
 import { getSupabaseAdmin } from './supabase.js';
 import { sendNotification } from './email.js';
 import { notifyNewPrayerRequest } from './push.js';
+import { normalizeEmail } from './validators.js';
 
 function parseSort(sort) {
   if (!sort) return { column: 'created_date', ascending: false };
@@ -29,8 +30,19 @@ function normalizeEntityBody(entity, body = {}) {
     if (payload.email && !payload.donor_email) {
       payload.donor_email = payload.email;
     }
+    if (payload.donor_email) {
+      payload.donor_email = normalizeEmail(payload.donor_email);
+    }
     delete payload.email;
     delete payload.frequency;
+  }
+
+  if (entity === 'ContactMessage' && payload.email) {
+    payload.email = normalizeEmail(payload.email);
+  }
+
+  if (entity === 'PrayerRequest' && payload.email) {
+    payload.email = normalizeEmail(payload.email);
   }
 
   return payload;
