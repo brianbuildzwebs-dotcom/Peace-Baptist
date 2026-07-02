@@ -3,6 +3,11 @@ import { getSupabaseAdmin } from './supabase.js';
 import { sendNotification } from './email.js';
 import { notifyNewPrayerRequest } from './push.js';
 import { normalizeEmail } from './validators.js';
+import {
+  cleanupOrphanedSubmissions,
+  deleteSubmissionsForEvent,
+  deleteSubmissionsForForm,
+} from './formSubmissions.js';
 
 function parseSort(sort) {
   if (!sort) return { column: 'created_date', ascending: false };
@@ -173,9 +178,26 @@ export async function deleteEntity(entity, id) {
     throw err;
   }
 
+  if (entity === 'CustomForm') {
+    await deleteSubmissionsForForm(id);
+  }
+
+  if (entity === 'Event') {
+    await deleteSubmissionsForEvent(id);
+  }
+
   const { error } = await supabase.from(config.table).delete().eq('id', id);
   if (error) throw error;
 }
+
+export async function listValidFormSubmissions(options = {}) {
+  const rows = await listEntities('FormSubmission', options);
+  const { filterValidSubmissions, getActiveCustomFormIds } = await import('./formSubmissions.js');
+  const activeFormIds = await getActiveCustomFormIds();
+  return filterValidSubmissions(rows, activeFormIds);
+}
+
+export { cleanupOrphanedSubmissions };
 
 export function canPublicRead(entity, config) {
   return config?.publicRead === true;

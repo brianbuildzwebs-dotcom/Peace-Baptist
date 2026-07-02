@@ -9,6 +9,7 @@ import {
   canPublicRead,
   canPublicCreate,
 } from '../entities.js';
+import { filterValidSubmissions, getActiveCustomFormIds } from '../formSubmissions.js';
 import { isSupabaseConfigured } from '../supabase.js';
 import { filterPublicSiteSettings } from '../publicSettings.js';
 import { filterPublicDevotions, promoteDueDevotions } from '../dailyWalk.js';
@@ -48,6 +49,10 @@ export async function handleEntityCollection(req, res, entity) {
       }
 
       let rows = await listEntities(entity, { filter, sort, limit });
+      if (entity === 'FormSubmission' && isAdmin) {
+        const activeFormIds = await getActiveCustomFormIds();
+        rows = filterValidSubmissions(rows, activeFormIds);
+      }
       if (entity === 'DailyDevotion') {
         await promoteDueDevotions().catch(() => {});
         const isPublicDateView = filter.devotion_date != null;

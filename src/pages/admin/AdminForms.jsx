@@ -72,10 +72,22 @@ export default function AdminForms() {
   };
 
   const handleDelete = async (id) => {
-    if (confirm("Delete this form?")) {
-      await base44.entities.CustomForm.delete(id);
-      loadForms();
+    let submissionCount = 0;
+    try {
+      const subs = await base44.entities.FormSubmission.filter({ form_id: id });
+      submissionCount = subs.length;
+    } catch {
+      submissionCount = 0;
     }
+
+    const message = submissionCount
+      ? `Delete this form and its ${submissionCount} submission(s)? This cannot be undone.`
+      : "Delete this form? This cannot be undone.";
+
+    if (!confirm(message)) return;
+
+    await base44.entities.CustomForm.delete(id);
+    loadForms();
   };
 
   const viewSubmissions = async (form) => {

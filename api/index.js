@@ -5,6 +5,7 @@ import { handleMe, handleAuthAction } from '../server/lib/handlers/auth.js';
 import { handleEntityCollection, handleEntityById } from '../server/lib/handlers/entities.js';
 import { handleFunction } from '../server/lib/handlers/functions.js';
 import { handleUpload } from '../server/lib/handlers/upload.js';
+import { handleAdminCleanupOrphans } from '../server/lib/handlers/admin.js';
 import {
   handlePushCronDailyWalk,
   handlePushCronScheduled,
@@ -61,6 +62,11 @@ export default async function handler(req, res) {
 
     if (root === 'functions' && second) {
       return handleFunction(req, res, second);
+    }
+
+    if (root === 'admin') {
+      if (second === 'cleanup-orphaned-submissions') return handleAdminCleanupOrphans(req, res);
+      return res.status(404).json({ error: 'Not found' });
     }
 
     if (root === 'push') {

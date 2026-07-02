@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   const [subscriberCount, setSubscriberCount] = useState(null);
 
   useEffect(() => {
+    adminFetch("/admin/cleanup-orphaned-submissions", { method: "POST" }).catch(() => {});
+
     adminFetch("/push/subscriber-count")
       .then((d) => setSubscriberCount(d.count ?? 0))
       .catch(() => setSubscriberCount(null));
@@ -20,14 +22,15 @@ export default function AdminDashboard() {
     Promise.all([
       base44.entities.Event.filter({ status: "upcoming" }).then(d => d.length).catch(() => 0),
       base44.entities.PrayerRequest.filter({ status: "new" }).then(d => d.length).catch(() => 0),
-      base44.entities.FormSubmission.list("-created_date", 5).catch(() => []),
+      base44.entities.FormSubmission.list("-created_date", 100).catch(() => []),
       base44.entities.MediaItem.list().then(d => d.length).catch(() => 0),
       base44.entities.ContactMessage.filter({ status: "new" }).then(d => d.length).catch(() => 0),
       base44.entities.GivingRecord.list().then(d => d.reduce((sum, r) => sum + (r.amount || 0), 0)).catch(() => 0),
       base44.entities.PrayerRequest.filter({ status: "new" }, "-created_date", 5).catch(() => []),
     ]).then(([events, prayers, submissions, media, contacts, giving, rPrayers]) => {
-      setStats({ events, prayers, submissions: submissions.length, media, contacts, giving });
-      setRecentSubmissions(submissions);
+      const activeSubmissions = Array.isArray(submissions) ? submissions : [];
+      setStats({ events, prayers, submissions: activeSubmissions.length, media, contacts, giving });
+      setRecentSubmissions(activeSubmissions.slice(0, 5));
       setRecentPrayers(rPrayers);
     });
   }, []);
