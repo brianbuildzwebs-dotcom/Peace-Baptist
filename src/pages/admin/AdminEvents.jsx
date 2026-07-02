@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, Eye, X, Upload } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatEventDate } from "@/lib/eventDates";
 
-const categories = ["worship", "fellowship", "youth", "outreach", "study", "special", "other"];
+const categories = ["worship", "fellowship", "youth", "outreach", "study", "special", "announcement", "other"];
 
 const emptyForm = {
   title: "",
