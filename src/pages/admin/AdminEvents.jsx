@@ -253,17 +253,31 @@ export default function AdminEvents() {
             ) : (
               <div className="space-y-3">
                 {submissions.map((r) => (
-                  <div key={r.id} className="bg-white/5 rounded-xl p-4">
-                    <div className="flex items-center justify-between gap-3 mb-1">
-                      <div className="text-white font-medium">{r.submitter_name || "Anonymous"}</div>
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-white/50">
-                        {r.data?.registration_type === "sign_up" ? "Sign Up" : "RSVP"}
-                      </span>
+                  <div key={r.id} className="bg-white/5 rounded-xl p-4 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="text-white font-medium">{r.submitter_name || "Anonymous"}</div>
+                        <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-white/50">
+                          {r.data?.registration_type === "sign_up" ? "Sign Up" : "RSVP"}
+                        </span>
+                      </div>
+                      <div className="text-white/40 text-sm">{r.submitter_email}</div>
+                      {r.data && Object.entries(r.data).filter(([k]) => !["name", "email", "registration_type"].includes(k)).map(([k, v]) => (
+                        <div key={k} className="text-white/30 text-xs mt-1">{k}: {String(v)}</div>
+                      ))}
                     </div>
-                    <div className="text-white/40 text-sm">{r.submitter_email}</div>
-                    {r.data && Object.entries(r.data).filter(([k]) => !["name", "email", "registration_type"].includes(k)).map(([k, v]) => (
-                      <div key={k} className="text-white/30 text-xs mt-1">{k}: {String(v)}</div>
-                    ))}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!confirm("Delete this registration?")) return;
+                        await base44.entities.FormSubmission.delete(r.id);
+                        viewSubmissions(viewingSubmissions);
+                      }}
+                      className="p-2 text-white/30 hover:text-red-400 rounded-lg hover:bg-white/5 shrink-0"
+                      aria-label="Delete registration"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 ))}
                 <div className="text-white/40 text-sm text-center pt-2">{submissions.length} total submission(s)</div>

@@ -18,16 +18,46 @@ export async function getActiveCustomFormIds() {
   return new Set((data || []).map((row) => row.id));
 }
 
-export function isOrphanedSubmission(submission, activeFormIds) {
+export async function getActiveEventIds() {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return new Set();
+
+  const { data, error } = await supabase.from('events').select('id');
+  if (error) throw error;
+  return new Set((data || []).map((row) => row.id));
+}
+
+export function isCustomFormSubmission(submission, activeFormIds) {
+  const formId = submission?.form_id;
+  if (!formId || String(formId).startsWith(DEFAULT_FORM_PREFIX)) return false;
+  if (!UUID_RE.test(String(formId))) return false;
+  return activeFormIds.has(formId);
+}
+
+export function isEventRegistrationSubmission(submission) {
+  const formId = String(submission?.form_id || '');
+  return formId.startsWith(DEFAULT_FORM_PREFIX) || Boolean(submission?.event_id);
+}
+
+export function isOrphanedSubmission(submission, activeFormIds, activeEventIds = new Set()) {
   const formId = submission?.form_id;
   if (!formId) return true;
-  if (String(formId).startsWith(DEFAULT_FORM_PREFIX)) return false;
+
+  if (String(formId).startsWith(DEFAULT_FORM_PREFIX)) {
+    const eventId = submission?.event_id;
+    return Boolean(eventId) && !activeEventIds.has(eventId);
+  }
+
   if (!UUID_RE.test(String(formId))) return false;
   return !activeFormIds.has(formId);
 }
 
-export function filterValidSubmissions(submissions = [], activeFormIds) {
-  return submissions.filter((row) => !isOrphanedSubmission(row, activeFormIds));
+export function filterValidSubmissions(submissions = [], activeFormIds, activeEventIds = new Set()) {
+  return submissions.filter((row) => !isOrphanedSubmission(row, activeFormIds, activeEventIds));
+}
+
+export function filterCustomFormSubmissions(submissions = [], activeFormIds) {
+  return submissions.filter((row) => isCustomFormSubmission(row, activeFormIds));
 }
 
 export async function deleteSubmissionsForForm(formId) {
@@ -62,12 +92,15 @@ export async function cleanupOrphanedSubmissions() {
   const supabase = getSupabaseAdmin();
   if (!supabase) return { deleted: 0 };
 
-  const activeFormIds = await getActiveCustomFormIds();
-  const { data, error } = await supabase.from('form_submissions').select('id, form_id');
+  const [activeFormIds, activeEventIds] = await Promise.all([
+    getActiveCustomFormIds(),
+    getActiveEventIds(),
+  ]);
+  const { data, error } = await supabase.from('form_submissions').select('id, form_id, event_id');
   if (error) throw error;
 
   const orphanIds = (data || [])
-    .filter((row) => isOrphanedSubmission(row, activeFormIds))
+    .filter((row) => isOrphanedSubmission(row, activeFormIds, activeEventIds))
     .map((row) => row.id);
 
   if (!orphanIds.length) return { deleted: 0 };

@@ -1,39 +1,91 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio, Bell } from "lucide-react";
+import { Calendar, Heart, FileText, Play, TrendingUp, Send, Radio, Bell, Trash2, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { adminFetch } from "@/lib/admin-fetch";
 
+const DEFAULT_FORM_PREFIX = "default_";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isCustomFormSubmission(submission, activeFormIds) {
+  const formId = submission?.form_id;
+  if (!formId || String(formId).startsWith(DEFAULT_FORM_PREFIX)) return false;
+  if (!UUID_RE.test(String(formId))) return false;
+  return activeFormIds.has(formId);
+}
+
+function isEventRegistration(submission) {
+  const formId = String(submission?.form_id || "");
+  return formId.startsWith(DEFAULT_FORM_PREFIX) || Boolean(submission?.event_id);
+}
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ events: 0, prayers: 0, submissions: 0, media: 0, contacts: 0, giving: 0 });
+  const [stats, setStats] = useState({
+    events: 0,
+    prayers: 0,
+    formSubmissions: 0,
+    eventRegistrations: 0,
+    media: 0,
+    contacts: 0,
+    giving: 0,
+  });
   const [recentPrayers, setRecentPrayers] = useState([]);
-  const [recentSubmissions, setRecentSubmissions] = useState([]);
+  const [recentFormSubmissions, setRecentFormSubmissions] = useState([]);
+  const [recentEventRegistrations, setRecentEventRegistrations] = useState([]);
+  const [eventTitles, setEventTitles] = useState({});
   const [livePushStatus, setLivePushStatus] = useState("");
   const [subscriberCount, setSubscriberCount] = useState(null);
 
+  const loadDashboard = useCallback(() => {
+    Promise.all([
+      base44.entities.Event.filter({ status: "upcoming" }).then((d) => d.length).catch(() => 0),
+      base44.entities.PrayerRequest.filter({ status: "new" }).then((d) => d.length).catch(() => 0),
+      base44.entities.CustomForm.filter({ status: "active" }).catch(() => []),
+      base44.entities.Event.list("-date", 50).catch(() => []),
+      base44.entities.FormSubmission.list("-created_date", 100).catch(() => []),
+      base44.entities.MediaItem.list().then((d) => d.length).catch(() => 0),
+      base44.entities.ContactMessage.filter({ status: "new" }).then((d) => d.length).catch(() => 0),
+      base44.entities.GivingRecord.list().then((d) => d.reduce((sum, r) => sum + (r.amount || 0), 0)).catch(() => 0),
+      base44.entities.PrayerRequest.filter({ status: "new" }, "-created_date", 5).catch(() => []),
+    ]).then(([events, prayers, forms, allEvents, submissions, media, contacts, giving, rPrayers]) => {
+      const activeFormIds = new Set((forms || []).map((f) => f.id));
+      const titles = Object.fromEntries((allEvents || []).map((event) => [event.id, event.title]));
+      const all = Array.isArray(submissions) ? submissions : [];
+
+      const customForms = all.filter((row) => isCustomFormSubmission(row, activeFormIds));
+      const eventRegs = all.filter((row) => isEventRegistration(row));
+
+      setEventTitles(titles);
+      setStats({
+        events,
+        prayers,
+        formSubmissions: customForms.length,
+        eventRegistrations: eventRegs.length,
+        media,
+        contacts,
+        giving,
+      });
+      setRecentFormSubmissions(customForms.slice(0, 5));
+      setRecentEventRegistrations(eventRegs.slice(0, 5));
+      setRecentPrayers(rPrayers);
+    });
+  }, []);
+
   useEffect(() => {
-    adminFetch("/admin/cleanup-orphaned-submissions", { method: "POST" }).catch(() => {});
+    adminFetch("/admin/cleanup-orphaned-submissions", { method: "POST" })
+      .finally(loadDashboard);
 
     adminFetch("/push/subscriber-count")
       .then((d) => setSubscriberCount(d.count ?? 0))
       .catch(() => setSubscriberCount(null));
+  }, [loadDashboard]);
 
-    Promise.all([
-      base44.entities.Event.filter({ status: "upcoming" }).then(d => d.length).catch(() => 0),
-      base44.entities.PrayerRequest.filter({ status: "new" }).then(d => d.length).catch(() => 0),
-      base44.entities.FormSubmission.list("-created_date", 100).catch(() => []),
-      base44.entities.MediaItem.list().then(d => d.length).catch(() => 0),
-      base44.entities.ContactMessage.filter({ status: "new" }).then(d => d.length).catch(() => 0),
-      base44.entities.GivingRecord.list().then(d => d.reduce((sum, r) => sum + (r.amount || 0), 0)).catch(() => 0),
-      base44.entities.PrayerRequest.filter({ status: "new" }, "-created_date", 5).catch(() => []),
-    ]).then(([events, prayers, submissions, media, contacts, giving, rPrayers]) => {
-      const activeSubmissions = Array.isArray(submissions) ? submissions : [];
-      setStats({ events, prayers, submissions: activeSubmissions.length, media, contacts, giving });
-      setRecentSubmissions(activeSubmissions.slice(0, 5));
-      setRecentPrayers(rPrayers);
-    });
-  }, []);
+  const deleteSubmission = async (id) => {
+    if (!confirm("Delete this submission?")) return;
+    await base44.entities.FormSubmission.delete(id);
+    loadDashboard();
+  };
 
   const sendLiveAlert = async () => {
     if (!confirm("Send a live stream notification to all subscribers?")) return;
@@ -60,7 +112,8 @@ export default function AdminDashboard() {
   const cards = [
     { label: "Upcoming Events", value: stats.events, icon: Calendar, color: "text-blue-400" },
     { label: "New Prayer Requests", value: stats.prayers, icon: Heart, color: "text-pink-400" },
-    { label: "Form Submissions", value: stats.submissions, icon: FileText, color: "text-green-400" },
+    { label: "Custom Form Submissions", value: stats.formSubmissions, icon: FileText, color: "text-green-400" },
+    { label: "Event RSVPs / Sign Ups", value: stats.eventRegistrations, icon: Users, color: "text-emerald-400" },
     { label: "Media Items", value: stats.media, icon: Play, color: "text-purple-400" },
     { label: "New Messages", value: stats.contacts, icon: Send, color: "text-orange-400" },
     { label: "Total Giving", value: `$${stats.giving.toLocaleString()}`, icon: TrendingUp, color: "text-gold" },
@@ -68,7 +121,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map((card, i) => (
           <motion.div
@@ -125,7 +177,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Prayer Requests */}
         <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
           <h3 className="text-white font-heading font-bold mb-4">Recent Prayer Requests</h3>
           {recentPrayers.length === 0 ? (
@@ -146,23 +197,61 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Recent Submissions */}
         <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-          <h3 className="text-white font-heading font-bold mb-4">Recent Form Submissions</h3>
-          {recentSubmissions.length === 0 ? (
-            <p className="text-white/30 text-sm">No recent submissions.</p>
+          <h3 className="text-white font-heading font-bold mb-1">Recent Form Submissions</h3>
+          <p className="text-white/35 text-xs mb-4">From custom forms in Admin → Forms only.</p>
+          {recentFormSubmissions.length === 0 ? (
+            <p className="text-white/30 text-sm">No custom form submissions yet.</p>
           ) : (
             <div className="space-y-3">
-              {recentSubmissions.map((s) => (
-                <div key={s.id} className="bg-white/5 rounded-xl p-4">
-                  <div className="text-gold text-xs font-bold mb-1">{s.form_title}</div>
-                  <div className="text-white/70 text-sm">{s.submitter_name || "Anonymous"}</div>
-                  <div className="text-white/30 text-xs">{s.submitter_email}</div>
+              {recentFormSubmissions.map((s) => (
+                <div key={s.id} className="bg-white/5 rounded-xl p-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-gold text-xs font-bold mb-1">{s.form_title}</div>
+                    <div className="text-white/70 text-sm">{s.submitter_name || "Anonymous"}</div>
+                    <div className="text-white/30 text-xs">{s.submitter_email}</div>
+                  </div>
+                  <button type="button" onClick={() => deleteSubmission(s.id)} className="p-2 text-white/30 hover:text-red-400 rounded-lg hover:bg-white/5 shrink-0" aria-label="Delete submission">
+                    <Trash2 size={15} />
+                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
+
+      <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+        <div className="flex items-center justify-between gap-4 mb-1">
+          <h3 className="text-white font-heading font-bold">Recent Event RSVPs &amp; Sign Ups</h3>
+          <Link to="/admin/events" className="text-gold text-xs font-medium hover:underline shrink-0">
+            Manage events
+          </Link>
+        </div>
+        <p className="text-white/35 text-xs mb-4">
+          These come from the Events page (RSVP / Sign Up), not the Forms builder. Delete test entries here or in Manage Events.
+        </p>
+        {recentEventRegistrations.length === 0 ? (
+          <p className="text-white/30 text-sm">No event registrations yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {recentEventRegistrations.map((s) => (
+              <div key={s.id} className="bg-white/5 rounded-xl p-4 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-gold text-xs font-bold mb-1">{s.form_title || "Event registration"}</div>
+                  {s.event_id && eventTitles[s.event_id] && (
+                    <div className="text-white/45 text-xs mb-1">{eventTitles[s.event_id]}</div>
+                  )}
+                  <div className="text-white/70 text-sm">{s.submitter_name || "Anonymous"}</div>
+                  <div className="text-white/30 text-xs">{s.submitter_email}</div>
+                </div>
+                <button type="button" onClick={() => deleteSubmission(s.id)} className="p-2 text-white/30 hover:text-red-400 rounded-lg hover:bg-white/5 shrink-0" aria-label="Delete registration">
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
