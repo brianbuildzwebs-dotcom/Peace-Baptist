@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { handleGetAppClick } from "@/lib/pwaInstall";
+import { handleGetAppClick, SHOW_INSTALL_MODAL_EVENT } from "@/lib/pwaInstall";
 import TopBar from "./TopBar";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
@@ -13,6 +13,12 @@ export default function PublicLayout() {
   const [installOpen, setInstallOpen] = useState(false);
 
   const openInstall = () => setInstallOpen(true);
+
+  useEffect(() => {
+    const onOpenInstall = () => openInstall();
+    window.addEventListener(SHOW_INSTALL_MODAL_EVENT, onOpenInstall);
+    return () => window.removeEventListener(SHOW_INSTALL_MODAL_EVENT, onOpenInstall);
+  }, []);
 
   const handleGetApp = () => {
     handleGetAppClick({ onShowInstructions: openInstall });

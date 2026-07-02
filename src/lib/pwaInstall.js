@@ -115,6 +115,18 @@ export function isIosDevice() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
+export function isAndroidDevice() {
+  return /android/i.test(navigator.userAgent);
+}
+
+export const SHOW_INSTALL_MODAL_EVENT = 'pbc-show-install-modal';
+
+export function openInstallModal() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(SHOW_INSTALL_MODAL_EVENT));
+  }
+}
+
 export function isStandaloneApp() {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(display-mode: standalone)').matches

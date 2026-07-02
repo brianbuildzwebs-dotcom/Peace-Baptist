@@ -99,7 +99,7 @@ export default function SiteFooter({ onOpenInstall }) {
                     onClick={openNotificationPrompt}
                     className="text-gold hover:text-gold-light transition-colors text-sm font-medium inline-flex items-center gap-1.5"
                   >
-                    <Bell size={14} /> Enable push alerts
+                    <Bell size={14} /> Turn on alerts on this phone
                   </button>
                 </li>
               )}

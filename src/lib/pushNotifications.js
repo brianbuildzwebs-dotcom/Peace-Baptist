@@ -1,4 +1,4 @@
-import { isIosDevice, isStandaloneApp } from '@/lib/pwaInstall';
+import { isAndroidDevice, isIosDevice, isStandaloneApp } from '@/lib/pwaInstall';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const TOPICS_KEY = 'pbc_push_topics';
@@ -134,10 +134,21 @@ export async function getPushPermission() {
   return Notification.permission;
 }
 
+export function getAndroidPushSetupTips() {
+  return [
+    'Tap Turn on alerts below, then tap Allow when Chrome asks.',
+    'Settings → Apps → Chrome → Battery → Unrestricted (or Don\'t optimize).',
+    'On Samsung: remove Chrome from Sleeping apps / Deep sleeping apps.',
+  ];
+}
+
 export function getNotificationPermissionHelp(permission = Notification?.permission) {
   if (permission === 'denied') {
     if (isIosDevice()) {
-      return 'Notifications are blocked. On iPhone: Settings → Notifications → Peace Baptist → Allow Notifications. Also open the site from your Home Screen app (not Safari), then tap Enable push alerts in the footer.';
+      return 'Notifications are blocked. On iPhone: Settings → Notifications → Peace Baptist → Allow Notifications. Also open the site from your Home Screen app (not Safari), then tap Turn on alerts again.';
+    }
+    if (isAndroidDevice()) {
+      return 'Notifications are blocked. Tap the lock icon in Chrome\'s address bar → Permissions → Notifications → Allow, then tap Turn on alerts again.';
     }
     return 'Notifications are blocked for this site. Click the lock icon in the address bar → Site settings → Notifications → Allow, then refresh and try again.';
   }
@@ -148,6 +159,13 @@ export function getNotificationPermissionHelp(permission = Notification?.permiss
     return 'On iPhone, add Peace Baptist to your Home Screen and open the app from that icon before enabling alerts.';
   }
   return 'Notification permission was not granted.';
+}
+
+export function getPushAlertStatusLabel({ subscribed, permission, needsInstall }) {
+  if (subscribed) return 'active';
+  if (needsInstall) return 'needs_install';
+  if (permission === 'denied') return 'blocked';
+  return 'not_setup';
 }
 
 export function openNotificationPrompt() {

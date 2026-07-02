@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Play, Clock, Calendar, BookOpen, Heart, MapPin } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import PushAlertsCallout from "./PushAlertsCallout";
 
 export default function HeroSection() {
   const { getImage } = useSiteImages();
@@ -22,6 +23,8 @@ export default function HeroSection() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 sm:pt-32 pb-32 lg:pb-24">
         <div className="max-w-4xl">
+          <PushAlertsCallout />
+
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}

@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Bell, Check, Smartphone, X } from "lucide-react";
+import { isAndroidDevice } from "@/lib/pwaInstall";
 import {
   canPromptForPush,
   clearStalePushEnabledFlag,
   fetchPushStatus,
+  getAndroidPushSetupTips,
   getNotificationPermissionHelp,
   getPushPermission,
   getSavedTopics,
@@ -19,7 +22,10 @@ import {
 } from "@/lib/pushNotifications";
 
 export default function NotificationPrompt({ onOpenInstall }) {
-  const [visible, setVisible] = useState(false);
+  const location = useLocation();
+  const onHomePage = location.pathname === "/";
+  const [autoVisible, setAutoVisible] = useState(false);
+  const [forcedVisible, setForcedVisible] = useState(false);
   const [installFirst, setInstallFirst] = useState(false);
   const [permissionBlocked, setPermissionBlocked] = useState(false);
   const [toast, setToast] = useState("");
@@ -35,10 +41,9 @@ export default function NotificationPrompt({ onOpenInstall }) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const evaluatePrompt = useCallback(async () => {
+  const preparePromptState = useCallback(async ({ allowOnHome = false } = {}) => {
     if (!canPromptForPush()) {
-      setVisible(false);
-      return;
+      return { shouldShow: false, subscribed: false };
     }
 
     const iosNeedsInstall = needsPwaForPush();
@@ -53,27 +58,35 @@ export default function NotificationPrompt({ onOpenInstall }) {
 
     if (subscribed) {
       await refreshPushSubscriptionIfNeeded();
-      setVisible(false);
-      return;
+      setForcedVisible(false);
+      return { shouldShow: false, subscribed: true };
     }
 
     clearStalePushEnabledFlag();
 
-    if (isNotificationPromptDismissed()) {
-      setVisible(false);
-      return;
+    if (!allowOnHome && onHomePage) {
+      return { shouldShow: false, subscribed: false };
+    }
+
+    if (!allowOnHome && isNotificationPromptDismissed()) {
+      return { shouldShow: false, subscribed: false };
     }
 
     if (iosNeedsInstall) {
       setPermissionBlocked(false);
-      setVisible(true);
-      return;
+      return { shouldShow: true, subscribed: false };
     }
 
     const perm = await getPushPermission();
     setPermissionBlocked(perm === "denied");
-    setVisible(true);
-  }, []);
+    return { shouldShow: true, subscribed: false };
+  }, [onHomePage]);
+
+  const evaluatePrompt = useCallback(async () => {
+    const result = await preparePromptState();
+    setAutoVisible(result.shouldShow);
+    if (result.subscribed) setForcedVisible(false);
+  }, [preparePromptState]);
 
   useEffect(() => {
     evaluatePrompt();
@@ -82,9 +95,11 @@ export default function NotificationPrompt({ onOpenInstall }) {
       if (document.visibilityState === "visible") evaluatePrompt();
     };
 
-    const onShowPrompt = () => {
+    const onShowPrompt = async () => {
       clearNotificationPromptDismissed();
-      evaluatePrompt();
+      const result = await preparePromptState({ allowOnHome: true });
+      if (result.shouldShow) setForcedVisible(true);
+      else setForcedVisible(false);
     };
 
     document.addEventListener("visibilitychange", onVisible);
@@ -93,7 +108,9 @@ export default function NotificationPrompt({ onOpenInstall }) {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener(SHOW_NOTIFICATION_PROMPT_EVENT, onShowPrompt);
     };
-  }, [evaluatePrompt]);
+  }, [evaluatePrompt, preparePromptState]);
+
+  const visible = forcedVisible || autoVisible;
 
   const toggleTopic = (topic) => {
     setTopics((prev) => (
@@ -147,7 +164,8 @@ export default function NotificationPrompt({ onOpenInstall }) {
           { permission }
         );
         setNotificationPromptDismissed();
-        setVisible(false);
+        setForcedVisible(false);
+        setAutoVisible(false);
         setToast(
           needsPwaForPush() || /iphone|ipad|ipod|android/i.test(navigator.userAgent)
             ? "Alerts enabled on this device"
@@ -164,7 +182,8 @@ export default function NotificationPrompt({ onOpenInstall }) {
 
   const dismiss = () => {
     setNotificationPromptDismissed();
-    setVisible(false);
+    setForcedVisible(false);
+    setAutoVisible(false);
   };
 
   if (!canPromptForPush()) return null;
@@ -232,6 +251,19 @@ export default function NotificationPrompt({ onOpenInstall }) {
               <p className="text-white/50 text-xs mb-3 leading-relaxed">
                 {getNotificationPermissionHelp("denied")}
               </p>
+            )}
+
+            {!installFirst && !permissionBlocked && isAndroidDevice() && (
+              <div className="mb-3 rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-left">
+                <p className="text-gold text-[11px] font-semibold uppercase tracking-wide mb-1">
+                  Android tip
+                </p>
+                <ol className="text-white/50 text-[11px] space-y-0.5 list-decimal list-inside leading-relaxed">
+                  {getAndroidPushSetupTips().map((tip) => (
+                    <li key={tip}>{tip}</li>
+                  ))}
+                </ol>
+              </div>
             )}
 
             {installFirst ? (
