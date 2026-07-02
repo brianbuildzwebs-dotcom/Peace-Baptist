@@ -22,6 +22,31 @@ function buildPushUrl(path) {
   return `${SITE_URL}${suffix}`;
 }
 
+const NOTIFICATION_ICON_KEY = 'notification_icon_image_url';
+const DEFAULT_NOTIFICATION_ICON = '/images/church-exterior.jpg';
+
+function buildAbsoluteAssetUrl(path) {
+  const raw = String(path || '').trim();
+  if (!raw) return buildPushUrl(DEFAULT_NOTIFICATION_ICON);
+  if (/^https?:\/\//i.test(raw)) return raw.replace(/\s+/g, '');
+  const suffix = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${SITE_URL}${suffix}`;
+}
+
+export async function getNotificationIconUrl() {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return buildAbsoluteAssetUrl(DEFAULT_NOTIFICATION_ICON);
+
+  const { data } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', NOTIFICATION_ICON_KEY)
+    .maybeSingle();
+
+  const value = data?.value?.trim();
+  return buildAbsoluteAssetUrl(value || DEFAULT_NOTIFICATION_ICON);
+}
+
 let vapidConfigured = false;
 
 function configureVapid() {
@@ -156,11 +181,14 @@ export async function sendTopicPush(topic, { title, body, url, tag }) {
   const subs = await listSubscriptionsForTopic(topic);
   let sent = 0;
   let failed = 0;
+  const icon = await getNotificationIconUrl();
   const payload = JSON.stringify({
     title,
     body,
     url: buildPushUrl(url),
     tag: tag || topic,
+    icon,
+    badge: icon,
   });
 
   for (const sub of subs) {

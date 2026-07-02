@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { requireAdmin } from '../auth.js';
 import { getSupabaseAdmin, getSupabaseUrl, isSupabaseConfigured } from '../supabase.js';
+import { deleteStorageObjectByPublicUrl } from '../storage.js';
 
 const BUCKET = 'site-uploads';
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -47,7 +48,7 @@ export async function handleUpload(req, res) {
     return res.status(503).json({ error: 'Storage not configured' });
   }
 
-  const { filename, contentType, data } = parseBody(req);
+  const { filename, contentType, data, replace_url: replaceUrl } = parseBody(req);
   if (!data) {
     return res.status(400).json({ error: 'No file data provided' });
   }
@@ -94,6 +95,10 @@ export async function handleUpload(req, res) {
 
   const base = getSupabaseUrl()?.replace(/\/$/, '');
   const file_url = `${base}/storage/v1/object/public/${BUCKET}/${objectPath}`;
+
+  if (replaceUrl) {
+    await deleteStorageObjectByPublicUrl(supabase, replaceUrl);
+  }
 
   return res.status(200).json({ file_url });
 }

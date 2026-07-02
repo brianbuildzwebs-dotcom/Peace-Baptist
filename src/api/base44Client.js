@@ -43,7 +43,7 @@ export const base44 = {
 
   integrations: {
     Core: {
-      async UploadFile({ file }) {
+      async UploadFile({ file, replaceUrl } = {}) {
         const token = await getPeaceAccessToken();
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
@@ -62,6 +62,7 @@ export const base44 = {
             filename: file.name,
             contentType: file.type || 'image/jpeg',
             data: btoa(binary),
+            ...(replaceUrl ? { replace_url: replaceUrl } : {}),
           }),
         });
 

@@ -1,6 +1,7 @@
 /** Site setting keys safe to expose to anonymous visitors. */
 export const PUBLIC_SITE_SETTING_KEYS = new Set([
   'splash_screen_image_url',
+  'notification_icon_image_url',
   'hero_image_url',
   'welcome_image_url',
   'about_hero_image_url',

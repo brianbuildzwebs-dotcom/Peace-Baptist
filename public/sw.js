@@ -23,12 +23,14 @@ self.addEventListener('push', (event) => {
   }
 
   const targetUrl = resolveNotificationUrl(payload.url);
+  const icon = payload.icon || '/images/church-exterior.jpg';
+  const badge = payload.badge || icon;
 
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: '/images/church-exterior.jpg',
-      badge: '/images/church-exterior.jpg',
+      icon,
+      badge,
       tag: payload.tag || 'peace-baptist',
       data: { url: targetUrl },
     })

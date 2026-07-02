@@ -65,7 +65,11 @@ export default function AdminSettings() {
     setUploadingKey(field.key);
     setUploadError("");
     try {
-      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
+      const previousUrl = getValue(field.key);
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({
+        file,
+        replaceUrl: previousUrl && previousUrl.includes('/storage/v1/object/public/site-uploads/') ? previousUrl : undefined,
+      });
       if (!fileUrl) throw new Error("Upload succeeded but no image URL was returned.");
       setValue(field.key, fileUrl);
       await persistSetting(field.key, field.label, fileUrl);
