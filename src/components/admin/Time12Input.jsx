@@ -23,14 +23,17 @@ export default function Time12Input({
           ))}
         </select>
         <span className="text-white/40">:</span>
-        <input
-          type="number"
-          min={0}
-          max={59}
+        <select
           value={minute}
-          onChange={(e) => onMinuteChange(Math.min(59, Math.max(0, parseInt(e.target.value, 10) || 0)))}
-          className="w-20 px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm"
-        />
+          onChange={(e) => onMinuteChange(Number(e.target.value))}
+          className="px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm"
+        >
+          {Array.from({ length: 60 }, (_, i) => (
+            <option key={i} value={i} className="bg-[#1E293B]">
+              {String(i).padStart(2, "0")}
+            </option>
+          ))}
+        </select>
         <select
           value={period}
           onChange={(e) => onPeriodChange(e.target.value)}

@@ -20,3 +20,40 @@ export function formatEasternTimeLabel(hour24, minute = 0) {
 export function easternToday() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
 }
+
+const CHURCH_TIMEZONE = "America/New_York";
+
+export function easternNowParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CHURCH_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  return {
+    hour: parseInt(parts.find((p) => p.type === "hour")?.value ?? "0", 10),
+    minute: parseInt(parts.find((p) => p.type === "minute")?.value ?? "0", 10),
+  };
+}
+
+export function hasScheduledPublishTime(row) {
+  return Number.isFinite(Number(row?.publish_hour));
+}
+
+export function isPublishTimeReached(row, now = new Date()) {
+  if (!row?.devotion_date || !hasScheduledPublishTime(row)) return false;
+
+  const today = easternToday();
+  const dateCmp = row.devotion_date === today ? 0 : row.devotion_date < today ? -1 : 1;
+  if (dateCmp > 0) return false;
+  if (dateCmp < 0) return true;
+
+  const hour = Number(row.publish_hour);
+  const minute = Number.isFinite(Number(row.publish_minute)) ? Number(row.publish_minute) : 0;
+  const parts = easternNowParts(now);
+
+  if (parts.hour > hour) return true;
+  if (parts.hour === hour && parts.minute >= minute) return true;
+  return false;
+}

@@ -48,9 +48,12 @@ export async function handleEntityCollection(req, res, entity) {
       }
 
       let rows = await listEntities(entity, { filter, sort, limit });
-      if (!isAdmin && entity === 'DailyDevotion') {
+      if (entity === 'DailyDevotion') {
         await promoteDueDevotions().catch(() => {});
-        rows = filterPublicDevotions(rows);
+        const isPublicDateView = filter.devotion_date != null;
+        if (!isAdmin || isPublicDateView) {
+          rows = filterPublicDevotions(rows);
+        }
       }
       if (!isAdmin && entity === 'SiteSettings') {
         rows = filterPublicSiteSettings(rows);
@@ -158,11 +161,13 @@ export async function handleEntityById(req, res, entity, id) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
-      if (!isAdmin && entity === 'DailyDevotion') {
+      if (entity === 'DailyDevotion') {
         await promoteDueDevotions().catch(() => {});
-        const [visible] = filterPublicDevotions([row]);
-        if (!visible) return res.status(404).json({ error: 'Not found', entity, id });
-        return res.status(200).json(visible);
+        if (!isAdmin) {
+          const [visible] = filterPublicDevotions([row]);
+          if (!visible) return res.status(404).json({ error: 'Not found', entity, id });
+          return res.status(200).json(visible);
+        }
       }
 
       return res.status(200).json(row);

@@ -22,7 +22,9 @@ export async function promoteDueDevotions(now = new Date()) {
 
   if (error) throw error;
 
-  const due = (data || []).filter((row) => isPublishTimeReached(row, now));
+  const due = (data || []).filter(
+    (row) => Number.isFinite(Number(row.publish_hour)) && isPublishTimeReached(row, now),
+  );
   if (!due.length) return { promoted: 0 };
 
   const ids = due.map((row) => row.id);

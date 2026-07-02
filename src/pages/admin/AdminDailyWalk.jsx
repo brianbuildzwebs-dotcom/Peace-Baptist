@@ -4,7 +4,14 @@ import { format } from "date-fns";
 import { base44 } from "@/api/base44Client";
 import { adminFetch } from "@/lib/admin-fetch";
 import Time12Input from "@/components/admin/Time12Input";
-import { easternToday, formatEasternTimeLabel, hour12To24, hour24To12 } from "@/lib/time12";
+import {
+  easternToday,
+  formatEasternTimeLabel,
+  hasScheduledPublishTime,
+  hour12To24,
+  hour24To12,
+  isPublishTimeReached,
+} from "@/lib/time12";
 
 const emptyForm = {
   devotion_date: "",
@@ -20,7 +27,8 @@ const emptyForm = {
 };
 
 function rowToForm(row) {
-  const { hour12, period } = hour24To12(row.publish_hour ?? 7);
+  const fallbackHour = Number.isFinite(Number(row.publish_hour)) ? Number(row.publish_hour) : 7;
+  const { hour12, period } = hour24To12(fallbackHour);
   let publish_mode = "schedule";
   if (row.status === "draft") publish_mode = "draft";
   else if (row.status === "published" && row.publish_hour == null) publish_mode = "now";
@@ -35,7 +43,7 @@ function rowToForm(row) {
     author: row.author || "Pastor Rudy Shepard",
     publish_mode,
     publish_hour12: hour12,
-    publish_minute: row.publish_minute ?? 0,
+    publish_minute: Number.isFinite(Number(row.publish_minute)) ? Number(row.publish_minute) : 0,
     publish_ampm: period,
   };
 }
@@ -65,12 +73,11 @@ function buildPayload(formData) {
   }
 
   const publish_hour = hour12To24(formData.publish_hour12, formData.publish_ampm);
-  const publish_minute = Number(formData.publish_minute) || 0;
-  const isFuture = formData.devotion_date > today;
+  const publish_minute = Math.min(59, Math.max(0, parseInt(String(formData.publish_minute), 10) || 0));
 
   return {
     ...payload,
-    status: isFuture ? "scheduled" : "scheduled",
+    status: "scheduled",
     publish_hour,
     publish_minute,
   };
@@ -78,10 +85,20 @@ function buildPayload(formData) {
 
 function statusLabel(row) {
   if (row.status === "draft") return "Draft";
-  if (row.status === "published" && row.publish_hour == null) return "Published";
-  if (row.publish_hour != null) {
-    return `${row.status === "scheduled" ? "Scheduled" : "Published"} · ${formatEasternTimeLabel(row.publish_hour, row.publish_minute ?? 0)}`;
+  if (row.status === "published" && !hasScheduledPublishTime(row)) return "Published";
+
+  if (hasScheduledPublishTime(row)) {
+    const timeLabel = formatEasternTimeLabel(
+      Number(row.publish_hour),
+      Number.isFinite(Number(row.publish_minute)) ? Number(row.publish_minute) : 0,
+    );
+    const isLive = isPublishTimeReached(row);
+    if (row.status === "scheduled" && !isLive) {
+      return `Scheduled · goes live ${timeLabel}`;
+    }
+    return `${isLive ? "Live" : "Scheduled"} · ${timeLabel}`;
   }
+
   return row.status;
 }
 
@@ -110,6 +127,14 @@ export default function AdminDailyWalk() {
     if (!formData.devotion_date) {
       alert("Please choose a devotion date.");
       return;
+    }
+
+    if (formData.publish_mode === "schedule") {
+      const minute = parseInt(String(formData.publish_minute), 10);
+      if (!Number.isFinite(minute) || minute < 0 || minute > 59) {
+        alert("Choose a valid publish minute (0–59).");
+        return;
+      }
     }
 
     const payload = buildPayload(formData);
@@ -148,8 +173,12 @@ export default function AdminDailyWalk() {
 
   const isFutureDate = formData.devotion_date > easternToday();
 
+  const fieldClass =
+    "w-full max-w-full box-border px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body";
+  const textareaClass = `${fieldClass} resize-y overflow-x-hidden break-words not-italic`;
+
   return (
-    <div>
+    <div className="max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-white font-heading text-xl font-bold">Daily Walk</h2>
@@ -182,7 +211,7 @@ export default function AdminDailyWalk() {
       {pushStatus && <p className="text-white/50 text-sm mb-4">{pushStatus}</p>}
 
       {showForm && (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6 space-y-4">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6 space-y-4 max-w-full overflow-hidden">
           <h3 className="text-white font-semibold">{editing ? "Edit devotion" : "New devotion"}</h3>
           <input
             type="date"
@@ -236,11 +265,11 @@ export default function AdminDailyWalk() {
           )}
 
           <p className="text-white/35 text-xs -mt-2">Only the date is required — fill in whichever fields you want.</p>
-          <input placeholder="Title (optional)" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
-          <input placeholder="Scripture reference — optional (e.g. Psalm 23:1)" value={formData.scripture_reference} onChange={(e) => setFormData({ ...formData, scripture_reference: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
-          <textarea rows={3} placeholder="Scripture text (KJV) — optional" value={formData.scripture_text} onChange={(e) => setFormData({ ...formData, scripture_text: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body not-italic" />
-          <textarea rows={5} placeholder="Pastor's message — optional" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body not-italic" />
-          <input placeholder="Author — optional" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
+          <input placeholder="Title (optional)" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} />
+          <input placeholder="Scripture reference — optional (e.g. Psalm 23:1)" value={formData.scripture_reference} onChange={(e) => setFormData({ ...formData, scripture_reference: e.target.value })} className={fieldClass} />
+          <textarea rows={3} placeholder="Scripture text (KJV) — optional" value={formData.scripture_text} onChange={(e) => setFormData({ ...formData, scripture_text: e.target.value })} className={textareaClass} />
+          <textarea rows={5} placeholder="Pastor's message — optional" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className={textareaClass} />
+          <input placeholder="Author — optional" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} className={fieldClass} />
           <div className="flex gap-3">
             <button type="button" onClick={handleSave} className="px-5 py-2.5 bg-gold text-navy font-semibold rounded-xl text-sm">Save</button>
             <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-5 py-2.5 text-white/50 text-sm">Cancel</button>

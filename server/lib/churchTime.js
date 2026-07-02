@@ -7,8 +7,8 @@ export function easternDateString(date = new Date()) {
 export function easternNowParts(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: CHURCH_TIMEZONE,
-    hour: 'numeric',
-    minute: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     weekday: 'short',
     hour12: false,
   }).formatToParts(date);
@@ -45,15 +45,19 @@ export function compareDatesYmd(a, b) {
   return a < b ? -1 : 1;
 }
 
+export function hasScheduledPublishTime(row) {
+  return Number.isFinite(Number(row?.publish_hour));
+}
+
 export function isPublishTimeReached(row, now = new Date()) {
-  if (!row?.devotion_date) return false;
+  if (!row?.devotion_date || !hasScheduledPublishTime(row)) return false;
 
   const today = easternDateString(now);
   const dateCmp = compareDatesYmd(row.devotion_date, today);
   if (dateCmp > 0) return false;
   if (dateCmp < 0) return true;
 
-  const hour = Number.isFinite(Number(row.publish_hour)) ? Number(row.publish_hour) : 0;
+  const hour = Number(row.publish_hour);
   const minute = Number.isFinite(Number(row.publish_minute)) ? Number(row.publish_minute) : 0;
   const parts = easternNowParts(now);
 
@@ -67,8 +71,11 @@ export function isDevotionPubliclyVisible(row, now = new Date()) {
   if (row.status === 'published' && row.publish_hour == null && row.publish_minute == null) {
     return true;
   }
-  if (row.status === 'published' || row.status === 'scheduled') {
-    return isPublishTimeReached(row, now);
+  if (row.status === 'scheduled') {
+    return hasScheduledPublishTime(row) && isPublishTimeReached(row, now);
+  }
+  if (row.status === 'published') {
+    return hasScheduledPublishTime(row) ? isPublishTimeReached(row, now) : true;
   }
   return false;
 }

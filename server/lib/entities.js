@@ -45,6 +45,25 @@ function normalizeEntityBody(entity, body = {}) {
     payload.email = normalizeEmail(payload.email);
   }
 
+  if (entity === 'DailyDevotion') {
+    if (payload.publish_hour != null) {
+      payload.publish_hour = parseInt(payload.publish_hour, 10);
+    }
+    if (payload.publish_minute != null) {
+      payload.publish_minute = parseInt(payload.publish_minute, 10);
+    }
+    if (payload.status === 'scheduled') {
+      if (!Number.isFinite(payload.publish_hour)) {
+        const err = new Error('Scheduled devotions require a publish time.');
+        err.status = 400;
+        throw err;
+      }
+      if (!Number.isFinite(payload.publish_minute)) {
+        payload.publish_minute = 0;
+      }
+    }
+  }
+
   return payload;
 }
 
@@ -137,7 +156,8 @@ export async function updateEntity(entity, id, body) {
     throw err;
   }
 
-  const { data, error } = await supabase.from(config.table).update(body).eq('id', id).select('*').single();
+  const payload = normalizeEntityBody(entity, body);
+  const { data, error } = await supabase.from(config.table).update(payload).eq('id', id).select('*').single();
   if (error) throw error;
   return toApiRow(data, entity);
 }
