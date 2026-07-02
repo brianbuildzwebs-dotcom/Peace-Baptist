@@ -57,6 +57,13 @@
       "type": "boolean",
       "default": false
     },
+    "sign_up_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "announcement": {
+      "type": "string"
+    },
     "max_attendees": {
       "type": "number"
     }

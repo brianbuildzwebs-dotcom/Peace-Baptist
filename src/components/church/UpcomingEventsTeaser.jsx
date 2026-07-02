@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, ArrowRight, Clock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { format } from "date-fns";
+import { formatEventDate } from "@/lib/eventDates";
+import EventAnnouncementsStrip from "./EventAnnouncementsStrip";
 import SectionHeading from "./SectionHeading";
 import { churchInfo } from "@/lib/churchInfo";
 
@@ -11,8 +12,11 @@ export default function UpcomingEventsTeaser() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    base44.entities.Event.filter({ status: "upcoming" }, "-date", 3)
-      .then(setEvents)
+    base44.entities.Event.filter({ status: "upcoming" }, "date", 12)
+      .then((rows) => {
+        const featured = rows.filter((event) => event.featured);
+        setEvents((featured.length ? featured : rows).slice(0, 3));
+      })
       .catch(() => {});
   }, []);
 
@@ -73,6 +77,7 @@ export default function UpcomingEventsTeaser() {
           title="Upcoming Events"
           subtitle="Join us for fellowship, worship, and community gatherings."
         />
+        <EventAnnouncementsStrip events={events} />
         <div className="grid md:grid-cols-3 gap-8">
           {events.map((event, i) => (
             <motion.div
@@ -91,7 +96,7 @@ export default function UpcomingEventsTeaser() {
               <div className="p-6">
                 <div className="flex items-center gap-2 text-gold text-sm font-medium mb-3">
                   <Calendar size={14} />
-                  {event.date && format(new Date(event.date), "MMMM d, yyyy")}
+                  {formatEventDate(event.date, "MMMM d, yyyy")}
                   {event.time && ` · ${event.time}`}
                 </div>
                 <h3 className="font-heading text-xl font-bold text-navy mb-2">{event.title}</h3>

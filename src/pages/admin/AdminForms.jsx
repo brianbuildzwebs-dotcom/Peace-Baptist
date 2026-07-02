@@ -216,6 +216,10 @@ export default function AdminForms() {
                       <div className="text-white/30 text-xs">{s.created_date && new Date(s.created_date).toLocaleDateString()}</div>
                     </div>
                     <div className="text-white/40 text-xs mb-2">{s.submitter_email}</div>
+                    {s.event_id && <div className="text-white/30 text-xs mb-2">Event ID: {s.event_id}</div>}
+                    {s.data?.registration_type && (
+                      <div className="text-white/30 text-xs mb-2 capitalize">Type: {String(s.data.registration_type).replace(/_/g, " ")}</div>
+                    )}
                     {s.data && Object.entries(s.data).filter(([k]) => k !== 'name' && k !== 'email').map(([k, v]) => (
                       <div key={k} className="text-white/50 text-xs py-0.5"><span className="text-white/30">{k}:</span> {String(v)}</div>
                     ))}

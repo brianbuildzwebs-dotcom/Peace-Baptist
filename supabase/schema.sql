@@ -77,6 +77,8 @@ create table if not exists public.events (
   rsvp_enabled boolean default true,
   form_id text,
   featured boolean default false,
+  sign_up_enabled boolean default false,
+  announcement text,
   max_attendees int
 );
 
