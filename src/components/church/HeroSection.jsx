@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Play, Clock, Calendar, BookOpen, Heart, MapPin } from "lucide-react";
+import { Play, Clock, Calendar, BookOpen, Heart } from "lucide-react";
 import { churchInfo } from "@/lib/churchInfo";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import HomePromoStrip from "./HomePromoStrip";
@@ -71,11 +71,11 @@ export default function HeroSection() {
               Watch Live
             </Link>
             <Link
-              to="/contact"
+              to="/daily-walk"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/30 text-white font-medium rounded-full hover:bg-white/10 transition-all duration-300"
             >
-              <MapPin size={18} />
-              Plan Your Visit
+              <BookOpen size={18} />
+              Daily Walk
             </Link>
             <Link
               to="/about"
