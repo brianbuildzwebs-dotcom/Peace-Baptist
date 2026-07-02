@@ -6,6 +6,7 @@ import ChurchLogo from "./ChurchLogo";
 import { churchInfo } from "@/lib/churchInfo";
 import { usePwaInstallState } from "@/hooks/usePwaInstallState";
 import { usePushAlertState } from "@/hooks/usePushAlertState";
+import { openCookieSettings } from "@/lib/cookieConsent";
 
 export default function SiteFooter({ onOpenInstall }) {
   const { hideInstallPromo } = usePwaInstallState();
@@ -180,9 +181,26 @@ export default function SiteFooter({ onOpenInstall }) {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/40 text-sm">&copy; {new Date().getFullYear()} {churchInfo.name}. All rights reserved.</p>
-          <p className="text-white/30 text-xs">320 Military Cutoff Rd · Wilmington, NC</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-5 gap-y-2 text-sm">
+            <Link to="/privacy" className="text-white/50 hover:text-gold transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-white/50 hover:text-gold transition-colors">
+              Terms of Use
+            </Link>
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="text-white/50 hover:text-gold transition-colors"
+            >
+              Cookie Settings
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-white/40 text-sm">&copy; {new Date().getFullYear()} {churchInfo.name}. All rights reserved.</p>
+            <p className="text-white/30 text-xs">320 Military Cutoff Rd · Wilmington, NC</p>
+          </div>
         </div>
       </div>
     </footer>

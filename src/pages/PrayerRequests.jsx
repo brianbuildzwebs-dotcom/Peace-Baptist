@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -79,7 +80,24 @@ export default function PrayerRequests() {
           <div className="grid lg:grid-cols-5 gap-16">
             {/* Form */}
             <div className="lg:col-span-3">
-              <SectionHeading label="We're Here for You" title="Submit a Prayer Request" center={false} subtitle="All Prayer Requests are published instantly. By posting a Prayer Request you agree to the terms and conditions of our Privacy Policy." />
+              <SectionHeading
+                label="We're Here for You"
+                title="Submit a Prayer Request"
+                center={false}
+                subtitle={(
+                  <>
+                    All prayer requests are published instantly. By submitting, you agree to our{" "}
+                    <Link to="/terms" className="text-gold hover:text-gold-light underline">
+                      Terms of Use
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="text-gold hover:text-gold-light underline">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </>
+                )}
+              />
 
               {submitted ? (
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-cloud rounded-2xl p-12 text-center">

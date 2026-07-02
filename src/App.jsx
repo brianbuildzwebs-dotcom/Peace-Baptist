@@ -23,6 +23,8 @@ import Give from './pages/Give';
 import Contact from './pages/Contact';
 import Ministries from './pages/Ministries';
 import DailyWalk from './pages/DailyWalk';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 // Layouts
 import PublicLayout from './components/church/PublicLayout';
@@ -83,6 +85,8 @@ const AuthenticatedApp = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/ministries" element={<Ministries />} />
         <Route path="/daily-walk" element={<DailyWalk />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
       </Route>
 
       {/* Common admin URL typos */}

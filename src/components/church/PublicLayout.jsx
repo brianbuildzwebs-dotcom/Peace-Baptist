@@ -8,6 +8,7 @@ import PwaInstallBanner from "./PwaInstallBanner";
 import InstallAppModal from "./InstallAppModal";
 import NotificationPrompt from "./NotificationPrompt";
 import PwaBranding from "./PwaBranding";
+import CookieConsentBanner from "./CookieConsentBanner";
 
 export default function PublicLayout() {
   const [installOpen, setInstallOpen] = useState(false);
@@ -38,6 +39,7 @@ export default function PublicLayout() {
       <PwaBranding />
       <NotificationPrompt onOpenInstall={openInstall} />
       <InstallAppModal open={installOpen} onClose={() => setInstallOpen(false)} />
+      <CookieConsentBanner />
     </div>
   );
 }

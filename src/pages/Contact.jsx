@@ -4,6 +4,8 @@ import { MapPin, Phone, Mail, Clock, Send, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { churchInfo } from "@/lib/churchInfo";
 import { emailValidationMessage, isValidEmail, normalizeEmail } from "@/lib/validators";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { openCookieSettings } from "@/lib/cookieConsent";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
@@ -11,6 +13,8 @@ export default function Contact() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
+  const consent = useCookieConsent();
+  const mapsAllowed = consent.functional;
 
   useEffect(() => {
     base44.entities.SiteSettings.filter({ key: "google_maps_embed" })
@@ -123,7 +127,7 @@ export default function Contact() {
 
               {/* Google Maps */}
               <div className="mt-8 rounded-2xl overflow-hidden border border-gray-200 h-48">
-                {mapsUrl ? (
+                {mapsAllowed && mapsUrl ? (
                   <iframe
                     src={mapsUrl}
                     title="Church Location"
@@ -133,10 +137,36 @@ export default function Contact() {
                     allowFullScreen
                   />
                 ) : (
-                  <div className="w-full h-full bg-cloud flex items-center justify-center">
+                  <div className="w-full h-full bg-cloud flex items-center justify-center p-6">
                     <div className="text-center">
                       <MapPin size={32} className="text-gold/30 mx-auto mb-2" />
-                      <p className="text-gray-400 text-sm">Admin: add Google Maps embed URL in Settings</p>
+                      {mapsAllowed ? (
+                        <p className="text-gray-400 text-sm">Admin: add Google Maps embed URL in Settings</p>
+                      ) : (
+                        <>
+                          <p className="text-gray-600 text-sm mb-3">
+                            The interactive map uses Google Maps and loads only with your permission.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={openCookieSettings}
+                            className="text-gold text-sm font-medium hover:text-gold-light underline"
+                          >
+                            Enable map in Cookie Settings
+                          </button>
+                          <p className="text-gray-500 text-xs mt-3">
+                            Or{" "}
+                            <a
+                              href={churchInfo.mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gold hover:text-gold-light underline"
+                            >
+                              open directions in Google Maps
+                            </a>
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
