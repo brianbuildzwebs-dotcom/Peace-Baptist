@@ -8,6 +8,7 @@ import AdminRoute from '@/components/AdminRoute';
 import AdminMfaGate from '@/components/auth/AdminMfaGate';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import SeoManager from './components/church/SeoManager';
 import AppSplashMark from './components/church/AppSplashMark';
 import { getCachedSplashUrl } from '@/lib/splashImage';
 
@@ -128,6 +129,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <SeoManager />
           <AuthenticatedApp />
         </Router>
         <Toaster />

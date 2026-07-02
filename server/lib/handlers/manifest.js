@@ -2,10 +2,10 @@ import { getSupabaseAdmin } from '../supabase.js';
 
 const BASE_MANIFEST = {
   id: '/',
-  name: 'Peace Baptist Church',
+  name: 'Peace Baptist Church App',
   short_name: 'Peace Baptist',
   description:
-    'Peace Baptist Church — Wilmington, NC. Daily Walk, live worship, prayer requests, and events.',
+    'Peace Baptist Church app for Wilmington, NC — Daily Walk devotions, live worship, prayer requests, events, and more.',
   start_url: '/?source=pwa',
   scope: '/',
   display: 'standalone',
