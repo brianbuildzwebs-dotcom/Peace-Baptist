@@ -1,4 +1,6 @@
 const INSTALLED_KEY = 'pbc_pwa_installed';
+const INSTALL_PROMO_DISMISS_KEY = 'pbc_install_promo_dismissed_session';
+const LEGACY_INSTALL_DISMISS_KEY = 'pbc_pwa_install_dismissed_until';
 let deferredInstallPrompt = null;
 const installListeners = new Set();
 const uiStateListeners = new Set();
@@ -125,6 +127,35 @@ export function openInstallModal() {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(SHOW_INSTALL_MODAL_EVENT));
   }
+}
+
+/** Dismiss hides install promo for this browser session only — returns on the next visit. */
+export function isInstallPromoDismissedThisVisit() {
+  try {
+    return sessionStorage.getItem(INSTALL_PROMO_DISMISS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function dismissInstallPromoThisVisit() {
+  try {
+    sessionStorage.setItem(INSTALL_PROMO_DISMISS_KEY, '1');
+    localStorage.removeItem(LEGACY_INSTALL_DISMISS_KEY);
+  } catch {
+    /* ignore */
+  }
+  notifyUIStateListeners();
+}
+
+export function clearInstallPromoDismissThisVisit() {
+  try {
+    sessionStorage.removeItem(INSTALL_PROMO_DISMISS_KEY);
+    localStorage.removeItem(LEGACY_INSTALL_DISMISS_KEY);
+  } catch {
+    /* ignore */
+  }
+  notifyUIStateListeners();
 }
 
 export function isStandaloneApp() {

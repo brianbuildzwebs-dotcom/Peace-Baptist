@@ -22,9 +22,10 @@ export function onPushAlertStateChange(listener) {
   return () => alertStateListeners.delete(listener);
 }
 
+/** Dismiss hides promos for this browser session only — they return on the next visit. */
 export function isNotificationPromptDismissed() {
   try {
-    return localStorage.getItem(DISMISS_KEY) === '1' || sessionStorage.getItem(DISMISS_KEY) === '1';
+    return sessionStorage.getItem(DISMISS_KEY) === '1';
   } catch {
     return false;
   }
@@ -32,8 +33,8 @@ export function isNotificationPromptDismissed() {
 
 export function setNotificationPromptDismissed() {
   try {
-    localStorage.setItem(DISMISS_KEY, '1');
     sessionStorage.setItem(DISMISS_KEY, '1');
+    localStorage.removeItem(DISMISS_KEY);
   } catch {
     /* ignore */
   }
@@ -42,8 +43,8 @@ export function setNotificationPromptDismissed() {
 
 export function clearNotificationPromptDismissed() {
   try {
-    localStorage.removeItem(DISMISS_KEY);
     sessionStorage.removeItem(DISMISS_KEY);
+    localStorage.removeItem(DISMISS_KEY);
   } catch {
     /* ignore */
   }

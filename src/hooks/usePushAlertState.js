@@ -46,7 +46,8 @@ export function usePushAlertState() {
     };
   }, [refresh]);
 
-  const showEnablePromo = ready && canPrompt && !subscribed;
+  const canEnableAlerts = ready && canPrompt && !subscribed;
+  const showHomeNotifyPromo = canEnableAlerts && !dismissed;
   const status = getPushAlertStatusLabel({ subscribed, permission, needsInstall });
 
   return {
@@ -56,8 +57,9 @@ export function usePushAlertState() {
     permission,
     needsInstall,
     canPrompt,
-    showEnablePromo,
-    showFooterEnableLink: showEnablePromo,
+    showEnablePromo: canEnableAlerts,
+    showHomeNotifyPromo,
+    showFooterEnableLink: canEnableAlerts,
     status,
   };
 }
