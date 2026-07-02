@@ -40,15 +40,20 @@ function rowToForm(row) {
   };
 }
 
+function optionalText(value) {
+  const trimmed = String(value || "").trim();
+  return trimmed || null;
+}
+
 function buildPayload(formData) {
   const today = easternToday();
   const payload = {
     devotion_date: formData.devotion_date,
-    title: formData.title,
-    scripture_reference: formData.scripture_reference,
-    scripture_text: formData.scripture_text,
-    message: formData.message,
-    author: formData.author,
+    title: optionalText(formData.title) || "Daily Walk",
+    scripture_reference: optionalText(formData.scripture_reference),
+    scripture_text: optionalText(formData.scripture_text),
+    message: optionalText(formData.message),
+    author: optionalText(formData.author),
   };
 
   if (formData.publish_mode === "draft") {
@@ -102,8 +107,8 @@ export default function AdminDailyWalk() {
   useEffect(loadData, []);
 
   const handleSave = async () => {
-    if (!formData.devotion_date || !formData.scripture_reference || !formData.scripture_text || !formData.message) {
-      alert("Date, scripture reference, scripture text, and message are required.");
+    if (!formData.devotion_date) {
+      alert("Please choose a devotion date.");
       return;
     }
 
@@ -230,11 +235,12 @@ export default function AdminDailyWalk() {
             </div>
           )}
 
-          <input placeholder="Title (optional)" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm" />
-          <input placeholder="Scripture reference (e.g. Psalm 23:1)" value={formData.scripture_reference} onChange={(e) => setFormData({ ...formData, scripture_reference: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm" />
-          <textarea rows={3} placeholder="Scripture text (KJV)" value={formData.scripture_text} onChange={(e) => setFormData({ ...formData, scripture_text: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm" />
-          <textarea rows={5} placeholder="Pastor's message" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm" />
-          <input placeholder="Author" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm" />
+          <p className="text-white/35 text-xs -mt-2">Only the date is required — fill in whichever fields you want.</p>
+          <input placeholder="Title (optional)" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
+          <input placeholder="Scripture reference — optional (e.g. Psalm 23:1)" value={formData.scripture_reference} onChange={(e) => setFormData({ ...formData, scripture_reference: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
+          <textarea rows={3} placeholder="Scripture text (KJV) — optional" value={formData.scripture_text} onChange={(e) => setFormData({ ...formData, scripture_text: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body not-italic" />
+          <textarea rows={5} placeholder="Pastor's message — optional" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body not-italic" />
+          <input placeholder="Author — optional" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder:text-white/30 outline-none focus:border-gold text-sm font-body" />
           <div className="flex gap-3">
             <button type="button" onClick={handleSave} className="px-5 py-2.5 bg-gold text-navy font-semibold rounded-xl text-sm">Save</button>
             <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="px-5 py-2.5 text-white/50 text-sm">Cancel</button>
@@ -252,7 +258,9 @@ export default function AdminDailyWalk() {
             <div key={row.id} className="bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-white font-medium">{format(new Date(row.devotion_date + "T12:00:00"), "EEE, MMM d, yyyy")}</p>
-                <p className="text-white/50 text-sm truncate">{row.scripture_reference} — {row.title || "Daily Walk"}</p>
+                <p className="text-white/50 text-sm truncate">
+                  {[row.scripture_reference, row.title || "Daily Walk"].filter(Boolean).join(" — ") || "No content yet"}
+                </p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-white/30">
                   <span>{statusLabel(row)}</span>
                   {row.notification_sent_at && (

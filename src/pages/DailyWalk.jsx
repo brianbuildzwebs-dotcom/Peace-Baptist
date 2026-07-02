@@ -86,20 +86,32 @@ export default function DailyWalk() {
               <p className="text-gray-400 text-sm mt-2">Check back soon or enable notifications for the morning alert.</p>
             </div>
           ) : (
-            <article className="bg-navy rounded-3xl p-8 sm:p-10 text-white shadow-xl">
-              {devotion.title && (
-                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-gold mb-6">{devotion.title}</h2>
+            <article className="bg-navy rounded-3xl p-8 sm:p-10 text-white shadow-xl font-body">
+              {(devotion.title && devotion.title !== "Daily Walk") && (
+                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-gold mb-6 not-italic">{devotion.title}</h2>
               )}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
-                <p className="text-gold text-sm font-bold uppercase tracking-wider mb-2">Scripture</p>
-                <p className="font-heading text-lg font-semibold mb-3">{devotion.scripture_reference}</p>
-                <p className="text-white/80 leading-relaxed italic whitespace-pre-wrap">{devotion.scripture_text}</p>
-              </div>
-              <div className="prose prose-invert max-w-none">
-                <p className="text-white/90 leading-relaxed whitespace-pre-wrap text-lg">{devotion.message}</p>
-              </div>
+              {(devotion.scripture_reference || devotion.scripture_text) && (
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
+                  <p className="text-gold text-sm font-semibold uppercase tracking-wider mb-3 font-body">Scripture</p>
+                  {devotion.scripture_reference && (
+                    <p className="font-heading text-lg font-semibold mb-3 text-white not-italic">{devotion.scripture_reference}</p>
+                  )}
+                  {devotion.scripture_text && (
+                    <p className="text-white/85 leading-relaxed whitespace-pre-wrap text-base sm:text-lg not-italic font-normal">
+                      {devotion.scripture_text}
+                    </p>
+                  )}
+                </div>
+              )}
+              {devotion.message && (
+                <div className="max-w-none">
+                  <p className="text-white/90 leading-relaxed whitespace-pre-wrap text-base sm:text-lg not-italic font-normal">
+                    {devotion.message}
+                  </p>
+                </div>
+              )}
               {devotion.author && (
-                <p className="mt-8 text-white/50 text-sm">— {devotion.author}</p>
+                <p className="mt-8 text-white/50 text-sm not-italic font-body">— {devotion.author}</p>
               )}
             </article>
           )}
