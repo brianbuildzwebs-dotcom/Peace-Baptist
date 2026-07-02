@@ -11,6 +11,7 @@ import {
 } from '../entities.js';
 import { isSupabaseConfigured } from '../supabase.js';
 import { filterPublicSiteSettings } from '../publicSettings.js';
+import { filterPublicDevotions, promoteDueDevotions } from '../dailyWalk.js';
 import { allowPublicCreate, isHoneypotTriggered } from '../rateLimit.js';
 import { isValidEmail, normalizeEmail } from '../validators.js';
 
@@ -43,10 +44,14 @@ export async function handleEntityCollection(req, res, entity) {
       }
 
       if (!isAdmin && entity === 'DailyDevotion') {
-        filter.status = 'published';
+        delete filter.status;
       }
 
       let rows = await listEntities(entity, { filter, sort, limit });
+      if (!isAdmin && entity === 'DailyDevotion') {
+        await promoteDueDevotions().catch(() => {});
+        rows = filterPublicDevotions(rows);
+      }
       if (!isAdmin && entity === 'SiteSettings') {
         rows = filterPublicSiteSettings(rows);
       }
@@ -151,6 +156,13 @@ export async function handleEntityById(req, res, entity, id) {
 
       if (!isAdmin && entity === 'PrayerRequest' && !row.is_public) {
         return res.status(403).json({ error: 'Forbidden' });
+      }
+
+      if (!isAdmin && entity === 'DailyDevotion') {
+        await promoteDueDevotions().catch(() => {});
+        const [visible] = filterPublicDevotions([row]);
+        if (!visible) return res.status(404).json({ error: 'Not found', entity, id });
+        return res.status(200).json(visible);
       }
 
       return res.status(200).json(row);

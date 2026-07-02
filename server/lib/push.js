@@ -1,5 +1,7 @@
 import webpush from 'web-push';
 import { getSupabaseAdmin } from './supabase.js';
+import { easternDateString, easternNowParts } from './churchTime.js';
+import { getPublishedDevotionForDate } from './dailyWalk.js';
 
 const CHURCH_TIMEZONE = 'America/New_York';
 
@@ -102,17 +104,7 @@ export function isPushConfigured() {
 }
 
 function easternHour() {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: CHURCH_TIMEZONE,
-    hour: 'numeric',
-    hour12: false,
-  }).formatToParts(new Date());
-  const hour = parts.find((p) => p.type === 'hour')?.value;
-  return parseInt(hour ?? '0', 10);
-}
-
-function easternDateString() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: CHURCH_TIMEZONE }).format(new Date());
+  return easternNowParts().hour;
 }
 
 async function listSubscriptionsForTopic(topic) {
@@ -246,14 +238,7 @@ export async function sendDailyWalkNotification({ force = false, fromCron = fals
   }
 
   const today = easternDateString();
-  const { data: devotion, error } = await supabase
-    .from('daily_devotions')
-    .select('*')
-    .eq('devotion_date', today)
-    .eq('status', 'published')
-    .maybeSingle();
-
-  if (error) throw error;
+  const devotion = await getPublishedDevotionForDate(today);
   if (!devotion) return { skipped: true, reason: 'no_devotion', date: today };
   if (!force && devotion.notification_sent_at) {
     return { skipped: true, reason: 'already_sent', date: today };
@@ -305,19 +290,7 @@ async function getDailyWalkNotifyHour() {
 }
 
 function easternNow() {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: CHURCH_TIMEZONE,
-    hour: 'numeric',
-    minute: 'numeric',
-    weekday: 'short',
-    hour12: false,
-  }).formatToParts(new Date());
-
-  const hour = parseInt(parts.find((p) => p.type === 'hour')?.value ?? '0', 10);
-  const minute = parseInt(parts.find((p) => p.type === 'minute')?.value ?? '0', 10);
-  const weekday = parts.find((p) => p.type === 'weekday')?.value ?? 'Sun';
-  const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-  return { hour, minute, day: dayMap[weekday] ?? 0 };
+  return easternNowParts();
 }
 
 const DEFAULT_PUSH_SCHEDULES = [

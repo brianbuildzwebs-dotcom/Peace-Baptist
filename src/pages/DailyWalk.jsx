@@ -16,7 +16,7 @@ export default function DailyWalk() {
 
   useEffect(() => {
     setLoading(true);
-    base44.entities.DailyDevotion.filter({ devotion_date: selectedDate, status: "published" })
+    base44.entities.DailyDevotion.filter({ devotion_date: selectedDate })
       .then((rows) => setDevotion(rows[0] || null))
       .catch(() => setDevotion(null))
       .finally(() => setLoading(false));

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Bell, Plus, Save, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import Time12Input from "@/components/admin/Time12Input";
+import { hour12To24, hour24To12 } from "@/lib/time12";
 
 const DAY_OPTIONS = [
   { id: 0, label: "Sun" },
@@ -176,29 +178,22 @@ export default function AdminNotifications() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="text-white/50 text-xs mb-1 block">Hour (ET)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={23}
-                  value={schedule.hour}
-                  onChange={(e) => updateSchedule(schedule.id, { hour: parseInt(e.target.value, 10) || 0 })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-white/50 text-xs mb-1 block">Minute</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={59}
-                  value={schedule.minute ?? 0}
-                  onChange={(e) => updateSchedule(schedule.id, { minute: parseInt(e.target.value, 10) || 0 })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm"
-                />
-              </div>
+            <div>
+              <label className="text-white/50 text-xs mb-2 block">Send time (Eastern)</label>
+              <Time12Input
+                hour12={hour24To12(schedule.hour).hour12}
+                minute={schedule.minute ?? 0}
+                period={hour24To12(schedule.hour).period}
+                onHour12Change={(value) => {
+                  const { period } = hour24To12(schedule.hour);
+                  updateSchedule(schedule.id, { hour: hour12To24(value, period) });
+                }}
+                onMinuteChange={(value) => updateSchedule(schedule.id, { minute: value })}
+                onPeriodChange={(value) => {
+                  const { hour12 } = hour24To12(schedule.hour);
+                  updateSchedule(schedule.id, { hour: hour12To24(hour12, value) });
+                }}
+              />
             </div>
 
             <div>

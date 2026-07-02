@@ -11,7 +11,9 @@ create table if not exists public.daily_devotions (
   scripture_text text not null,
   message text not null,
   author text not null default 'Pastor Rudy Shepard',
-  status text not null default 'published' check (status in ('draft', 'published')),
+  status text not null default 'published' check (status in ('draft', 'scheduled', 'published')),
+  publish_hour int,
+  publish_minute int default 0,
   notification_sent_at timestamptz,
   unique (devotion_date)
 );

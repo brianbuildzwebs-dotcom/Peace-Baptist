@@ -79,9 +79,9 @@ export default function WatchLive() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            label="Sermon Library"
-            title="Past Services"
-            subtitle="Browse and watch recordings from our past worship services and sermons."
+            label="Recent"
+            title="Recent Services"
+            subtitle="Browse and watch recordings from our past worship services."
           />
 
           {playlistEmbed ? (

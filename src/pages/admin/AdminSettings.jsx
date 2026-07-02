@@ -6,7 +6,7 @@ import { SITE_IMAGE_FIELDS } from "@/hooks/useSiteImages";
 import { churchInfo } from "@/lib/churchInfo";
 
 const DEFAULT_SETTINGS = [
-  { key: "sermon_playlist_url", label: "Sermon Playlist YouTube Embed URL (optional override)", hint: "Default playlist is in churchInfo.js. Paste iframe src URL here to override." },
+  { key: "sermon_playlist_url", label: "Recent Services YouTube Embed URL (optional override)", hint: "Default playlist is in churchInfo.js. Paste iframe src URL here to override." },
   { key: "google_maps_embed", label: "Google Maps Embed URL (optional override)", hint: "Default map is in churchInfo.js. Paste embed src URL here to override." },
   { key: "facebook_url", label: "Facebook Page URL", hint: "e.g. https://www.facebook.com/yourchurch" },
   { key: "youtube_url", label: "YouTube Channel URL", hint: "e.g. https://www.youtube.com/@yourchurch" },

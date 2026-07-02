@@ -60,7 +60,7 @@ export default function Media() {
           {/* Tabs */}
           <div className="flex items-center gap-4 mb-8 border-b border-gray-200 pb-4">
             <button onClick={() => setTab("sermon")} className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${tab === "sermon" ? "bg-navy text-white" : "text-gray-600 hover:bg-gray-100"}`}>
-              <BookOpen size={16} /> Sermon Playlists
+              <BookOpen size={16} /> Recent Services
             </button>
             <Link to="/bible-believers-broadcast" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all text-gray-600 hover:bg-gray-100 hover:text-navy">
               <Radio size={16} /> Bible Believers Broadcast
@@ -75,7 +75,7 @@ export default function Media() {
             <div className="mb-10 rounded-2xl overflow-hidden shadow-lg aspect-video">
               <iframe
                 src={sermonPlaylistUrl}
-                title="Sermon Playlist"
+                title="Recent Services"
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
