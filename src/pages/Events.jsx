@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { formatEventDate } from "@/lib/eventDates";
 import EventRegistrationPanel from "@/components/church/EventRegistrationPanel";
 import EventAnnouncementsStrip from "@/components/church/EventAnnouncementsStrip";
+import ExpandableText from "@/components/church/ExpandableText";
 import { churchInfo } from "@/lib/churchInfo";
 
 const TABS = [
@@ -241,7 +242,7 @@ export default function Events() {
                         <span>{event.announcement}</span>
                       </div>
                     )}
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-5">{event.description}</p>
+                    <ExpandableText text={event.description} className="text-gray-600 text-sm mb-5" />
                     <EventActions event={event} onRegister={openRegistration} />
                   </div>
                 </motion.div>
@@ -280,7 +281,7 @@ export default function Events() {
                         <span>{event.announcement}</span>
                       </div>
                     )}
-                    <p className="text-gray-600 text-sm">{event.description}</p>
+                    <p className="text-gray-600 text-sm whitespace-pre-wrap">{event.description}</p>
                   </div>
                   <div className="w-full sm:w-auto shrink-0">
                     <EventActions event={event} onRegister={openRegistration} />

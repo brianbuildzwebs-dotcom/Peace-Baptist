@@ -7,6 +7,7 @@ import { formatEventDate } from "@/lib/eventDates";
 import EventAnnouncementsStrip from "./EventAnnouncementsStrip";
 import SectionHeading from "./SectionHeading";
 import { churchInfo } from "@/lib/churchInfo";
+import ExpandableText from "./ExpandableText";
 
 export default function UpcomingEventsTeaser() {
   const [events, setEvents] = useState([]);
@@ -106,7 +107,7 @@ export default function UpcomingEventsTeaser() {
                     {event.location}
                   </div>
                 )}
-                <p className="text-gray-600 text-sm line-clamp-2">{event.description}</p>
+                <ExpandableText text={event.description} className="text-gray-600 text-sm" />
               </div>
             </motion.div>
           ))}
